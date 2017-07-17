@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ical4j demo</title>
+</head>
+
+<body>
+
+    <div>
+        <h3>새로운 캘린더를 생성한다.</h3>
+        <button id="create-new-calendar-file">Crate new iCalendar</button>
+        <textarea id="result1" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
+    </div>
+
+    <div>
+        <h3>iCalendar string을 파싱한다.</h3>
+        <button id="parse-calendar-string">Parse iCalendar String</button>
+        <textarea id="result2" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
+    </div>
+
+    <div>
+        <h3>iCalendar file을 파싱한다.</h3>
+        <button id="parse-calendar-file">Parse iCalendar File</button>
+        <textarea id="result3" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
+    </div>
+
+    <div>
+        <h3>All day 이벤트를 생성한다.</h3>
+        <button id="create-allday-event">Create All day Event</button>
+        <textarea id="result4" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
+    </div>
+
+    <div>
+        <h3>4시간짜리 미팅 이벤트를 생성한다.</h3>
+        <button id="create-fourhour-event">Create Four Hour meeting Event</button>
+        <textarea id="result5" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>
+
+
+<!--<span th:each="data : ${dataList}">-->
+        <!--<h3 th:text="'summary:'+${data.eventSummary}"></h3>-->
+        <!--<h3 th:text="'startDate:'+${data.startDate}"></h3>-->
+        <!--<h3 th:text="'endDate:'+${data.endDate}"></h3>-->
+        <!--<h3>==========</h3>-->
+    <!--</span>-->
+
+
+
+<!--Event Summary:-->
+<!--<br/>-->
+<!--<input type="text" name="eventSummary" id="eventSummary" field="eventSummary"/>-->
+<!--<br/>-->
+<!--Start Date:<br/>-->
+<!--<input type="date" name="startDate" id="startDate" value="startDate"/>-->
+<!--<br/>-->
+<!--End Date:<br/>-->
+<!--<input type="date" name="endDate" id="endDate" value="endDate"/>-->
+<!--<br/><br/>-->
+<!---->
+<!---->
+<!--<button id="creat" type="button">submit</button>-->
