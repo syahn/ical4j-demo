@@ -2,43 +2,90 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>ical4j demo</title>
+    <style>
+        .result-textarea {
+            display: block;
+            margin: 15px auto;
+            width: 200px;
+            height: 120px;
+        }
+        .result-paragraph {
+            display: block;
+            margin: 15px auto;
+            width: 200px;
+            height: 100%;
+            text-align: left;
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+        .container {
+            width: 1000px;
+            display: flex;
+            flex-wrap: wrap;
+            text-align: center;
+            position: relative;
+            left: 18%;
+        }
+        .ex {
+            width: 300px;
+            background:whitesmoke ;
+            margin: 10px;
+        }
+    </style>
 </head>
 
+
 <body>
+    <main class="container">
+        <div class="ex ex1">
+            <h3>새로운 캘린더를 생성한다.</h3>
+            <button id="create-new-calendar-file">Crate new iCalendar</button>
+            <textarea id="result1" class="result-textarea"></textarea>
+        </div>
 
-    <div>
-        <h3>새로운 캘린더를 생성한다.</h3>
-        <button id="create-new-calendar-file">Crate new iCalendar</button>
-        <textarea id="result1" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
-    </div>
+        <div class="ex ex2">
+            <h3>iCalendar string을 파싱한다.</h3>
 
-    <div>
-        <h3>iCalendar string을 파싱한다.</h3>
-        <button id="parse-calendar-string">Parse iCalendar String</button>
-        <textarea id="result2" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
-    </div>
+            <textarea id="ical_string" class="result-textarea" name="ical_string"></textarea>
+            <button id="parse-calendar-string">Parse iCalendar String</button>
+            <div id="result2" class="result-paragraph"></div>
+        </div>
 
-    <div>
-        <h3>iCalendar file을 파싱한다.</h3>
-        <button id="parse-calendar-file">Parse iCalendar File</button>
-        <textarea id="result3" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
-    </div>
+        <div class="ex ex3">
+            <h3>iCalendar file을 파싱한다.</h3>
+            <button id="parse-calendar-file">Parse iCalendar File</button>
+            <textarea id="result3" class="result-textarea"></textarea>
+        </div>
 
-    <div>
-        <h3>All day 이벤트를 생성한다.</h3>
-        <button id="create-allday-event">Create All day Event</button>
-        <textarea id="result4" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
-    </div>
+        <div class="ex ex4">
+            <h3>All day 이벤트를 생성한다.</h3>
+            <button id="create-allday-event">Create All day Event</button>
+            <textarea id="result4" class="result-textarea"></textarea>
+        </div>
 
-    <div>
-        <h3>4시간짜리 미팅 이벤트를 생성한다.</h3>
-        <button id="create-fourhour-event">Create Four Hour meeting Event</button>
-        <textarea id="result5" class="result" style="display: block; width: 600px; height: 120px;"></textarea>
-    </div>
+        <div class="ex ex5">
+            <h3>4시간짜리 미팅 이벤트를 생성한다.</h3>
+            <button id="create-fourhour-event">Create Four Hour meeting Event</button>
+            <textarea id="result5" class="result-textarea"></textarea>
+        </div>
+
+        <div class="ex ex6">
+            <h3>새로운 이벤트를 추가한다.</h3>
+            <p>Event: </p>
+            <input type="text" name="event" id="event" field="event"/>
+
+            <p>Choose Date:</p>
+            <input type="date" name="date" id="date" value="date"/>
+
+            <button id="create-new-event" type="button">Create event</button>
+
+            <div id="result6" class="result-paragraph"></div>
+        </div>
+    </main>
+
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="js/main.js"></script>
-
 </body>
 </html>
 
@@ -54,14 +101,3 @@
 
 <!--Event Summary:-->
 <!--<br/>-->
-<!--<input type="text" name="eventSummary" id="eventSummary" field="eventSummary"/>-->
-<!--<br/>-->
-<!--Start Date:<br/>-->
-<!--<input type="date" name="startDate" id="startDate" value="startDate"/>-->
-<!--<br/>-->
-<!--End Date:<br/>-->
-<!--<input type="date" name="endDate" id="endDate" value="endDate"/>-->
-<!--<br/><br/>-->
-<!---->
-<!---->
-<!--<button id="creat" type="button">submit</button>-->

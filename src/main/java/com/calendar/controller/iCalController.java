@@ -30,8 +30,7 @@ import java.util.List;
 public class iCalController {
 
     @GetMapping("/")
-    public String index(Model model) throws IOException, ParserException {
-
+    public String index() throws IOException, ParserException {
         return "index";
     }
 }

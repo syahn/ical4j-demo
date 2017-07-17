@@ -1,8 +1,13 @@
 package com.calendar.controller;
 
+import com.calendar.CalendarData;
 import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.*;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.parameter.Cn;
@@ -10,14 +15,21 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.util.UidGenerator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.awt.*;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
-import java.util.GregorianCalendar;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by NAVER on 2017-07-17.
@@ -27,7 +39,7 @@ import java.util.GregorianCalendar;
 public class iCalRestController {
 
     @PostMapping("/create-new-calendar-file")
-    public String createNewCalendarFile() {
+    public String createNewCalendarFile() throws IOException {
 
         Calendar calendar = new Calendar();
         calendar.getProperties().add(new ProdId("-//Ben Fortuna//iCal4j 1.0//EN"));
@@ -38,15 +50,13 @@ public class iCalRestController {
     }
 
     @PostMapping("/parse-calendar-string")
-    public String parseCalendarString() throws IOException, ParserException {
-
-        // 기존 캘린더 파일을 읽어 calendar 인스턴스 생성
-        FileInputStream fin = new FileInputStream("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
-        CalendarBuilder builder = new CalendarBuilder();
-        Calendar calendar = builder.build(fin);
+    public String parseCalendarString(
+        @RequestParam("ical_string") String icalString
+    ) throws IOException, ParserException {
 
         // string으로 저장
-        String myCalendarString = calendar.toString();
+        System.out.println(icalString);
+        String myCalendarString = icalString;
 
         // 캘린더 스트링 파싱
         StringReader sin = new StringReader(myCalendarString);
@@ -70,7 +80,6 @@ public class iCalRestController {
     @PostMapping("/create-allday-event")
     public String createAllDayEvent() throws IOException, ParserException {
 
-
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         calendar.set(java.util.Calendar.MONTH, java.util.Calendar.DECEMBER);
         calendar.set(java.util.Calendar.DAY_OF_MONTH, 25);
@@ -91,7 +100,7 @@ public class iCalRestController {
     @PostMapping("/create-fourhour-event")
     public String createFourHourEvent() throws IOException, ParserException {
 
-        //     Create a TimeZone
+        // Create a TimeZone
         TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
         TimeZone timezone = registry.getTimeZone("America/Mexico_City");
         VTimeZone tz = timezone.getVTimeZone();
@@ -153,68 +162,41 @@ public class iCalRestController {
 
         return icsCalendar.toString();
     }
+
+    @PostMapping("/create-new-event")
+    public CalendarData createNewEvent(
+        @RequestParam("event") String event,
+        @RequestParam("date") String date
+    ) throws IOException, ParserException, ParseException {
+
+        // String을 Date형으로 전환
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date parsedDate = df.parse(date);
+
+        // Calendar 인스턴스 생성 및 날짜 초기화
+        FileInputStream fin = new FileInputStream("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        CalendarBuilder builder = new CalendarBuilder();
+        Calendar originalCalendar = builder.build(fin);
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.setTime(parsedDate);
+
+        // initialise as an all-day event..
+        VEvent newEvent = new VEvent(new Date(calendar.getTime()), event);
+
+        // Generate a UID for the event..
+        UidGenerator ug = new UidGenerator("1");
+        newEvent.getProperties().add(ug.generateUid());
+
+        // 캘린더에 새로운 이벤트 추가
+        originalCalendar.getComponents().add(newEvent);
+
+        // 업데이트된 파일 저장
+        FileOutputStream fout = new FileOutputStream("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        CalendarOutputter outputter = new CalendarOutputter();
+        outputter.output(originalCalendar, fout);
+
+        return new CalendarData(event, date, originalCalendar.toString());
+    }
+
 }
-//
-//    // 이벤트 날짜 생성하기
-//
-//
-//
-//                // 캘린더 파일 생성하기
-//                FileOutputStream fout = new FileOutputStream("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData2.ics");
-//
-//                CalendarOutputter outputter = new CalendarOutputter();
-//                outputter.output(icsCalendar, fout);
-////
-////
-//        // Reading the file and creating the calendar
-//        CalendarBuilder builder = new CalendarBuilder();
-//        Calendar cal = null;
-//        try {
-//            cal = builder.build(new FileInputStream("my.ics"));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ParserException e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//// Create the date range which is desired.
-//        DateTime from = new DateTime("20100101T070000Z");
-//        DateTime to = new DateTime("20100201T070000Z");;
-//        Period period = new Period(from, to);
-//
-//
-//// For each VEVENT in the ICS
-//        for (Object o : cal.getComponents("VEVENT")) {
-//            Component c = (Component)o;
-//            PeriodList list = c.calculateRecurrenceSet(period);
-//
-//            for (Object po : list) {
-//                System.out.println((Period)po);
-//            }
-//        }
 
-
-//
-//        ICalendar ical = null;
-//        List<CalendarDataString> dataList = new ArrayList<>();
-//
-//        try {
-//            ical = Biweekly.parse(file).first();//VCALENDAR는 유일하다 가정
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }finally {
-//
-//            //각 이벤트의 정보(내용,날짜)를 Calendar오브젝트에 담기
-//
-//            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-//
-//            for(VEvent event:ical.getEvents()){
-//                CalendarDataString data = new CalendarDataString();
-//                data.setEventSummary(event.getSummary().getValue());
-//                data.setStartDate(formatter.format(event.getDateStart().getValue()));
-//                data.setEndDate(formatter.format(event.getDateEnd().getValue()));
-//                dataList.add(data);
-//            }
-//        }
-//

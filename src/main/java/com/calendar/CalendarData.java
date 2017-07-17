@@ -1,43 +1,42 @@
 package com.calendar;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 import java.util.Date;
 
 /**
  * Created by NAVER on 2017-07-14.
  */
 public class CalendarData {
+    private String event;
+    private String date;
+    private String iCal;
 
-    private String eventSummary;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date startDate;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date endDate;
-
-    public String getEventSummary() {
-        return eventSummary;
+    public CalendarData(String event, String date, String iCal) {
+        this.event = event;
+        this.date = date;
+        this.iCal = iCal;
     }
 
-    public void setEventSummary(String eventSummary) {
-        this.eventSummary = eventSummary;
+    public String getEvent() {
+        return event;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public void setEvent(String event) {
+        this.event = event;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public String getDate() {
+        return date;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public void setDate(String date) {
+        this.date = date;
     }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public String getiCal() {
+        return iCal;
+    }
+
+    public void setiCal(String iCal) {
+        this.iCal = iCal;
     }
 }
