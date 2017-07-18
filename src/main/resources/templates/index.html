@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>ical4j demo</title>
     <style>
@@ -9,6 +9,7 @@
             width: 200px;
             height: 120px;
         }
+
         .result-paragraph {
             display: block;
             margin: 15px auto;
@@ -18,6 +19,7 @@
             font-size: 13px;
             word-wrap: break-word;
         }
+
         .container {
             width: 1000px;
             display: flex;
@@ -26,77 +28,234 @@
             position: relative;
             left: 18%;
         }
+
         .ex {
             width: 300px;
-            background:whitesmoke ;
+            background: whitesmoke;
             margin: 10px;
+        }
+
+        .ex8 {
+            text-align: left;
+            width: 600px;
         }
     </style>
 </head>
 
 
 <body>
-    <main class="container">
-        <div class="ex ex1">
-            <h3>새로운 캘린더를 생성한다.</h3>
-            <button id="create-new-calendar-file">Crate new iCalendar</button>
-            <textarea id="result1" class="result-textarea"></textarea>
-        </div>
+<main class="container">
+    <div class="ex ex1">
+        <h3>새로운 캘린더를 생성한다.</h3>
+        <button id="create-new-calendar-file">Crate new iCalendar</button>
+        <textarea id="result1" class="result-textarea"></textarea>
+    </div>
 
-        <div class="ex ex2">
-            <h3>iCalendar string을 파싱한다.</h3>
+    <div class="ex ex2">
+        <h3>iCalendar string을 파싱한다.</h3>
 
-            <textarea id="ical_string" class="result-textarea" name="ical_string"></textarea>
-            <button id="parse-calendar-string">Parse iCalendar String</button>
-            <div id="result2" class="result-paragraph"></div>
-        </div>
+        <textarea id="ical_string" class="result-textarea" name="ical_string"></textarea>
+        <button id="parse-calendar-string">Parse iCalendar String</button>
+        <div id="result2" class="result-paragraph"></div>
+    </div>
 
-        <div class="ex ex3">
-            <h3>iCalendar file을 파싱한다.</h3>
-            <button id="parse-calendar-file">Parse iCalendar File</button>
-            <textarea id="result3" class="result-textarea"></textarea>
-        </div>
+    <div class="ex ex3">
+        <h3>iCalendar file을 파싱한다.</h3>
+        <button id="parse-calendar-file">Parse iCalendar File</button>
+        <textarea id="result3" class="result-textarea"></textarea>
+    </div>
 
-        <div class="ex ex4">
-            <h3>All day 이벤트를 생성한다.</h3>
-            <button id="create-allday-event">Create All day Event</button>
-            <textarea id="result4" class="result-textarea"></textarea>
-        </div>
+    <div class="ex ex4">
+        <h3>All day 이벤트를 생성한다.</h3>
+        <button id="create-allday-event">Create All day Event</button>
+        <textarea id="result4" class="result-textarea"></textarea>
+    </div>
 
-        <div class="ex ex5">
-            <h3>4시간짜리 미팅 이벤트를 생성한다.</h3>
-            <button id="create-fourhour-event">Create Four Hour meeting Event</button>
-            <textarea id="result5" class="result-textarea"></textarea>
-        </div>
+    <div class="ex ex5">
+        <h3>4시간짜리 미팅 이벤트를 생성한다.</h3>
+        <button id="create-fourhour-event">Create Four Hour meeting Event</button>
+        <textarea id="result5" class="result-textarea"></textarea>
+    </div>
 
-        <div class="ex ex6">
-            <h3>새로운 이벤트를 추가한다.</h3>
-            <p>Event: </p>
-            <input type="text" name="event" id="event" field="event"/>
+    <div class="ex ex6">
+        <h3>새로운 이벤트를 추가한다.</h3>
+        <p>Event: </p>
+        <input type="text" name="event" id="event" field="event"/>
 
-            <p>Choose Date:</p>
-            <input type="date" name="date" id="date" value="date"/>
+        <p>Choose Date:</p>
+        <input type="date" name="date" id="date" value="date"/>
 
-            <button id="create-new-event" type="button">Create event</button>
+        <button id="create-new-event" type="button">Create event</button>
 
-            <div id="result6" class="result-paragraph"></div>
-        </div>
-    </main>
+        <div id="result6" class="result-paragraph"></div>
+    </div>
+
+    <div class="ex ex7">
+        <h3>ics형식의 STRING에서 데이터 추출하기</h3>
+        <textarea id="ical_input_string" class="result-textarea" name="ical_string"></textarea>
+        <button id="parse-meeting-event" type="button">Parse event</button>
+    </div>
+
+    <div class="ex ex8">
+        <!--<div id="result7" class="result-paragraph"></div>-->
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tbody>
+            <tr>
+                <td style="height:2px;background-color:#157efb;font-size:0;line-height:0"></td>
+            </tr>
+            <tr>
+                <td style="border:1px solid #e9e9e9;border-top:0;background:#fff">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tbody>
+                        <tr>
+                            <td style="padding:0 4% 0 3%;border-bottom:1px solid #f0f0f0;background-color:#fcfcfc;vertical-align:top">
+                                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                    <tbody>
+                                    <tr>
+                                        <td style="width:13px;padding:19px 0 0 0;color:#ff0000;vertical-align:top;font-size:12px">
+                                            &nbsp;
+                                        </td>
+                                        <td id="result-summary" style="padding:20px 0 16px 0;color:#000;line-height:18px;font-weight:bold;font-size:16px;font-family:meiryo,sans-serif;">
+
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tbody>
+                        <tr>
+                            <td style="height:12px;"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tbody>
+                        <tr>
+                            <td style="padding:0 4% 0 3%;background:#fff;vertical-align:top">
+                                <table cellpadding="0" cellspacing="0" border="0" width="100%"
+                                       style="color:#000;font-size:12px;font-family:meiryo">
+                                    <tbody>
+                                    <tr>
+                                        <td style="height:16px;line-height:0;font-size:0">&nbsp;</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:13px;line-height:17px;vertical-align:top;font-size:12px">
+        <span style="display:block;padding: 5px 0 0 6px;margin:0;vertical-align:top;">
+                    </span>
+                                        </td>
+                                        <td style="width:67px;line-height:17px;vertical-align:top;color:#222;font-weight:bold;font-family:meiryo,sans-serif">
+                                            일시
+                                        </td>
+                                        <td style="line-height:17px;vertical-align: top;">
+                                            <p id="result-time" style="padding:0;margin:0;font-family:meiryo,sans-serif;line-height:17px;font-size:12px;color:#222;">
+                                                </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:19px;line-height:0;font-size:0">&nbsp;</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:13px;line-height:17px;vertical-align:top;font-size:12px"><span
+                                                style="display:block;padding: 5px 0 0 6px;margin:0;vertical-align:top;"></span>
+                                        </td>
+                                        <td style="width:67px;line-height:17px;vertical-align:top;color:#222;;font-weight:bold;font-family:meiryo,sans-serif;">
+                                            장소
+                                        </td>
+                                        <td id="result-location"style="line-height:17px;word-break:break-all;font-family:meiryo,sans-serif;vertical-align:top;">
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:19px;line-height:0;font-size:0">&nbsp;</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <table cellpadding="0" cellspacing="0" border="0" width="100%"
+                                       style="color:#000;font-size:12px;font-family:meiryo">
+                                    <tbody>
+                                    <tr>
+                                        <td style="width:13px;line-height:17px;vertical-align:top;font-size:12px"><span
+                                                style="display:block;padding: 5px 0 0 6px;margin:0;vertical-align:top;"></span>
+                                        </td>
+                                        <td style="width:67px;line-height:17px;vertical-align:top;color:#222;font-weight:bold;font-family:meiryo,sans-serif;">
+                                            참석자
+                                        </td>
+                                        <td style="line-height:17px">
+                                            <p style="padding:0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;font-weight:bold;word-break:break-all;">
+                                                정재호 &lt;jaeho.jung@worksmobile.com&gt; <span
+                                                    style="display:inline-block;padding:2px 1px 0 2px;margin:0 0 0 2px;border:1px solid #cbcbcb;font-family:meiryo,sans-serif;font-size:11px;font-weight:normal;line-height:14px;color:#7c7c7c;">마스터</span>
+                                            </p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                전기현 &lt;gihyun.jeon@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                박준영 &lt;joonyeongpark@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                박석희 &lt;seokhee.park@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                유재원 &lt;yoo.movie@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                진현승 &lt;jin.hs@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                김영진 &lt;young.jin.kim@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                윤세형 &lt;sehyeong.yoon@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                박상태 &lt;sangtae.park16@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                이우재 &lt;lwoody@worksmobile.com&gt;</p>
+                                            <p style="padding:8px 0 0;margin:0;font-family:meiryo,sans-serif;font-size:12px;color:#222;word-break:break-all;">
+                                                안상영 &lt;sangyoung.an@worksmobile.com&gt;</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:19px;line-height:0;font-size:0">&nbsp;</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                    <tbody>
+                                    <tr>
+                                        <td style="height:25px;"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
 
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="js/main.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
 
 
 <!--<span th:each="data : ${dataList}">-->
-        <!--<h3 th:text="'summary:'+${data.eventSummary}"></h3>-->
-        <!--<h3 th:text="'startDate:'+${data.startDate}"></h3>-->
-        <!--<h3 th:text="'endDate:'+${data.endDate}"></h3>-->
-        <!--<h3>==========</h3>-->
-    <!--</span>-->
-
+<!--<h3 th:text="'summary:'+${data.eventSummary}"></h3>-->
+<!--<h3 th:text="'startDate:'+${data.startDate}"></h3>-->
+<!--<h3 th:text="'endDate:'+${data.endDate}"></h3>-->
+<!--<h3>==========</h3>-->
+<!--</span>-->
 
 
 <!--Event Summary:-->

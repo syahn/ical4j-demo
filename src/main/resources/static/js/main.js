@@ -60,6 +60,17 @@ $(document).ready(function () {
                 "<p>" + data.iCal + "</p>");
         });
     });
+    $("#parse-meeting-event").click(function () {
+        var event = $("#ical_input_string").val();
+
+        $.post("http://localhost:8080/parse-meeting-event", {
+            "ical_string": event
+        }).done(function (data) {
+            $("#result-location").append("<span>" + data.location + "</span>");
+            $("#result-summary").append("<span>" + data.summary + "</span>");
+            $("#result-time").append("<span>" + data.start + ' - ' + data.end + "</span>");
+        });
+    });
 
 
 });

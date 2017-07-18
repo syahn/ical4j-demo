@@ -1,13 +1,11 @@
 package com.calendar.controller;
 
 import com.calendar.CalendarData;
+import com.calendar.DefaultScheduleModel;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.parameter.Cn;
@@ -15,12 +13,10 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.util.UidGenerator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +25,10 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by NAVER on 2017-07-17.
@@ -51,11 +50,10 @@ public class iCalRestController {
 
     @PostMapping("/parse-calendar-string")
     public String parseCalendarString(
-        @RequestParam("ical_string") String icalString
+            @RequestParam("ical_string") String icalString
     ) throws IOException, ParserException {
 
         // string으로 저장
-        System.out.println(icalString);
         String myCalendarString = icalString;
 
         // 캘린더 스트링 파싱
@@ -70,7 +68,7 @@ public class iCalRestController {
     public String parseCalendarFile() throws IOException, ParserException {
 
         // 기존 캘린더 파일을 읽어 calendar 인스턴스 생성
-        FileInputStream fin = new FileInputStream("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        FileInputStream fin = new FileInputStream("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/meeting.ics");
         CalendarBuilder builder = new CalendarBuilder();
         Calendar calendar = builder.build(fin);
 
@@ -159,14 +157,13 @@ public class iCalRestController {
         // Add the event and print
         icsCalendar.getComponents().add(meeting);
 
-
         return icsCalendar.toString();
     }
 
     @PostMapping("/create-new-event")
     public CalendarData createNewEvent(
-        @RequestParam("event") String event,
-        @RequestParam("date") String date
+            @RequestParam("event") String event,
+            @RequestParam("date") String date
     ) throws IOException, ParserException, ParseException {
 
         // String을 Date형으로 전환
@@ -197,6 +194,43 @@ public class iCalRestController {
 
         return new CalendarData(event, date, originalCalendar.toString());
     }
+
+    @PostMapping("/parse-meeting-event")
+    public DefaultScheduleModel parseMeetingEvent(
+            @RequestParam("ical_string") String icalString
+    ) throws IOException, ParserException, ParseException {
+        SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
+        SimpleDateFormat startTimePattern = new SimpleDateFormat("yyyy년 MM월 dd일 (E) a HH:mm");
+        SimpleDateFormat endTimePattern = new SimpleDateFormat("a HH:mm '서울(GMT+09:00)'");
+
+        // 기존 캘린더 파일을 읽어 calendar 인스턴스 생성
+        CalendarBuilder builder = new CalendarBuilder();
+        net.fortuna.ical4j.model.Calendar calendar = builder.build(new StringReader(icalString));
+
+        // VEVENT 컴포넌트와 하위 데이터 추출
+        Component component = calendar.getComponent("VEVENT");
+        DateTime start = new DateTime(component.getProperty("DTSTART").getValue());
+        DateTime end = new DateTime(component.getProperty("DTEND").getValue());
+        String summary = component.getProperty("SUMMARY").getValue();
+        String organizer = component.getProperty(Property.ORGANIZER).getValue();
+        String location = component.getProperty(Property.LOCATION).getValue();
+        List<String> attendeeList = new ArrayList<String>();
+
+        // TODO: attendee의 이름과 메일만 추출하기
+        for (Iterator i = component.getProperties(Property.ATTENDEE).iterator(); i.hasNext(); ) {
+            Attendee attendee = (Attendee) i.next();
+            String name = attendee.getValue();
+            attendeeList.add(name);
+        }
+
+        String start_str = startTimePattern.format(start).toString();
+        String end_str = endTimePattern.format(end).toString();
+
+        return new DefaultScheduleModel(start_str, end_str, summary, location, organizer, attendeeList);
+
+    }
+
 
 }
 
