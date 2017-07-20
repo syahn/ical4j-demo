@@ -44,7 +44,7 @@ import java.util.List;
 public class iCalRestController {
 
     @PostMapping("/apply-iCalData")
-    public List<List<ICalEvent>> applyICalData(@RequestParam("month") int month) throws IOException, ParserException, ParseException {
+    public List<List<ICalEvent>> applyICalData(@RequestParam("month") int month,@RequestParam("year") int year) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
         FileInputStream fin = new FileInputStream("/Users/LEE/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
@@ -55,13 +55,17 @@ public class iCalRestController {
         List<List<ICalEvent>> totalList = new ArrayList<>();
 
         //현재, 이전, 다음 달의 일정 데이터리스트 만들기
-        List<ICalEvent> currentMonth = makeDataList(2017,month,calendar);
-        List<ICalEvent> nextMonth = makeDataList(2017,month+1,calendar);
-        List<ICalEvent> preMonth = makeDataList(2017,month-1,calendar);
+        int preYear = month==1 ? year-1:year;
+        int nextYear = month==12 ? year+1:year;
+        int preMonth = month==1 ? 12: month-1;
+        int nextMonth = month==12 ? 1:month+1;
+        List<ICalEvent> currentMonthList = makeDataList(year,month,calendar);
+        List<ICalEvent> nextMonthList = makeDataList(nextYear,nextMonth,calendar);
+        List<ICalEvent> preMonthList = makeDataList(preYear,preMonth,calendar);
 
-        totalList.add(currentMonth);
-        totalList.add(nextMonth);
-        totalList.add(preMonth);
+        totalList.add(currentMonthList);
+        totalList.add(nextMonthList);
+        totalList.add(preMonthList);
 
         return totalList;
     }
