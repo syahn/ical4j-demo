@@ -35,6 +35,7 @@
     </style>
     <![endif]-->
     <script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="main-publicCalendar" src="./calendarSource_files/main-publicCalendar.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="lib/domReady" src="./calendarSource_files/domReady.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/ajax" src="./calendarSource_files/ajax.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/dateAPI" src="./calendarSource_files/dateAPI.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/jsmessage" src="./calendarSource_files/jsmessage.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="publicCalendar/scheduleDataForPublic" src="./calendarSource_files/scheduleDataForPublic.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="publicCalendar/monthView" src="./calendarSource_files/monthView.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="../lib/jindo.desktop.all.ns" src="./calendarSource_files/jindo.desktop.all.ns.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/util" src="./calendarSource_files/util.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/variables" src="./calendarSource_files/variables.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/localUserContext" src="./calendarSource_files/localUserContext.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="lib/text" src="./calendarSource_files/text.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/statics" src="./calendarSource_files/statics.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="commons/Layer" src="./calendarSource_files/Layer.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="lcslog" src="./calendarSource_files/lcslog.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="clickcr" src="./calendarSource_files/clickcr.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="jindo" src="./calendarSource_files/jindo.js.다운로드"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="../lib/jindo_component" src="./calendarSource_files/jindo_component.js.다운로드"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
 <body class="">
 <div id="frame" class="frame">
@@ -42,15 +43,15 @@
         <div class="title">
             <h1>
                 <button class="btn_prev" onclick="location.href='/month_6'"><span class="blind">이전 달 보기</span></button>
-                <span class="_title">2017.07</span>
+                <span id="current_month" class="_title" value="7" >2017.07</span>
                 <button class="btn_next" onclick="location.href='/month_8'"><span class="blind">다음 달 보기</span></button>
             </h1>
             <button class="today">오늘</button>
         </div>
         <button class="btn btn_sub">구독</button>
-        <form id="form-print" th:action="@{preview}" method="post">
-            <button class = "btn print" style="margin-left:420px" type="submit" name="month" value="7">인쇄</button>
-        </form>
+        <!--<form id="form-print" th:action="@{preview}" method="post">-->
+        <button id="print-btn" class = "btn print" style="margin-left:420px" value="7">인쇄</button>
+        <!--</form>-->
 
 
         <!-- <button class="btn btn_add">추가</button> -->
@@ -70,11 +71,8 @@
             </tr>
             </tbody>
         </table>
-
-        <span th:each="data : ${dataList}">
-
         <div class="month_table sixth">
-            <span class="table_container _schedule_container">
+            <div class="table_container _schedule_container">
                 <div class="month_row" style="height:16.666666666666668%" data-row="0">
                     <table cellpadding="0" cellspacing="0" class="grid">
                         <tbody>
@@ -104,14 +102,6 @@
                             <td dayindex="0" colspan="1">
                                 <div key="20194466/1210819049_2017-06-25_0" class="_schedule schedule calendar_text_color_333333 ">
                                     <div class="info">			<a href="https://calendar.naver.com/publicCalendar.nhn?publishedKey=769d54e7f884c5f930b4ec86eb15dc38#" onclick="return false;" title="롯데 4 vs 2 두산">롯데 4 vs 2 두산</a>		</div>
-
-                                    <div class="info">
-                                        <a href="https://calendar.naver.com/publicCalendar.nhn?publishedKey=769d54e7f884c5f930b4ec86eb15dc38#"
-                                           onclick="return false;" title="롯데 4 vs 2 두산" th:text="${data.eventSummary}">
-
-                                        </a>
-                                    </div>
-
                                 </div>
                             </td>
                             <td dayindex="1">&nbsp;</td>
@@ -439,9 +429,7 @@
                         </tbody>
                     </table>
                 </div>
-            </span>
             </div>
-        </span>
             <!-- 큰 스티커 영역 -->
             <div class="_big_sticker_container">
                 <div class="_schedule l_sticker" key="1343922/6707069_2013-07-31_3" style="left:449.14285714285717px;top:46.14285714285714px;">
@@ -514,8 +502,8 @@
     __oInitialData.oCalendarInfo = {"publishUrl":"http://naver.me/5gsBCMDr","name":"롯데 자이언츠","shared":false,"description":null,"subscrible":true,"calendarId":20194466,"ownerId":"nv_spocal2","opened":true,"personal":{"memberType":0,"userId":"nv_spocal2","dlEmail":null,"showInCalendarList":true,"calendarBasedNotify":false,"showSchedules":true,"role":"R1_MASTER","relationType":1,"dbServerId":0,"color":33,"defaultAlarm":null,"sortOrder":6000000,"modify":null,"calendarId":20194466,"defaultAlarmExist":false,"colorCode":"333333"}};
     __oInitialData.sTodayDate = '2017-07-06 14:26:22';
 </script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script data-main="main-publicCalendar" src="./calendarSource_files/require.js.다운로드" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

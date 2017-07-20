@@ -1,7 +1,9 @@
 package com.calendar.controller;
 
-import com.calendar.CalendarData;
+import com.calendar.data.CalendarData;
 import com.calendar.DefaultScheduleModel;
+import com.calendar.data.ICalEvent;
+import com.calendar.util.ProcessIcal;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
@@ -13,9 +15,7 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.util.UidGenerator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,6 +37,18 @@ import java.util.List;
 @EnableAutoConfiguration
 public class iCalRestController {
 
+    @GetMapping(value="/request-ical-data")
+    public List<ICalEvent> processIcalData(@RequestParam("month") int month) throws IOException, ParserException, ParseException {
+
+        //사용자 기존 캘린더 입력정보 ics로부터 불러오기
+        Calendar calendar = ProcessIcal.parseIcalFile("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/iCalData/simple.ics");
+
+        //각 이벤트의 정보(내용,날짜)를 ICalEvent오브젝트에 담기
+        List<ICalEvent> dataList = ProcessIcal.resolveIcalDataToMemory(calendar);
+
+        return ProcessIcal.filterByMonth(dataList, month);
+    }
+
     @PostMapping("/create-new-calendar-file")
     public String createNewCalendarFile() throws IOException {
 
@@ -50,7 +62,7 @@ public class iCalRestController {
 
     @PostMapping("/parse-calendar-string")
     public String parseCalendarString(
-            @RequestParam("ical_string") String icalString
+        @RequestParam("ical_string") String icalString
     ) throws IOException, ParserException {
 
         // string으로 저장
@@ -199,7 +211,6 @@ public class iCalRestController {
     public DefaultScheduleModel parseMeetingEvent(
             @RequestParam("ical_string") String icalString
     ) throws IOException, ParserException, ParseException {
-        SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
         SimpleDateFormat startTimePattern = new SimpleDateFormat("yyyy년 MM월 dd일 (E) a HH:mm");
         SimpleDateFormat endTimePattern = new SimpleDateFormat("a HH:mm '서울(GMT+09:00)'");
@@ -232,5 +243,23 @@ public class iCalRestController {
     }
 
 
+
+
 }
 
+
+
+//        //오늘만 종일 반복 일정인 이벤트만 필터링
+//        java.util.Calendar today = java.util.Calendar.getInstance();
+//        today.set(java.util.Calendar.HOUR_OF_DAY, 0);
+//        today.clear(java.util.Calendar.MINUTE);
+//        today.clear(java.util.Calendar.SECOND);
+//        // create a period starting now with a duration of one (1) day..
+//        Period period = new Period(new DateTime(today.getTime()), new Dur(1, 0, 0, 0));
+//        Filter filter = new Filter(new PeriodRule(period));
+//        List eventsToday = (List) filter.filter(calendar.getComponents(Component.VEVENT));
+//
+//
+//
+//        //일반복만 추려내기?
+//        List<VEvent> events = calendar.getComponents(Component.VEVENT);
