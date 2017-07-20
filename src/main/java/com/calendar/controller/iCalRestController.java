@@ -28,6 +28,9 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -44,102 +47,61 @@ public class iCalRestController {
     public List<List<ICalEvent>> applyICalData(@RequestParam("month") int month) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
-        FileInputStream fin = new FileInputStream("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        FileInputStream fin = new FileInputStream("/Users/LEE/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
         CalendarBuilder builder = new CalendarBuilder();
         Calendar calendar = builder.build(fin);
 
-        //모든 이전, 다음 달 포함 리스트
+        //현재, 이전, 다음 달 포함 리스트
         List<List<ICalEvent>> totalList = new ArrayList<>();
 
+        //현재, 이전, 다음 달의 일정 데이터리스트 만들기
+        List<ICalEvent> currentMonth = makeDataList(2017,month,calendar);
+        List<ICalEvent> nextMonth = makeDataList(2017,month+1,calendar);
+        List<ICalEvent> preMonth = makeDataList(2017,month-1,calendar);
 
-        //각각의 달 리스트
-        List<ICalEvent> dataList_prev = new ArrayList<>();
-        List<ICalEvent> dataList_center = new ArrayList<>();
-        List<ICalEvent> dataList_next = new ArrayList<>();
+        totalList.add(currentMonth);
+        totalList.add(nextMonth);
+        totalList.add(preMonth);
 
-        String prevMonth = Integer.toString(month-1);
-        String nextMonth = Integer.toString(month+1);
-        String centerMonth = Integer.toString(month);
+        return totalList;
+    }
 
-        //현재 달 추려내기 - 추후에 인자로 받아 자동으로 해당월의 전달 다음달 일정만 추림 - 달 마다 30일 31일 28일 구분해줘야함 - 추후에
-        String dateStart = "20170"+centerMonth+"01T070000Z";
-        String dateEnd = "20170"+centerMonth+"30T070000Z";
-        DateTime from_center = new DateTime(dateStart);
-        DateTime to_center = new DateTime(dateEnd);
-        Period period_center = new Period(from_center, to_center);
+    public List<ICalEvent> makeDataList(int year ,int month, Calendar calendar) throws ParseException {
 
-        //다음 달 추려내기 - 일주일만
-        dateStart = "20170"+nextMonth+"01T070000Z";
-        dateEnd = "20170"+nextMonth+"06T070000Z";
-        DateTime from_next = new DateTime(dateStart);
-        DateTime to_next = new DateTime(dateEnd);
-        Period period_next = new Period(from_next, to_next);
+        //첫 일자, 마지막 일자 포맷 만들기
+        YearMonth yearMonth = YearMonth.of( year , month );//java8
+        LocalDate tempEnd = yearMonth.atEndOfMonth();
+        LocalDate tempStart = yearMonth.atDay(1);
+        DateTime startDate = new DateTime(tempStart.format(DateTimeFormatter.ofPattern("yyyyMMdd"))+"T000000Z");
+        DateTime endDate = new DateTime(tempEnd.format(DateTimeFormatter.ofPattern("yyyyMMdd"))+"T000000Z");
 
-        //이전 달 추려내기 - 일주일만
-        dateStart = "20170"+prevMonth+"25T070000Z";
-        dateEnd = "20170"+prevMonth+"30T070000Z";
-        DateTime from_prev = new DateTime(dateStart);
-        DateTime to_prev = new DateTime(dateEnd);
-        Period period_prev = new Period(from_prev, to_prev);
+        //데이터 리스트
+        List<ICalEvent> dataList = new ArrayList<>();
 
-        //6,7월에 안에 일어나는 이벤트들 리스트에 포함
+        //기간 만들기
+        Period period = new Period(startDate, endDate);
+
+        //기간으로 필터링한 이벤트들 리스트에 포함
         List<VEvent> events = calendar.getComponents("VEVENT");
         List<VEvent> events_center = new ArrayList<>();
-        List<VEvent> events_next = new ArrayList<>();
-        List<VEvent> events_prev = new ArrayList<>();
-        Filter filter_center = new Filter(new PeriodRule(period_center));
-        Filter filter_next = new Filter(new PeriodRule(period_next));
-        Filter filter_prev = new Filter(new PeriodRule(period_prev));
-        events_center = (List<VEvent>) filter_center.filter(events);
-        events_next = (List<VEvent>) filter_next.filter(events);
-        events_prev = (List<VEvent>) filter_prev.filter(events);
+        Filter filter = new Filter(new PeriodRule(period));
+        events = (List<VEvent>) filter.filter(events);
 
-        // 현재달
-        for (VEvent event : events_center) {
+        //iCalEvent 오브젝트에 담기
+        for (VEvent event : events) {
 
             //넘겨줄 현재 달 이벤트오브젝트 리스트 생성
             ICalEvent data = new ICalEvent();
             data.setSummary(event.getSummary().getValue());
             data.setStart(event.getStartDate().getValue());
             data.setEnd(event.getEndDate().getValue());
-            dataList_center.add(data);
+            dataList.add(data);
 
             System.out.println(event.getSummary().getValue());
 
         }
 
-        //다음 달
-        for (VEvent event : events_next) {
-
-            ICalEvent data = new ICalEvent();
-            data.setSummary(event.getSummary().getValue());
-            data.setStart(event.getStartDate().getValue());
-            data.setEnd(event.getEndDate().getValue());
-            dataList_next.add(data);
-
-            System.out.println(event.getSummary().getValue());
-
-        }
-
-        //이전달
-        for (VEvent event : events_prev) {
-
-            ICalEvent data = new ICalEvent();
-            data.setSummary(event.getSummary().getValue());
-            data.setStart(event.getStartDate().getValue());
-            data.setEnd(event.getEndDate().getValue());
-            dataList_prev.add(data);
-
-            System.out.println(event.getSummary().getValue());
-
-        }
-
-
-        totalList.add(dataList_center);
-        totalList.add(dataList_next);
-        totalList.add(dataList_prev);
-
-        return totalList;
+        return dataList;
     }
 
     @PostMapping("/create-new-calendar-file")
