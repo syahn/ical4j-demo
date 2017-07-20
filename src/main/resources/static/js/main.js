@@ -6,6 +6,7 @@
 
 $(document).ready(function () {
 
+
     $("#create-new-calendar-file").click(function () {
         $.post("http://localhost:8080/create-new-calendar-file")
             .done(function (data) {

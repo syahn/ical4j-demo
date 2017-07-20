@@ -2,9 +2,12 @@ package com.calendar.controller;
 
 import com.calendar.CalendarData;
 import com.calendar.DefaultScheduleModel;
+import com.calendar.ICalEvent;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
+import net.fortuna.ical4j.filter.Filter;
+import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
@@ -36,6 +39,108 @@ import java.util.List;
 @RestController
 @EnableAutoConfiguration
 public class iCalRestController {
+
+    @PostMapping("/apply-iCalData")
+    public List<List<ICalEvent>> applyICalData(@RequestParam("month") int month) throws IOException, ParserException, ParseException {
+
+        //사용자 기존 캘린더 입력정보 ics로부터 불러오기
+        FileInputStream fin = new FileInputStream("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        CalendarBuilder builder = new CalendarBuilder();
+        Calendar calendar = builder.build(fin);
+
+        //모든 이전, 다음 달 포함 리스트
+        List<List<ICalEvent>> totalList = new ArrayList<>();
+
+
+        //각각의 달 리스트
+        List<ICalEvent> dataList_prev = new ArrayList<>();
+        List<ICalEvent> dataList_center = new ArrayList<>();
+        List<ICalEvent> dataList_next = new ArrayList<>();
+
+        String prevMonth = Integer.toString(month-1);
+        String nextMonth = Integer.toString(month+1);
+        String centerMonth = Integer.toString(month);
+
+        //현재 달 추려내기 - 추후에 인자로 받아 자동으로 해당월의 전달 다음달 일정만 추림 - 달 마다 30일 31일 28일 구분해줘야함 - 추후에
+        String dateStart = "20170"+centerMonth+"01T070000Z";
+        String dateEnd = "20170"+centerMonth+"30T070000Z";
+        DateTime from_center = new DateTime(dateStart);
+        DateTime to_center = new DateTime(dateEnd);
+        Period period_center = new Period(from_center, to_center);
+
+        //다음 달 추려내기 - 일주일만
+        dateStart = "20170"+nextMonth+"01T070000Z";
+        dateEnd = "20170"+nextMonth+"06T070000Z";
+        DateTime from_next = new DateTime(dateStart);
+        DateTime to_next = new DateTime(dateEnd);
+        Period period_next = new Period(from_next, to_next);
+
+        //이전 달 추려내기 - 일주일만
+        dateStart = "20170"+prevMonth+"25T070000Z";
+        dateEnd = "20170"+prevMonth+"30T070000Z";
+        DateTime from_prev = new DateTime(dateStart);
+        DateTime to_prev = new DateTime(dateEnd);
+        Period period_prev = new Period(from_prev, to_prev);
+
+        //6,7월에 안에 일어나는 이벤트들 리스트에 포함
+        List<VEvent> events = calendar.getComponents("VEVENT");
+        List<VEvent> events_center = new ArrayList<>();
+        List<VEvent> events_next = new ArrayList<>();
+        List<VEvent> events_prev = new ArrayList<>();
+        Filter filter_center = new Filter(new PeriodRule(period_center));
+        Filter filter_next = new Filter(new PeriodRule(period_next));
+        Filter filter_prev = new Filter(new PeriodRule(period_prev));
+        events_center = (List<VEvent>) filter_center.filter(events);
+        events_next = (List<VEvent>) filter_next.filter(events);
+        events_prev = (List<VEvent>) filter_prev.filter(events);
+
+        // 현재달
+        for (VEvent event : events_center) {
+
+            //넘겨줄 현재 달 이벤트오브젝트 리스트 생성
+            ICalEvent data = new ICalEvent();
+            data.setSummary(event.getSummary().getValue());
+            data.setStart(event.getStartDate().getValue());
+            data.setEnd(event.getEndDate().getValue());
+            dataList_center.add(data);
+
+            System.out.println(event.getSummary().getValue());
+
+        }
+
+        //다음 달
+        for (VEvent event : events_next) {
+
+            ICalEvent data = new ICalEvent();
+            data.setSummary(event.getSummary().getValue());
+            data.setStart(event.getStartDate().getValue());
+            data.setEnd(event.getEndDate().getValue());
+            dataList_next.add(data);
+
+            System.out.println(event.getSummary().getValue());
+
+        }
+
+        //이전달
+        for (VEvent event : events_prev) {
+
+            ICalEvent data = new ICalEvent();
+            data.setSummary(event.getSummary().getValue());
+            data.setStart(event.getStartDate().getValue());
+            data.setEnd(event.getEndDate().getValue());
+            dataList_prev.add(data);
+
+            System.out.println(event.getSummary().getValue());
+
+        }
+
+
+        totalList.add(dataList_center);
+        totalList.add(dataList_next);
+        totalList.add(dataList_prev);
+
+        return totalList;
+    }
 
     @PostMapping("/create-new-calendar-file")
     public String createNewCalendarFile() throws IOException {
