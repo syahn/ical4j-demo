@@ -19,41 +19,53 @@ $(document).ready(function () {
             //현재 달의 1일 dayindex 찾기
             var indexOfFirstDay = parseInt($("table[data-week-row='0']>tbody>tr[class='date']>td>strong:not(:contains('31')):contains(1)").attr("dayindex"));
 
+
             //현재 달 필터링 후 셀 안에 표시
-            filterMonthList(list[0],indexOfFirstDay,0);
-
+            filterNoRecurList(list[0],indexOfFirstDay,0);
             //다음 달 필터링 후 셀 안에 표시
-            filterMonthList(list[1],indexOfFirstDay,1);
-
+            filterNoRecurList(list[1],indexOfFirstDay,1);
             //이전 달 필터링 후 셀 안에 표시
-            filterMonthList(list[2],indexOfFirstDay,2);
+            filterNoRecurList(list[2],indexOfFirstDay,2);
 
         });
 });
 
 //데이터 필터링
-function filterMonthList(list,indexNum,type) {
+function filterNoRecurList(list,indexNum,type) {
 
     for(i=0;i<list.length;i++){
-        //종일데이터의 경우
-        var startDate = list[i].start.toString().substring(6,8);
-        var endDate = list[i].end.toString().substring(6,8);//종일만적용됨
-        var summary = list[i].summary.toString();
-
-        //반복데이터의경우
-        var interval = list[i].interval;
-        var frequency = list[i].frequency;
-        var dayList = list[i].bydayList; // weekly의 경우 필수적으로 포함됨
-        var until = list[i].until;
-        var monthOfStartDate = list[i].start.toString().substring(4,6);
-        var yearOfStartDate = list[i].start.toString().substring(0,4);
-
-        addEventToDom(startDate,summary,indexNum,type);
+        if(list[i].isRecur===false){
+            var startDate = list[i].start.toString().substring(6,8);
+            var endDate = list[i].end.toString().substring(6,8);//종일만적용됨
+            var summary = list[i].summary.toString();
+            addEventToDom(startDate,summary,indexNum,type);
+        }
     }
 }
 
-function filterRecurMonthList() {
-    
+function filterRecurMonthList(list,indexNum) {
+    for(i=0;i<list.length;i++){
+        if(list[i].isRecur===true){
+            var interval = list[i].interval;
+            var frequency = list[i].frequency;
+            var until = list[i].until;
+            var monthOfStartDate = list[i].start.toString().substring(4,6);
+            var yearOfStartDate = list[i].start.toString().substring(0,4);
+            //var dayList = list[i].bydayList; // weekly의 경우 필수적으로 포함됨
+        }
+    }
+
+    if(frequency === "YEARLY"){
+
+    }else if(frequency === "MONTHLY"){
+
+    }else if(frequency === "WEEKLY"){
+
+    }else if(frequency === "DAILY"){
+
+    }
+
+
 }
 
 //이벤트추가
@@ -92,6 +104,14 @@ function lastday(y,m){
 
 
 // //반복데이터일 경우
+
+//반복데이터의경우
+// var interval = list[i].interval;
+// var frequency = list[i].frequency;
+// var dayList = list[i].bydayList; // weekly의 경우 필수적으로 포함됨
+// var until = list[i].until;
+// var monthOfStartDate = list[i].start.toString().substring(4,6);
+// var yearOfStartDate = list[i].start.toString().substring(0,4);
 // if(interval!==null){
 //     //정해진기간 존재하는 경우
 //     if(until!==null){

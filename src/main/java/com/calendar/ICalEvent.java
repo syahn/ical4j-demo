@@ -9,9 +9,10 @@ public class ICalEvent {
     private String start;
     private String end;
     private String summary;
+    private Boolean isRecur = false;
 
     private String frequency;
-    private String until;
+    private String until = "";
     private List<String> bydayList;
     private int interval;
 
@@ -110,5 +111,13 @@ public class ICalEvent {
 
     public void setInterval(int interval) {
         this.interval = interval;
+    }
+
+    public Boolean getIsRecur() {
+        return isRecur;
+    }
+
+    public void setIsRecur(Boolean recur) {
+        isRecur = recur;
     }
 }

@@ -47,7 +47,7 @@ public class iCalRestController {
     public List<List<ICalEvent>> applyICalData(@RequestParam("month") int month,@RequestParam("year") int year) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
-        FileInputStream fin = new FileInputStream("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        FileInputStream fin = new FileInputStream("/Users/LEE/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
         CalendarBuilder builder = new CalendarBuilder();
         Calendar calendar = builder.build(fin);
 
@@ -76,11 +76,17 @@ public class iCalRestController {
     public List<ICalEvent> makeDataList(int year ,int month, Calendar calendar) throws ParseException {
 
         //첫 일자, 마지막 일자 포맷 만들기
-        YearMonth yearMonth = YearMonth.of( year , month );//java8
-        LocalDate tempEnd = yearMonth.atEndOfMonth();
-        LocalDate tempStart = yearMonth.atDay(1);
-        DateTime startDate = new DateTime(tempStart.format(DateTimeFormatter.ofPattern("yyyyMMdd"))+"T000000Z");
-        DateTime endDate = new DateTime(tempEnd.format(DateTimeFormatter.ofPattern("yyyyMMdd"))+"T000000Z");
+        //현재, 이전, 다음 달의 일정 데이터리스트 만들기
+        int preYear = month==1 ? year-1:year;
+        int nextYear = month==12 ? year+1:year;
+        int preMonth = month==1 ? 12: month-1;
+        int nextMonth = month==12 ? 1:month+1;
+        YearMonth yearMonth1 = YearMonth.of( preYear , preMonth );//java8
+        YearMonth yearMonth2 = YearMonth.of( nextYear, nextMonth );
+        LocalDate tempStart = yearMonth1.atDay(23);
+        LocalDate tempEnd = yearMonth2.atDay(6);
+        DateTime startDate = new DateTime(tempStart.format(DateTimeFormatter.ofPattern("yyyyMMdd"))+"T000000Z");//전달 23일
+        DateTime endDate = new DateTime(tempEnd.format(DateTimeFormatter.ofPattern("yyyyMMdd"))+"T000000Z");//다음달 6일
 
         //데이터 리스트
         List<ICalEvent> dataList = new ArrayList<>();
@@ -96,21 +102,29 @@ public class iCalRestController {
         //iCalEvent 오브젝트에 담기
         for (VEvent event : events) {
 
-            if(event.getProperty("RRULE")==null){
-                //넘겨줄 현재 달 이벤트오브젝트 리스트 생성
-                ICalEvent data = new ICalEvent();
-                data.setSummary(event.getSummary().getValue());
-                data.setStart(event.getStartDate().getValue());
-                data.setEnd(event.getEndDate().getValue());
-                dataList.add(data);
-            }
+            //넘겨줄 현재 달 이벤트오브젝트 리스트 생성
+            ICalEvent data = new ICalEvent();
+            data.setSummary(event.getSummary().getValue());
+            data.setStart(event.getStartDate().getValue());
+            data.setEnd(event.getEndDate().getValue());
+            dataList.add(data);
 
+            if(event.getProperty("RRULE")!=null) {
+                RRule rule = (RRule) event.getProperty("RRULE");
+                data.setIsRecur(true);
+                data.setInterval(rule.getRecur().getInterval());
+                data.setFrequency(rule.getRecur().getFrequency());
+                if(rule.getRecur().getUntil()!=null) {
+                    data.setUntil(rule.getRecur().getUntil().toString());
+                }
+            }
             System.out.println(event.getSummary().getValue());
 
         }
 
         return dataList;
     }
+
 
     @PostMapping("/create-new-calendar-file")
     public String createNewCalendarFile() throws IOException {
