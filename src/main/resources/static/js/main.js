@@ -9,23 +9,69 @@ $(document).ready(function () {
         .done(function (eventList) {
             for (var i = 0; i < eventList.length; i++) {
                 var event = eventList[i];
-                console.log(event);
+                if (shouldNotIncluded(event, currentPageData.month)) continue;
                 if (isRecurrentEvent(event)) {
                     appendRecurrentEvent(event, currentPageData.month);
                 } else {
                     $(findDomLocation(event, currentPageData.month)).append(eventSummary(event));
                 }
-
             }
         });
 });
 
-function appendRecurrentEvent(event, currentMonth) {
-    var numOfCount = event.untilDate - event.startDate + 1;
-    for (var i = 0; i<numOfCount; i++) {
-        $(findDomLocation(event, currentMonth)).append(eventSummary(event));
-        event.startDate += event.interval;
+
+function shouldNotIncluded(event, currentMonth) {
+
+    if (event.recur && currentMonth <= event.untilMonth) {
+        return (event.month > currentMonth && event.startDate > calcuateAlloc("next"))
+            ? true
+            : false;
     }
+    if (event.month < currentMonth) {
+        var lastDate = getLastDate(event.month);
+        if (event.startDate < lastDate - calcuateAlloc("previous")) {
+            return true;
+        }
+    }
+    else if (event.month > currentMonth) {
+        if (event.startDate > calcuateAlloc("next")) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function appendRecurrentEvent(event, currentMonth) {
+
+    while (event.month < event.untilMonth || (event.month === event.untilMonth && event.startDate <= event.untilDate)) {
+        // if (event.month === currentMonth) {
+        $(findDomLocation(event, currentMonth)).append(eventSummary(event));
+        // }
+
+
+        if (event.frequency == "DAILY") {
+            event.startDate += event.interval;
+            if (event.startDate > getLastDate(event.month)) {
+                event.month += 1;
+                event.startDate = event.startDate - getLastDate(event.month);
+            }
+
+        }
+        else if (event.frequency == "WEEKLY") {
+            event.startDate += event.interval * 7;
+            if (event.startDate > getLastDate(event.month)) {
+                event.month += 1;
+                event.startDate = event.startDate - getLastDate(event.month);
+            }
+        }
+        else if (event.frequency == "MONTHLY") {
+            event.month += 1;
+
+        }
+
+    }
+
 
 }
 
@@ -50,40 +96,24 @@ function findDomLocation(event, currentMonth) {
 function getLocation(event, currentMonth) {
     var index;
     var whichMonth = event.month;
-    var firstDayOfMonth = getFirstDay($("#current_month").attr("value")) - 1;
+    var firstDayOfMonth = getFirstDay(currentMonth);
 
+    // Process this month
     if (whichMonth == currentMonth) {
-        index = event.startDate + firstDayOfMonth;
-
-
-    } // 이전 달 이벤트
+        index = event.startDate + firstDayOfMonth - 1;
+    } // Process previous month
     else if (whichMonth < currentMonth) {
-        var firstDateIncluded = getLastDate(whichMonth) - calcuateAlloc(whichMonth);
+        var firstDateIncluded = getLastDate(whichMonth) - calcuateAlloc("previous") + 1;
         index = event.startDate - firstDateIncluded;
-
-    } // 다음 달 이벤트
+    } // Process next month
     else {
-        index = firstDayOfMonth + getLastDate($("#current_month").attr("value")) + event.startDate;
+
+        index = firstDayOfMonth + getLastDate(currentMonth) + event.startDate - 1;
     }
 
     return index.toString();
 }
 
-function shouldIncluded(event, whichMonth) {
-    if (whichMonth == "previous") {
-        var lastDate = getLastDate(event.month);
-
-        if (event.startDate >= lastDate - calcuateAlloc(whichMonth)) {
-            return true;
-        }
-    }
-    else {
-        if (event.startDate <= calcuateAlloc(whichMonth)) {
-            return true;
-        }
-    }
-    return false;
-}
 
 function calcuateAlloc(whichMonth) {
     if (whichMonth == "previous") {

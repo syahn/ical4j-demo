@@ -21,13 +21,20 @@ public class iCalController {
     }
 
     @GetMapping("/month_6")
-    public String month() throws IOException, ParserException {
+    public String sixth(Model model) throws IOException, ParserException {
+//        model.addAttribute("month", 6);
         return "month_6";
     }
 
     @GetMapping("/month_7")
-    public String month2(Model model) throws IOException, ParserException {
-        model.addAttribute("month", 7);
+    public String seventh(Model model) throws IOException, ParserException {
+//        model.addAttribute("month", 7);
         return "month_7";
+    }
+
+    @GetMapping("/month_8")
+    public String eighth(Model model) throws IOException, ParserException {
+//        model.addAttribute("month", 8);
+        return "month_8";
     }
 }

@@ -70,6 +70,8 @@ public class ProcessIcal {
                 filteredList.add(event);
             } else if (month == event.getMonth() - 1 && event.getStartDate() <= 6) {
                 filteredList.add(event);
+            } else if (event.getRecur()) {
+                filteredList.add(event);
             }
         }
 
