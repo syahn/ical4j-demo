@@ -33,7 +33,6 @@ $(document).ready(function () {
 
 function filterMonthList(list,indexNum,type) {
 
-    //
     for(i=0;i<list.length;i++){
         var date = list[i].start.toString().substring(6,8);
         var summary = list[i].summary.toString();
