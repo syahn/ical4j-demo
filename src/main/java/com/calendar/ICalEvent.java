@@ -9,6 +9,12 @@ public class ICalEvent {
     private String start;
     private String end;
     private String summary;
+
+    private String frequency;
+    private String until;
+    private List<String> bydayList;
+    private int interval;
+
     private String location;
     private String organizer;
     private List<String> list;
@@ -72,5 +78,37 @@ public class ICalEvent {
 
     public void setList(List<String> list) {
         this.list = list;
+    }
+
+    public String getFrequency() {
+        return frequency;
+    }
+
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
+    }
+
+    public String getUntil() {
+        return until;
+    }
+
+    public void setUntil(String until) {
+        this.until = until;
+    }
+
+    public List<String> getBydayList() {
+        return bydayList;
+    }
+
+    public void setBydayList(List<String> bydayList) {
+        this.bydayList = bydayList;
+    }
+
+    public int getInterval() {
+        return interval;
+    }
+
+    public void setInterval(int interval) {
+        this.interval = interval;
     }
 }
