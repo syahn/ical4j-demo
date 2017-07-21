@@ -8,7 +8,10 @@ import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
+import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.*;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.parameter.Cn;
@@ -31,10 +34,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by NAVER on 2017-07-17.
@@ -47,7 +47,7 @@ public class iCalRestController {
     public List<List<ICalEvent>> applyICalData(@RequestParam("month") int month,@RequestParam("year") int year) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
-        FileInputStream fin = new FileInputStream("/Users/LEE/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        FileInputStream fin = new FileInputStream("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
         CalendarBuilder builder = new CalendarBuilder();
         Calendar calendar = builder.build(fin);
 
@@ -70,6 +70,9 @@ public class iCalRestController {
         return totalList;
     }
 
+    //종일 일정리스트와
+    //반복 일정리스트 분멸해서 넣기
+
     public List<ICalEvent> makeDataList(int year ,int month, Calendar calendar) throws ParseException {
 
         //첫 일자, 마지막 일자 포맷 만들기
@@ -87,19 +90,20 @@ public class iCalRestController {
 
         //기간으로 필터링한 이벤트들 리스트에 포함
         List<VEvent> events = calendar.getComponents("VEVENT");
-        List<VEvent> events_center = new ArrayList<>();
         Filter filter = new Filter(new PeriodRule(period));
         events = (List<VEvent>) filter.filter(events);
 
         //iCalEvent 오브젝트에 담기
         for (VEvent event : events) {
 
-            //넘겨줄 현재 달 이벤트오브젝트 리스트 생성
-            ICalEvent data = new ICalEvent();
-            data.setSummary(event.getSummary().getValue());
-            data.setStart(event.getStartDate().getValue());
-            data.setEnd(event.getEndDate().getValue());
-            dataList.add(data);
+            if(event.getProperty("RRULE")==null){
+                //넘겨줄 현재 달 이벤트오브젝트 리스트 생성
+                ICalEvent data = new ICalEvent();
+                data.setSummary(event.getSummary().getValue());
+                data.setStart(event.getStartDate().getValue());
+                data.setEnd(event.getEndDate().getValue());
+                dataList.add(data);
+            }
 
             System.out.println(event.getSummary().getValue());
 
