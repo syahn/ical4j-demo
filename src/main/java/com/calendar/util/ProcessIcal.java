@@ -50,6 +50,7 @@ public class ProcessIcal {
                 data.setUntilYear(extractYear(data.getUntil()));
                 data.setUntilMonth(extractMonth(data.getUntil()));
                 data.setUntilDate(extractDate(data.getUntil()));
+
             } else {
                 data.setRecur(false);
             }

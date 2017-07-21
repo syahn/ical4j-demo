@@ -41,7 +41,7 @@ public class iCalRestController {
     public List<ICalEvent> processIcalData(@RequestParam("month") int month) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
-        Calendar calendar = ProcessIcal.parseIcalFile("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/iCalData/advanced3.ics");
+        Calendar calendar = ProcessIcal.parseIcalFile("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/iCalData/advanced2.ics");
 
         //각 이벤트의 정보(내용,날짜)를 ICalEvent오브젝트에 담기
         List<ICalEvent> dataList = ProcessIcal.resolveIcalDataToMemory(calendar);

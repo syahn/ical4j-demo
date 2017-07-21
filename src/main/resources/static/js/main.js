@@ -4,40 +4,55 @@
 
 
 $(document).ready(function () {
-    var currentPageData = generateMonthObject();
-    $.get("http://localhost:9000/request-ical-data", currentPageData)
-        .done(function (eventList) {
-            for (var i = 0; i < eventList.length; i++) {
-                var event = eventList[i];
-                if (shouldNotIncluded(event, currentPageData.month)) continue;
-                if (isRecurrentEvent(event)) {
-                    appendRecurrentEvent(event, currentPageData.month);
-                } else {
-                    $(findDomLocation(event, currentPageData.month)).append(eventSummary(event));
-                }
-            }
-        });
+    $.get("http://localhost:9000/request-ical-data",
+        generateMonthObject()
+    ).done(function(events) {
+        renderingCalendarEvents(events);
+    });
 });
 
+function renderingCalendarEvents(events) {
+    for (var i = 0; i < events.length; i++) {
 
-function shouldNotIncluded(event, currentMonth) {
+        var event = events[i];
+        var currentMonth = $("#current_month").attr("value");
+        var indexOfDom = getLocation(event, currentMonth);
 
-    if (event.recur && currentMonth <= event.untilMonth) {
-        return (event.month > currentMonth && event.startDate > calcuateAlloc("next"))
-            ? true
-            : false;
+        if (shouldNotIncluded(event, currentMonth, indexOfDom))
+            continue;
+
+        if (isRecurrentEvent(event)) {
+            appendRecurrentEvent(event, currentMonth);
+        } else {
+            $(findDomLocation(indexOfDom)).append(eventSummary(event));
+        }
     }
+}
+
+
+function shouldNotIncluded(event, currentMonth, index) {
+
+    // Does recurrent event have a relation with current month?
+    if (isValidRecurrentEvent(event, currentMonth)) {
+        return true;
+    } else {
+        return false;
+    }
+    // Is is a event in previous month?
     if (event.month < currentMonth) {
         var lastDate = getLastDate(event.month);
         if (event.startDate < lastDate - calcuateAlloc("previous")) {
             return true;
         }
     }
-    else if (event.month > currentMonth) {
+    // Is is a event in next month?
+    if (event.month > currentMonth) {
         if (event.startDate > calcuateAlloc("next")) {
             return true;
         }
     }
+    // Is index is in the grid of current month?
+    if (index < 0 && index > 34) return true;
 
     return false;
 }
@@ -45,10 +60,8 @@ function shouldNotIncluded(event, currentMonth) {
 function appendRecurrentEvent(event, currentMonth) {
 
     while (event.month < event.untilMonth || (event.month === event.untilMonth && event.startDate <= event.untilDate)) {
-        // if (event.month === currentMonth) {
-        $(findDomLocation(event, currentMonth)).append(eventSummary(event));
-        // }
 
+        $(findDomLocation(getLocation(event, currentMonth))).append(eventSummary(event));
 
         if (event.frequency == "DAILY") {
             event.startDate += event.interval;
@@ -56,7 +69,6 @@ function appendRecurrentEvent(event, currentMonth) {
                 event.month += 1;
                 event.startDate = event.startDate - getLastDate(event.month);
             }
-
         }
         else if (event.frequency == "WEEKLY") {
             event.startDate += event.interval * 7;
@@ -67,30 +79,15 @@ function appendRecurrentEvent(event, currentMonth) {
         }
         else if (event.frequency == "MONTHLY") {
             event.month += 1;
-
         }
-
     }
-
-
 }
 
-function isRecurrentEvent(event) {
-    return event.recur ? true : false;
-}
-
-function generateMonthObject() {
-    var currentData = {};
-    currentData["month"] = $("#current_month").attr("value");
-    return currentData;
-}
-
-function eventSummary(event) {
-    return "<span style='color: blue;'>" + event.summary + "</span>"
-}
-
-function findDomLocation(event, currentMonth) {
-    return '.schedule_list > tbody > tr:nth-child(2) > td[dayindex=' + getLocation(event, currentMonth) + ']';
+function isValidRecurrentEvent(event, currentMonth) {
+    if (event.month > currentMonth && event.startDate > calcuateAlloc("next")) {
+        return event.recur && currentMonth <= event.untilMonth;
+    }
+    return false;
 }
 
 function getLocation(event, currentMonth) {
@@ -107,19 +104,35 @@ function getLocation(event, currentMonth) {
         index = event.startDate - firstDateIncluded;
     } // Process next month
     else {
-
         index = firstDayOfMonth + getLastDate(currentMonth) + event.startDate - 1;
     }
 
-    return index.toString();
+    return index;
 }
 
+function generateMonthObject() {
+    var currentData = {};
+    currentData["month"] = $("#current_month").attr("value");
+    return currentData;
+}
+
+function isRecurrentEvent(event) {
+    return event.recur ? true : false;
+}
+
+function eventSummary(event) {
+    return "<div style='background: blue;'><span style='color: white;'>" + event.summary + "</span></div>"
+}
+
+function findDomLocation(index) {
+    return '.schedule_list > tbody > tr:nth-child(2) > td[dayindex=' + index + ']';
+}
 
 function calcuateAlloc(whichMonth) {
     if (whichMonth == "previous") {
         return getFirstDay($("#current_month").attr("value"));
     }
-    else {
+    if (whichMonth == "next") {
         return 6 - getLastDay($("#current_month").attr("value"))
     }
 }
