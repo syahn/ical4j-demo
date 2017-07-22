@@ -44,7 +44,7 @@ import java.util.*;
 public class iCalRestController {
 
     @PostMapping("/apply-iCalData")
-    public List<List<ICalEvent>> applyICalData(@RequestParam("month") int month,@RequestParam("year") int year) throws IOException, ParserException, ParseException {
+    public List<ICalEvent> applyICalData(@RequestParam("month") int month,@RequestParam("year") int year) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
         FileInputStream fin = new FileInputStream("/Users/LEE/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
@@ -54,25 +54,12 @@ public class iCalRestController {
         //현재, 이전, 다음 달 포함 리스트
         List<List<ICalEvent>> totalList = new ArrayList<>();
 
-        //현재, 이전, 다음 달의 일정 데이터리스트 만들기
-        int preYear = month==1 ? year-1:year;
-        int nextYear = month==12 ? year+1:year;
-        int preMonth = month==1 ? 12: month-1;
-        int nextMonth = month==12 ? 1:month+1;
-        List<ICalEvent> currentMonthList = makeDataList(year,month,calendar);
-        List<ICalEvent> nextMonthList = makeDataList(nextYear,nextMonth,calendar);
-        List<ICalEvent> preMonthList = makeDataList(preYear,preMonth,calendar);
+        List<ICalEvent> eventList = makeDataList(year,month,calendar);
 
-        totalList.add(currentMonthList);
-        totalList.add(nextMonthList);
-        totalList.add(preMonthList);
-
-        return totalList;
+        return eventList;
     }
 
-    //종일 일정리스트와
-    //반복 일정리스트 분멸해서 넣기
-
+    //일정리스트 - 전달 23일 부터 다음 달 6일까지 해당 이벤트 리스트 만들기
     public List<ICalEvent> makeDataList(int year ,int month, Calendar calendar) throws ParseException {
 
         //첫 일자, 마지막 일자 포맷 만들기
@@ -91,7 +78,7 @@ public class iCalRestController {
         //데이터 리스트
         List<ICalEvent> dataList = new ArrayList<>();
 
-        //기간 만들기
+        //기간 만들기 - RRule 밑에 EXPIR있는 경우 인식 못함
         Period period = new Period(startDate, endDate);
 
         //기간으로 필터링한 이벤트들 리스트에 포함
@@ -106,6 +93,9 @@ public class iCalRestController {
             ICalEvent data = new ICalEvent();
             data.setSummary(event.getSummary().getValue());
             data.setStart(event.getStartDate().getValue());
+            data.setStartDay(extractDay(data.getStart()));
+            data.setStartMonth(extractMonth(data.getStart()));
+            data.setStartYear(extractYear(data.getStart()));
             data.setEnd(event.getEndDate().getValue());
             dataList.add(data);
 
@@ -116,6 +106,9 @@ public class iCalRestController {
                 data.setFrequency(rule.getRecur().getFrequency());
                 if(rule.getRecur().getUntil()!=null) {
                     data.setUntil(rule.getRecur().getUntil().toString());
+                    data.setUntilDay(extractDay(data.getUntil()));
+                    data.setUntilMonth(extractMonth(data.getUntil()));
+                    data.setUntilYear(extractYear(data.getUntil()));
                 }
             }
             System.out.println(event.getSummary().getValue());
@@ -123,6 +116,16 @@ public class iCalRestController {
         }
 
         return dataList;
+    }
+
+    private static int extractYear(String time) {
+        return Integer.parseInt(time.substring(0,4));
+    }
+    private static int extractMonth(String time) {
+        return Integer.parseInt(time.substring(4,6));
+    }
+    private static int extractDay(String time) {
+        return Integer.parseInt(time.substring(6,8));
     }
 
 

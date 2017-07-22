@@ -6,13 +6,19 @@ import java.util.List;
  * Created by NAVER on 2017-07-19.
  */
 public class ICalEvent {
-    private String start;
+    private String startDate;
+    private int startDay;
+    private int startMonth;
+    private int startYear;
     private String end;
     private String summary;
     private Boolean isRecur = false;
 
     private String frequency;
-    private String until = "";
+    private String untilDate;
+    private int untilDay;
+    private int untilMonth;
+    private int untilYear;
     private List<String> bydayList;
     private int interval;
 
@@ -21,7 +27,7 @@ public class ICalEvent {
     private List<String> list;
 
     public ICalEvent(String start, String end, String summary, String location, String organizer, List<String> list) {
-        this.start = start;
+        this.startDate = start;
         this.end = end;
         this.summary = summary;
         this.location = location;
@@ -34,11 +40,11 @@ public class ICalEvent {
     }
 
     public String getStart() {
-        return start;
+        return startDate;
     }
 
     public void setStart(String start) {
-        this.start = start;
+        this.startDate = start;
     }
 
     public String getEnd() {
@@ -90,11 +96,11 @@ public class ICalEvent {
     }
 
     public String getUntil() {
-        return until;
+        return untilDate;
     }
 
     public void setUntil(String until) {
-        this.until = until;
+        this.untilDate = until;
     }
 
     public List<String> getBydayList() {
@@ -119,5 +125,61 @@ public class ICalEvent {
 
     public void setIsRecur(Boolean recur) {
         isRecur = recur;
+    }
+
+    public int getStartDay() {
+        return startDay;
+    }
+
+    public void setStartDay(int startDay) {
+        this.startDay = startDay;
+    }
+
+    public int getStartMonth() {
+        return startMonth;
+    }
+
+    public void setStartMonth(int startMonth) {
+        this.startMonth = startMonth;
+    }
+
+    public int getStartYear() {
+        return startYear;
+    }
+
+    public void setStartYear(int startYear) {
+        this.startYear = startYear;
+    }
+
+    public Boolean getRecur() {
+        return isRecur;
+    }
+
+    public void setRecur(Boolean recur) {
+        isRecur = recur;
+    }
+
+    public int getUntilDay() {
+        return untilDay;
+    }
+
+    public void setUntilDay(int untilDay) {
+        this.untilDay = untilDay;
+    }
+
+    public int getUntilMonth() {
+        return untilMonth;
+    }
+
+    public void setUntilMonth(int untilMonth) {
+        this.untilMonth = untilMonth;
+    }
+
+    public int getUntilYear() {
+        return untilYear;
+    }
+
+    public void setUntilYear(int untilYear) {
+        this.untilYear = untilYear;
     }
 }
