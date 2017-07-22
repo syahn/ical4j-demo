@@ -51,19 +51,15 @@ public class iCalRestController {
         CalendarBuilder builder = new CalendarBuilder();
         Calendar calendar = builder.build(fin);
 
-        //현재, 이전, 다음 달 포함 리스트
-        List<List<ICalEvent>> totalList = new ArrayList<>();
-
         List<ICalEvent> eventList = makeDataList(year,month,calendar);
 
         return eventList;
     }
 
-    //일정리스트 - 전달 23일 부터 다음 달 6일까지 해당 이벤트 리스트 만들기
+    //일정리스트 만들기
     public List<ICalEvent> makeDataList(int year ,int month, Calendar calendar) throws ParseException {
 
-        //첫 일자, 마지막 일자 포맷 만들기
-        //현재, 이전, 다음 달의 일정 데이터리스트 만들기
+        //전달 23일 부터 다음 달 6일까지
         int preYear = month==1 ? year-1:year;
         int nextYear = month==12 ? year+1:year;
         int preMonth = month==1 ? 12: month-1;

@@ -16,157 +16,148 @@ $(document).ready(function () {
         }
         ).done(function (list) {
 
-            //현재 달의 1일 dayindex 찾기
-            var indexOfFirstDay = parseInt($("table[data-week-row='0']>tbody>tr[class='date']>td>strong:not(:contains('31')):contains(1)").attr("dayindex"));
+            renderingAllEvents(list);
 
-            for(i=0;i<list.length;i++){
-
-                var event = list[i];
-
-                //1. 반복없는 데이터
-                if(event.isRecur==false){
-                    addEventToDom(event.startDay,event.startMonth,event.startYear,event.summary,indexOfFirstDay);
-                }
-
-                //2. 반복있는 데이터
-                else{
-
-                    //1-무한 반복
-                    if(event.until==null){
-
-                        if(event.frequency==="DAILY"){
-
-                            //렌더링 시작할 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            for(j=startIndex;j<42;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval;
-                            }
-                        }
-                        else if(event.frequency==="WEEKLY"){
-                            //렌더링 시작할 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            for(j=startIndex;j<42;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval*7;
-                            }
-                        }
-                        else if(event.frequency==="MONTHLY"){
-                            //렌더링 시작할 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            for(j=startIndex;j<42;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval*31;//월마다 간격 다른 것으로 수정해야함
-                            }
-                        }
-                        else if(event.frequency==="YEARLY"){
-                            //렌더링 시작할 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            for(j=startIndex;j<42;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval*365;//월마다 간격 다른 것으로 수정해야함
-                            }
-                        }
-                    }
-
-                    //2-기간 반복
-                    else {
-                        if(event.frequency==="DAILY"){
-
-                            //렌더링 시작 및 종료 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            var endIndex = parseInt(calculateIndexOfDate(event.untilDay,event.untilMonth,event.untilYear,indexOfFirstDay));
-                            for(j=startIndex;j<endIndex+1;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval;
-                            }
-                        }
-                        else if(event.frequency==="WEEKLY"){
-                            //렌더링 시작할 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            var endIndex = parseInt(calculateIndexOfDate(event.untilDay,event.untilMonth,event.untilYear,indexOfFirstDay));
-                            for(j=startIndex;j<endIndex+1;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval*7;
-                            }
-                        }
-                        else if(event.frequency==="MONTHLY"){
-                            //렌더링 시작할 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            var endIndex = parseInt(calculateIndexOfDate(event.untilDay,event.untilMonth,event.untilYear,indexOfFirstDay));
-                            for(j=startIndex;j<endIndex+1;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval*31;//월마다 간격 다른 것으로 수정해야함
-                            }
-                        }
-                        else if(event.frequency==="YEARLY"){
-                            //렌더링 시작할 절대 index찾아서 시작
-                            var startIndex = parseInt(calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay));
-                            var endIndex = parseInt(calculateIndexOfDate(event.untilDay,event.untilMonth,event.untilYear,indexOfFirstDay));
-                            for(j=startIndex;j<endIndex+1;){
-                                addRecurEventToDom(j,event.summary);
-                                j+=event.interval*365;//월마다 간격 다른 것으로 수정해야함
-                            }
-                        }
-                    }
-
-                }
-            }
         });
 });
 
+function renderingAllEvents(list) {
 
-//종일이벤트 추가
-function addEventToDom(eventDay,eventMonth,eventYear,summary,firstIndex) {
+    //현재 달의 1일 dayindex 찾기 - 월뷰에 표시할 각 데이터의 절대 인덱스 계산에 기준점
+    var indexOfFirstDay = parseInt($("table[data-week-row='0']>tbody>tr[class='date']>td>strong:not(:contains('31')):contains(1)").attr("dayindex"));
 
-        var numOfIndex = calculateIndexOfDate(eventDay,eventMonth,eventYear,firstIndex);
+    for(i=0;i<list.length;i++){
 
-        var dateContainer = $(".schedule_list>tbody>tr:nth-child(2)>td[dayindex="+numOfIndex+"]");
-        dateContainer.append("<div style='background: blue;'><span style='color: white;'>" + summary + "</span></div>");
+        var event = list[i];
+
+        //이벤트의 시작날짜의 절대 인덱스
+        var startIndex = calculateIndexOfDate(event.startDay,event.startMonth,event.startYear,indexOfFirstDay);
+
+        //1. 반복없는 데이터
+        if(event.isRecur==false){
+            addEventToDom(startIndex,event.summary,"purple");
+        }
+
+        //2. 반복있는 데이터
+        else{
+
+            //1 - 무한 반복
+            if(event.until==null){
+                recurEventToDom(event,startIndex,42);
+            }
+
+            //2 - 기간 반복
+            else {
+                //이벤트 종료날짜의 절대인덱스
+                var endIndex = calculateIndexOfDate(event.untilDay,event.untilMonth,event.untilYear,indexOfFirstDay);
+                recurEventToDom(event,startIndex,endIndex);
+            }
+
+        }
+    }
 }
 
-//반복이벤트 추가
-function addRecurEventToDom(index,summary){
+function recurEventToDom(event,startIndex,endIndex){ // 요일 반복에 대한 고려해야함
+
+    var end = endIndex>=42 ? 42 : endIndex;
+
+    if(event.frequency==="DAILY"){
+
+        for(j=startIndex;j<end;){
+            addEventToDom(j,event.summary,'black');
+            j+=event.interval;
+        }
+    }
+    else if(event.frequency==="WEEKLY"){
+
+        for(j=startIndex;j<end;){
+            addEventToDom(j,event.summary,'red');
+            j+=event.interval*7;
+        }
+    }
+    else if(event.frequency==="MONTHLY"){
+
+        var tempMonth = event.startMonth;
+        var tempYear = event.startYear;
+
+        for(j=startIndex;j<end;){
+
+            if(tempMonth>12){
+                tempMonth = 1;
+                tempYear++;
+            }
+
+            addEventToDom(j,event.summary,'green');
+            var daysForInterval = daysOfMonth(tempYear,tempMonth);
+            console.log(j);
+            console.log(daysForInterval);
+            j+=event.interval*daysForInterval;
+            tempMonth++;
+        }
+    }
+    else if(event.frequency==="YEARLY"){
+
+        for(j=startIndex;j<end;){
+            addEventToDom(j,event.summary,'blue');
+            j+=event.interval*365;
+        }
+    }
+
+}
+
+
+//이벤트 추가
+function addEventToDom(index,summary,color){
 
     var dateContainer = $(".schedule_list>tbody>tr:nth-child(2)>td[dayindex="+index+"]");
-    dateContainer.append("<div style='background: red;'><span style='color: white;'>" + summary + "</span></div>");
+    dateContainer.append("<div style='background: "+color+";'><span style='color: white;'>" + summary + "</span></div>");
 
 }
 
 //이벤트의 절대 인덱스 계산법
-function calculateIndexOfDate(eventDay, eventMonth, eventYear,firstIndex){
+function calculateIndexOfDate(eventStartDay, eventStartMonth, eventStartYear,firstIndex){
 
     var index;
-    var tempMonth = currentMonth;
-    var tempYear = currentYear;
+    // var currentDate = parseInt(currentYear.toString()+currentMonth.toString());
+    // var eventStartDate = parseInt(eventStartYear.toString()+eventStartMonth.toString());
 
-    //연도도 매칭 시켜야함
-    if(eventMonth==currentMonth){
-        index = (eventDay+firstIndex-1).toString();
-    }else if(eventMonth>currentMonth){
-        index = (eventDay+lastday(currentYear,currentMonth)+firstIndex-1).toString();
-    }else if(eventMonth<currentMonth){
+    //현재 달에서 이벤트 시작시
+    if(eventStartMonth==currentMonth&&eventStartYear==currentYear){
 
-        while(tempYear>=eventYear&&tempMonth>eventMonth){
+        index = eventStartDay+firstIndex-1;
+
+    }
+    //현재 달 이후에 이벤트 시작시(최대 6일까지만 존재)
+    else if((eventStartMonth>currentMonth&&eventStartYear==currentYear)||eventStartYear>currentYear){
+
+        index = eventStartDay+firstIndex-1+daysOfMonth(currentYear,currentMonth);
+
+    }
+    //현재 달 이전에 이벤트가 시작시(얼마나 이전인지 한계 없음)
+    else{
+
+        var tempMonth = currentMonth;
+        var tempYear = currentYear;
+
+        while(tempYear>=eventStartYear&&tempMonth>eventStartMonth){
 
             if(tempMonth==0){
                 tempMonth=12;
                 tempYear--;
             }
 
-            eventDay-=lastday(tempYear,tempMonth-1);
+            eventStartDay-=daysOfMonth(tempYear,tempMonth-1);
             tempMonth--;
 
         }
-        index = (eventDay+firstIndex-1).toString();
+
+        index = eventStartDay+firstIndex-1;
     }
 
     return index;
 }
 
-//월별 총일수 계산
-function lastday(y,m){
-    var m = m==0 ? 12 : m; //1월일 때 이전 달 조정
-    var y = m==0 ? y-1 : y; //1월이면 작년 12월이 이전 달이므로 년도 조정
+//y년도 m월의 일수 계산
+function daysOfMonth(y,m){
     return  parseInt(new Date(y, m, 0).getDate());
 }
