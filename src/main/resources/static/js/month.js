@@ -59,7 +59,7 @@ function renderingAllEvents(list) {
 
 function recurEventToDom(event,startIndex,endIndex){ // 요일 반복에 대한 고려해야함
 
-    var end = endIndex>=42 ? 42 : endIndex;
+    var end = endIndex>=42 ? 42 : endIndex+1;
 
     if(event.frequency==="DAILY"){
 
@@ -82,24 +82,27 @@ function recurEventToDom(event,startIndex,endIndex){ // 요일 반복에 대한 
 
         for(j=startIndex;j<end;){
 
+            addEventToDom(j,event.summary,'green');
+            var daysForInterval = daysOfMonth(tempYear,tempMonth);
+            j+=event.interval*daysForInterval;
+            tempMonth++;
+
             if(tempMonth>12){
                 tempMonth = 1;
                 tempYear++;
             }
-
-            addEventToDom(j,event.summary,'green');
-            var daysForInterval = daysOfMonth(tempYear,tempMonth);
-            console.log(j);
-            console.log(daysForInterval);
-            j+=event.interval*daysForInterval;
-            tempMonth++;
         }
     }
     else if(event.frequency==="YEARLY"){
 
+        var tempYear = event.startYear;
+
         for(j=startIndex;j<end;){
+            console.log(j);
             addEventToDom(j,event.summary,'blue');
-            j+=event.interval*365;
+            var daysForInterval = daysOfYear(tempYear);
+            j+=event.interval*daysForInterval;
+            tempYear++;
         }
     }
 
@@ -139,16 +142,15 @@ function calculateIndexOfDate(eventStartDay, eventStartMonth, eventStartYear,fir
         var tempMonth = currentMonth;
         var tempYear = currentYear;
 
-        while(tempYear>=eventStartYear&&tempMonth>eventStartMonth){
+        while(tempYear>eventStartYear||(tempYear==eventStartYear&&tempMonth>eventStartMonth)){
+
+            eventStartDay-=daysOfMonth(tempYear,tempMonth-1);
+            tempMonth--;
 
             if(tempMonth==0){
                 tempMonth=12;
                 tempYear--;
             }
-
-            eventStartDay-=daysOfMonth(tempYear,tempMonth-1);
-            tempMonth--;
-
         }
 
         index = eventStartDay+firstIndex-1;
@@ -158,6 +160,17 @@ function calculateIndexOfDate(eventStartDay, eventStartMonth, eventStartYear,fir
 }
 
 //y년도 m월의 일수 계산
-function daysOfMonth(y,m){
-    return  parseInt(new Date(y, m, 0).getDate());
+function daysOfMonth(year,month){
+    return  parseInt(new Date(year, month, 0).getDate());
+}
+
+//y년도 일수 계산
+function daysOfYear(year)
+{
+    return isLeapYear(year) ? 366 : 365;
+}
+
+//윤년
+function isLeapYear(year) {
+    return year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0);
 }
