@@ -35,7 +35,7 @@ function renderingAllEvents(list) {
 
         //1. 반복없는 데이터
         if(event.isRecur==false){
-            addEventToDom(startIndex,event.summary,"purple");
+            addEventToDom(startIndex,event.summary,"blue");
         }
 
         //2. 반복있는 데이터
@@ -64,7 +64,7 @@ function recurEventToDom(event,startIndex,endIndex){ // 요일 반복에 대한 
     if(event.frequency==="DAILY"){
 
         for(j=startIndex;j<end;){
-            addEventToDom(j,event.summary,'black');
+            addEventToDom(j,event.summary,'MediumPurple');
             j+=event.interval;
         }
     }
@@ -79,13 +79,19 @@ function recurEventToDom(event,startIndex,endIndex){ // 요일 반복에 대한 
 
         var tempMonth = event.startMonth;
         var tempYear = event.startYear;
+        var tempCount = 0;
 
         for(j=startIndex;j<end;){
 
-            addEventToDom(j,event.summary,'green');
+            if(tempCount==event.interval||tempCount==0){
+                addEventToDom(j,event.summary,'green');
+                tempCount = 0;
+            }
+
             var daysForInterval = daysOfMonth(tempYear,tempMonth);
-            j+=event.interval*daysForInterval;
+            j+=daysForInterval;
             tempMonth++;
+            tempCount++;
 
             if(tempMonth>12){
                 tempMonth = 1;
@@ -96,13 +102,19 @@ function recurEventToDom(event,startIndex,endIndex){ // 요일 반복에 대한 
     else if(event.frequency==="YEARLY"){
 
         var tempYear = event.startYear;
+        var tempCount = 0;
 
         for(j=startIndex;j<end;){
-            console.log(j);
-            addEventToDom(j,event.summary,'blue');
+
+            if(tempCount==event.interval||tempCount==0){
+                addEventToDom(j,event.summary,'black');
+                tempCount = 0;
+            }
+
             var daysForInterval = daysOfYear(tempYear);
-            j+=event.interval*daysForInterval;
+            j+=daysForInterval;
             tempYear++;
+            tempCount++;
         }
     }
 
