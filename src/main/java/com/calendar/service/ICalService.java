@@ -97,6 +97,8 @@ public class ICalService {
             data.setStartYear(extractYear(data.getStart()));
             data.setEnd(event.getEndDate().getValue());
 
+            data.setStartIndex(calculateIndexOfDate(data, "start"));//모든 이벤트 필수
+
             //반복있는 이벤트의 경우 추가 정보 삽입
             if (event.getProperty("RRULE") != null) {
                 RRule rule = (RRule) event.getProperty("RRULE");
@@ -108,6 +110,8 @@ public class ICalService {
                     data.setUntilDate(extractDate(data.getUntil()));
                     data.setUntilMonth(extractMonth(data.getUntil()));
                     data.setUntilYear(extractYear(data.getUntil()));
+
+                    data.setEndIndex(calculateIndexOfDate(data, "end"));//end index는 until있을 때만 필요
                 }
                 //요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6)
                 if(rule.getRecur().getDayList()!=null) {//요일 반복일때만 daylist 있음
@@ -126,8 +130,7 @@ public class ICalService {
                     System.out.println(startDayNum+1);
                 }
             }
-            data.setStartIndex(calculateIndexOfDate(data, "start"));
-            data.setEndIndex(calculateIndexOfDate(data, "end"));
+
             eventList.add(data);
             //System.out.println(event.getSummary().getValue());
         }
@@ -158,7 +161,7 @@ public class ICalService {
 
     private int calculateIndexOfDate(ICalEvent event, String mode) {
         int index;
-        int firstIndex = getFirstDay(event.getStartYear(), event.getStartMonth());
+        int firstIndex = getFirstDay(currentYear, currentMonth);
 
         int eventYear = mode.equals("start") ? event.getStartYear() : event.getUntilYear();
         int eventMonth = mode.equals("start") ? event.getStartMonth() : event.getUntilMonth();
@@ -176,19 +179,19 @@ public class ICalService {
 
         //현재 달 이전에 이벤트가 시작시(얼마나 이전인지 한계 없음)
         else {
-            int tempMonth = currentMonth;
+            int tempMonth = currentMonth-1;
             int tempYear = currentYear;
 
-            while (tempYear > eventYear || (tempYear == eventYear && tempMonth > eventMonth)) {
-
-                if (tempMonth == 1) break;
-                eventDate -= daysOfMonth(tempYear, tempMonth - 1);
-                tempMonth--;
+            while (tempYear > eventYear || (tempYear == eventYear && tempMonth >= eventMonth)) {
 
                 if (tempMonth == 0) {
                     tempMonth = 12;
                     tempYear--;
                 }
+
+                eventDate -= daysOfMonth(tempYear, tempMonth);
+                tempMonth--;
+
             }
 
             index = eventDate + firstIndex - 1;
@@ -212,7 +215,7 @@ public class ICalService {
 
     private int daysOfMonth(int year, int month) {
         YearMonth ym = YearMonth.of(year, month);
-        return  ym.getMonth().length(true);
+        return  ym.getMonth().length(isLeapYear(year));
     }
 
     private int daysOfYear(int year) {
