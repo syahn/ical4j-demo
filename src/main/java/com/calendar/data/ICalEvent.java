@@ -35,6 +35,25 @@ public class ICalEvent {
     private int startIndex;
     private int endIndex;
 
+    public List<Integer> getStartDayList() {
+        return startDayList;
+    }
+
+    public void setStartDayList(List<Integer> startDayList) {
+        this.startDayList = startDayList;
+    }
+
+    public int getStartDayNum() {
+        return startDayNum;
+    }
+
+    public void setStartDayNum(int startDayNum) {
+        this.startDayNum = startDayNum;
+    }
+
+    private List<Integer> startDayList; // for weekly
+    private int startDayNum;
+
     public int getEndIndex() {
         return endIndex;
     }

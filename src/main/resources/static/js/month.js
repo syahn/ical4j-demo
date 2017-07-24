@@ -28,7 +28,7 @@ function renderingAllEvents(list) {
 
 function recurEventToDom(event) { // 요일 반복에 대한 고려해야함
 
-    var end = event.until === undefined ? 42 : event.endIndex + 1;
+    var end = event.untilDate === null ? 42 : event.endIndex + 1;
 
     if (event.frequency === "DAILY") {
 
