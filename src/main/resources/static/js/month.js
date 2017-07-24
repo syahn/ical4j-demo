@@ -14,6 +14,7 @@ $(document).ready(function () {
 function renderingAllEvents(list) {
     for (var i = 0; i < list.length; i++) {
         var event = list[i];
+
         if (event.recur === false) {
             addEventToDom(event.startIndex, event.summary, "blue");
         }
@@ -46,7 +47,9 @@ function recurEventToDom(event) { // 요일 반복에 대한 고려해야함
             if(diff<0){
                 diff+=7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
             }
+
             for(j=event.startIndex;j<end;){
+
                 if(!(j+diff>=end)){
                     addEventToDom(j+diff,event.summary,'red');
                 }
@@ -70,6 +73,7 @@ function recurEventToDom(event) { // 요일 반복에 대한 고려해야함
 
             var daysForInterval = daysOfMonth(tempYear, tempMonth);
             j += daysForInterval;
+
             tempMonth++;
             tempCount++;
 
@@ -94,6 +98,7 @@ function recurEventToDom(event) { // 요일 반복에 대한 고려해야함
 
             var daysForInterval = daysOfYear(tempYear);
             j += daysForInterval;
+
             tempYear++;
             tempCount++;
         }

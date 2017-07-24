@@ -5,6 +5,7 @@ import java.util.List;
 /**
  * Created by NAVER on 2017-07-19.
  */
+
 public class ICalEvent {
 
     private String start;

@@ -1,8 +1,9 @@
 package com.calendar.controller;
 
-import com.calendar.data.ICalEvent;
 import com.calendar.data.ICalFilteredEvent;
 import com.calendar.service.ICalService;
+import net.fortuna.ical4j.data.CalendarBuilder;
+
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
@@ -53,5 +54,6 @@ public class ICalRestController {
 
         return iCal.resolveData(calendar);
     }
+
 }
 
