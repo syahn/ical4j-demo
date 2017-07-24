@@ -9,6 +9,7 @@ import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
+import net.fortuna.ical4j.model.WeekDay;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RRule;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -107,6 +109,22 @@ public class ICalService {
                     data.setUntilMonth(extractMonth(data.getUntil()));
                     data.setUntilYear(extractYear(data.getUntil()));
                 }
+                //요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6)
+                if(rule.getRecur().getDayList()!=null) {//요일 반복일때만 daylist 있음
+                    ArrayList<Integer> tempDayList = new ArrayList<>();
+                    for (WeekDay day : rule.getRecur().getDayList()) {
+                        tempDayList.add(WeekDay.getCalendarDay(day));
+                    }
+                    data.setStartDayList(tempDayList);
+
+                    //시작 날짜의 요일 dayofWeek 포함( 나중에 시작일 구분 시 필요) - 시작일이 요일이면
+                    LocalDate date = LocalDate.of(data.getStartYear(), data.getStartMonth(), data.getStartDate());
+                    DayOfWeek dayOfWeek = date.getDayOfWeek();
+                    int startDayNum = dayOfWeek.getValue();
+                    data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
+                    System.out.println(event.getSummary().getValue());
+                    System.out.println(startDayNum+1);
+                }
             }
             data.setStartIndex(calculateIndexOfDate(data, "start"));
             data.setEndIndex(calculateIndexOfDate(data, "end"));
@@ -130,7 +148,8 @@ public class ICalService {
             data.setRecur(event.getRecur());
             data.setInterval(event.getInterval());
             data.setStartMonth(event.getStartMonth());
-
+            data.setStartDayList(event.getStartDayList());
+            data.setStartDayNum(event.getStartDayNum());
             filteredEventList.add(data);
         }
         return filteredEventList;

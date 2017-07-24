@@ -26,6 +26,8 @@ public class ICalEvent {
     private int untilYear;
 
     private List<String> bydayList;
+    private List<Integer> startDayList; // for weekly
+    private int startDayNum;
     private int interval;
 
     private String location;
@@ -35,41 +37,6 @@ public class ICalEvent {
     private int startIndex;
     private int endIndex;
 
-    public List<Integer> getStartDayList() {
-        return startDayList;
-    }
-
-    public void setStartDayList(List<Integer> startDayList) {
-        this.startDayList = startDayList;
-    }
-
-    public int getStartDayNum() {
-        return startDayNum;
-    }
-
-    public void setStartDayNum(int startDayNum) {
-        this.startDayNum = startDayNum;
-    }
-
-    private List<Integer> startDayList; // for weekly
-    private int startDayNum;
-
-    public int getEndIndex() {
-        return endIndex;
-    }
-
-    public void setEndIndex(int endIndex) {
-        this.endIndex = endIndex;
-    }
-
-    public String getEnd() {
-        return end;
-    }
-
-    public void setEnd(String end) {
-        this.end = end;
-    }
-
     public String getStart() {
         return start;
     }
@@ -78,12 +45,12 @@ public class ICalEvent {
         this.start = start;
     }
 
-    public String getUntil() {
-        return until;
+    public String getEnd() {
+        return end;
     }
 
-    public void setUntil(String until) {
-        this.until = until;
+    public void setEnd(String end) {
+        this.end = end;
     }
 
     public String getSummary() {
@@ -134,6 +101,14 @@ public class ICalEvent {
         this.startYear = startYear;
     }
 
+    public String getUntil() {
+        return until;
+    }
+
+    public void setUntil(String until) {
+        this.until = until;
+    }
+
     public String getFrequency() {
         return frequency;
     }
@@ -182,6 +157,22 @@ public class ICalEvent {
         this.bydayList = bydayList;
     }
 
+    public List<Integer> getStartDayList() {
+        return startDayList;
+    }
+
+    public void setStartDayList(List<Integer> startDayList) {
+        this.startDayList = startDayList;
+    }
+
+    public int getStartDayNum() {
+        return startDayNum;
+    }
+
+    public void setStartDayNum(int startDayNum) {
+        this.startDayNum = startDayNum;
+    }
+
     public int getInterval() {
         return interval;
     }
@@ -220,5 +211,13 @@ public class ICalEvent {
 
     public void setStartIndex(int startIndex) {
         this.startIndex = startIndex;
+    }
+
+    public int getEndIndex() {
+        return endIndex;
+    }
+
+    public void setEndIndex(int endIndex) {
+        this.endIndex = endIndex;
     }
 }

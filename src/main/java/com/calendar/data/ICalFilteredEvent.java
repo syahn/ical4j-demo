@@ -1,5 +1,7 @@
 package com.calendar.data;
 
+import java.util.List;
+
 /**
  * Created by NAVER on 2017-07-19.
  */
@@ -13,6 +15,24 @@ public class ICalFilteredEvent {
     private String summary;
     private String untilDate;
     private int interval;
+    private List<Integer> startDayList;
+    private int startDayNum;
+
+    public List<Integer> getStartDayList() {
+        return startDayList;
+    }
+
+    public void setStartDayList(List<Integer> startDayList) {
+        this.startDayList = startDayList;
+    }
+
+    public int getStartDayNum() {
+        return startDayNum;
+    }
+
+    public void setStartDayNum(int startDayNum) {
+        this.startDayNum = startDayNum;
+    }
 
     public int getStartMonth() {
         return startMonth;
