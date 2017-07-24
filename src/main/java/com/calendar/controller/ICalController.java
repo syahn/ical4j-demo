@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 @Controller
 @EnableAutoConfiguration
-public class iCalController {
+public class ICalController {
 
     @GetMapping("/")
     public String index() throws IOException, ParserException {
