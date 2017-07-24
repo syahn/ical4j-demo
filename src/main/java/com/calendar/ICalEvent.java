@@ -20,6 +20,9 @@ public class ICalEvent {
     private int untilMonth;
     private int untilYear;
     private List<String> bydayList;
+    private List<Integer> startDayList; // for weekly
+    private int startDayNum;
+
     private int interval;
 
     private String location;
@@ -181,5 +184,37 @@ public class ICalEvent {
 
     public void setUntilYear(int untilYear) {
         this.untilYear = untilYear;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getUntilDate() {
+        return untilDate;
+    }
+
+    public void setUntilDate(String untilDate) {
+        this.untilDate = untilDate;
+    }
+
+    public List<Integer> getStartDayList() {
+        return startDayList;
+    }
+
+    public void setStartDayList(List<Integer> startDayList) {
+        this.startDayList = startDayList;
+    }
+
+    public int getStartDayNum() {
+        return startDayNum;
+    }
+
+    public void setStartDayNum(int startDayNum) {
+        this.startDayNum = startDayNum;
     }
 }

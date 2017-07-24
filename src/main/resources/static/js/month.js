@@ -70,10 +70,21 @@ function recurEventToDom(event,startIndex,endIndex){ // 요일 반복에 대한 
     }
     else if(event.frequency==="WEEKLY"){
 
-        for(j=startIndex;j<end;){
-            addEventToDom(j,event.summary,'red');
-            j+=event.interval*7;
+        var startDayList = event.startDayList;
+
+        for(d=0;d<startDayList.length;d++){
+            var diff = startDayList[d]-event.startDayNum;
+            if(diff<0){
+                diff+=7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
+            }
+            for(j=startIndex;j<end;){
+                if(!(j+diff>=end)){
+                    addEventToDom(j+diff,event.summary,'red');
+                }
+                j+=event.interval*7;
+            }
         }
+
     }
     else if(event.frequency==="MONTHLY"){
 

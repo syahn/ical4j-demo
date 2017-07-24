@@ -1,40 +1,30 @@
 package com.calendar.controller;
 
-import com.calendar.CalendarData;
-import com.calendar.DefaultScheduleModel;
 import com.calendar.ICalEvent;
 import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.TimeZone;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Period;
+import net.fortuna.ical4j.model.WeekDay;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VTimeZone;
-import net.fortuna.ical4j.model.parameter.Cn;
-import net.fortuna.ical4j.model.parameter.Role;
-import net.fortuna.ical4j.model.property.*;
-import net.fortuna.ical4j.util.UidGenerator;
+import net.fortuna.ical4j.model.property.RRule;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.StringReader;
-import java.net.URI;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by NAVER on 2017-07-17.
@@ -47,7 +37,14 @@ public class iCalRestController {
     public List<ICalEvent> applyICalData(@RequestParam("month") int month,@RequestParam("year") int year) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
-        FileInputStream fin = new FileInputStream("/Users/LEE/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        FileInputStream fin = new FileInputStream("C:/Users/NAVER/" +
+                "Desktop/" +
+                "ical4j-demo" +
+                "/target" +
+                "/classes/" +
+                "static/" +
+                "iCalData/" +
+                "iCalData.ics");
         CalendarBuilder builder = new CalendarBuilder();
         Calendar calendar = builder.build(fin);
 
@@ -106,6 +103,29 @@ public class iCalRestController {
                     data.setUntilMonth(extractMonth(data.getUntil()));
                     data.setUntilYear(extractYear(data.getUntil()));
                 }
+
+                //요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6)
+                if(rule.getRecur().getDayList()!=null) {//요일 반복일때만 daylist 있음
+                    ArrayList<Integer> tempDayList = new ArrayList<>();
+                    for (WeekDay day : rule.getRecur().getDayList()) {
+                        tempDayList.add(WeekDay.getCalendarDay(day));
+                    }
+                    data.setStartDayList(tempDayList);
+
+                    //시작 날짜의 요일 dayofWeek 포함( 나중에 시작일 구분 시 필요) - 시작일이 요일이면
+                    LocalDate date = LocalDate.of(data.getStartYear(), data.getStartMonth(), data.getStartDay());
+                    DayOfWeek dayOfWeek = date.getDayOfWeek();
+                    int startDayNum = dayOfWeek.getValue();
+                    data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
+                    System.out.println(event.getSummary().getValue());
+                    System.out.println(startDayNum+1);
+                }
+
+//                int pos = 0;
+//                for(Integer posNum: rule.getRecur().getSetPosList()){
+//                    pos = posNum;
+//                }
+//                data.setSetPos(pos);
             }
             System.out.println(event.getSummary().getValue());
 
