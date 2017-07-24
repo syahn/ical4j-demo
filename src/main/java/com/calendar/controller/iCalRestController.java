@@ -19,6 +19,7 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.util.UidGenerator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,11 +44,11 @@ import java.util.*;
 @EnableAutoConfiguration
 public class iCalRestController {
 
-    @PostMapping("/apply-iCalData")
+    @GetMapping("/load-iCalData")
     public List<ICalEvent> applyICalData(@RequestParam("month") int month,@RequestParam("year") int year) throws IOException, ParserException, ParseException {
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
-        FileInputStream fin = new FileInputStream("/Users/LEE/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        FileInputStream fin = new FileInputStream("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
         CalendarBuilder builder = new CalendarBuilder();
         Calendar calendar = builder.build(fin);
 

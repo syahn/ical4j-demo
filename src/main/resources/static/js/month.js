@@ -9,13 +9,13 @@ $(document).ready(function () {
     currentYear = parseInt($("._title").text().toString().substring(0,5));
     currentMonth = parseInt($(".print").attr("value"));
 
-    $.post("http://localhost:8080/apply-iCalData",
+    $.get("http://localhost:8080/load-iCalData",
         {
             "month": currentMonth,
             "year": currentYear
         }
         ).done(function (list) {
-
+            console.log(list);
             renderingAllEvents(list);
 
         });
