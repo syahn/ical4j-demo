@@ -80,7 +80,6 @@ public class ICalService {
         Filter filter = new Filter(new PeriodRule(period));
         events = (List<VEvent>) filter.filter(events);
 
-//        return storeDataToICalEvent(events);
         return filterByIndex(storeDataToICalEvent(events));
     }
 
@@ -89,9 +88,9 @@ public class ICalService {
         for (VEvent event : events) {
 
             ICalEvent data = new ICalEvent();
+            data.setUid(event.getUid().getValue());
             data.setSummary(event.getSummary().getValue());
             data.setStart(event.getStartDate().getValue());
-
             data.setStartDate(extractDate(data.getStart()));
             data.setStartMonth(extractMonth(data.getStart()));
             data.setStartYear(extractYear(data.getStart()));
@@ -126,8 +125,8 @@ public class ICalService {
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
                     int startDayNum = dayOfWeek.getValue();
                     data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
-                    System.out.println(event.getSummary().getValue());
-                    System.out.println(startDayNum+1);
+//                    System.out.println(event.getSummary().getValue());
+//                    System.out.println(startDayNum+1);
                 }
             }
 
@@ -141,21 +140,105 @@ public class ICalService {
         List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
 
         for(ICalEvent event : eventList) {
-            ICalFilteredEvent data = new ICalFilteredEvent();
-            data.setSummary(event.getSummary());
-            data.setStartIndex(event.getStartIndex());
-            data.setEndIndex(event.getEndIndex());
-            data.setUntilDate(event.getUntil());
-            data.setStartYear(event.getStartYear());
-            data.setFrequency(event.getFrequency());
-            data.setRecur(event.getRecur());
-            data.setInterval(event.getInterval());
-            data.setStartMonth(event.getStartMonth());
-            data.setStartDayList(event.getStartDayList());
-            data.setStartDayNum(event.getStartDayNum());
-            filteredEventList.add(data);
+            String frequency = event.getFrequency();
+            int startIndex = event.getStartIndex();
+            int endIndex = event.getEndIndex();
+            List<Integer> startDayList = event.getStartDayList();
+            int startDayNum = event.getStartDayNum();
+            int interval = event.getInterval();
+            int startYear = event.getStartYear();
+            int startMonth = event.getStartMonth();
+            int untilDate = event.getUntilDate();
+            boolean recur = event.getRecur();
+
+            int end = untilDate == 0 ? 42 : endIndex + 1;
+
+            if (recur == false) {
+                addEventToFilteredEvents("DAY", event, filteredEventList);
+            } else {
+                if (frequency.equals("DAILY")) {
+                    for (int j = startIndex; j < end;) {
+                        addEventToFilteredEvents("DAILY", event, filteredEventList);
+                        j += interval;
+                        event.setStartIndex(j);
+                    }
+                }
+                else if (frequency.equals("WEEKLY")) {
+
+                    for (int d = 0; d < startDayList.size(); d++) {
+                        int diff = startDayList.get(d) - startDayNum;
+                        if (diff < 0) {
+                            diff += 7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
+                        }
+                        for (int j = startIndex; j < end;) {
+                            if (!(j + diff >= end)) {
+                                addEventToFilteredEvents("WEEKLY", event, filteredEventList);
+                            }
+                            j += interval * 7;
+                            event.setStartIndex(j + diff);
+                        }
+                    }
+                }
+                else if (frequency.equals("MONTHLY")) {
+
+                    int tempMonth = startMonth;
+                    int tempYear = startYear;
+                    int tempCount = 0;
+
+                    for (int j = startIndex; j < end;) {
+
+                        if (tempCount == interval || tempCount == 0) {
+                            addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                            tempCount = 0;
+                        }
+
+                        int daysForInterval = daysOfMonth(tempYear, tempMonth);
+                        j += daysForInterval;
+                        event.setStartIndex(j);
+                        tempMonth++;
+                        tempCount++;
+
+                        if (tempMonth > 12) {
+                            tempMonth = 1;
+                            tempYear++;
+                        }
+                    }
+                }
+                else if (frequency.equals("YEARLY")) {
+
+                    int tempYear = startYear;
+                    int tempCount = 0;
+                    for (int j = startIndex; j < end;) {
+
+                        if (tempCount == interval || tempCount == 0) {
+                            addEventToFilteredEvents("YEARLY", event, filteredEventList);
+                            tempCount = 0;
+                        }
+
+                        int daysForInterval = daysOfYear(tempYear);
+                        j += daysForInterval;
+                        event.setStartIndex(j);
+                        tempYear++;
+                        tempCount++;
+                    }
+                }
+            }
         }
         return filteredEventList;
+    }
+
+    private void addEventToFilteredEvents(String type, ICalEvent event, List<ICalFilteredEvent> filteredEventList){
+        int startIndex = event.getStartIndex();
+        int endIndex = event.getEndIndex();
+
+        if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
+            ICalFilteredEvent data = new ICalFilteredEvent();
+            data.setSummary(event.getSummary());
+            data.setIndex(startIndex);
+            data.setUid(event.getUid());
+            data.setType(type);
+            filteredEventList.add(data);
+        }
     }
 
 
@@ -188,15 +271,11 @@ public class ICalService {
                     tempMonth = 12;
                     tempYear--;
                 }
-
                 eventDate -= daysOfMonth(tempYear, tempMonth);
                 tempMonth--;
-
             }
-
             index = eventDate + firstIndex - 1;
         }
-
         return index;
     }
 
