@@ -21,14 +21,22 @@ $(document).ready(function () {
 
     initialStartMonth = startOption.options[startOption.selectedIndex].value;
 
+
+
     $("._close").click(function () {
         window.close();
+    });
+
+    $.post("/print-change-range", {
+        start: startMonth,
+        end: endMonth
     });
 
     $("#button-print").click(function () {
         optionApply();
 
-        $.post("http://localhost:8080/convert",
+
+        $.post("http://localhost:9000/convert",
             {
                 "startMonth": startMonth,
                 "endMonth": endMonth,
@@ -85,7 +93,7 @@ function save() {
     };
 
     $.ajax({
-        url: "http://localhost:8080/convert",
+        url: "http://localhost:9000/convert",
         type: "POST",
         data: optionValue,
         success: function () {
@@ -109,6 +117,11 @@ function save() {
 function change() {
     var pageNum = document.getElementById("pageNum");
 
+    $.post("/print-change-range", {
+        start: startMonth,
+        end: endMonth
+    });
+
     // 총 페이지 수 계산
     optionApply();
     var numOfMonth = endMonth - startMonth + 1;
@@ -123,6 +136,8 @@ function change() {
         initialStartMonth = startMonth;
         checkBox();
     }
+
+
 
 }
 

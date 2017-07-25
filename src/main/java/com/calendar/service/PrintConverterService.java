@@ -14,7 +14,7 @@ import java.io.IOException;
 public class PrintConverterService {
 
     //pdf저장 메소드
-    final static String url = "http://localhost:9000/month/";//기본 url뒤에 월을 붙임
+    final static String fileUrl = "C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/";//기본 url뒤에 월을 붙임
 //
     private static final Logger LOG = LoggerFactory.getLogger(PrintConverterService.class);
 
@@ -22,8 +22,8 @@ public class PrintConverterService {
 
         // 각 월에 대한 임시 경로 생성
         String temp = "";
-        for (int i = startMonth; i <= endMonth; i++) {
-            temp += (url + Integer.toString(i) + " ");
+        for (int i = 6; i <= 8; i++) {
+            temp += (fileUrl + Integer.toString(i) + ".html ");
         }
 
         Process wkhtml; // Create uninitialized process
@@ -31,7 +31,7 @@ public class PrintConverterService {
 
         String extendedUrl = "wkhtmltopdf" +
                 (orientation == 1 ? " -O landscape " : " ") +
-                "%s C:/Users/NAVER/Desktop/prototype/target/classes/static/tempPdf/month_result.pdf";
+                "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/month_result.pdf";
 
         command = String.format(extendedUrl, temp);
 

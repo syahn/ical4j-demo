@@ -30,8 +30,8 @@ public class ICalRestController {
 
     @GetMapping("/load-iCalData")
     public List<ICalFilteredEvent> resolveICalData(
-        @RequestParam("month") int month,
-        @RequestParam("year") int year
+            @RequestParam("month") int month,
+            @RequestParam("year") int year
     ) throws IOException, ParserException, ParseException {
 
         iCal.setCurrenDate(year, month);
@@ -39,7 +39,12 @@ public class ICalRestController {
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
         Calendar calendar = iCal.parseFile(
                 "/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
-        return iCal.resolveData(calendar);
+
+        List<ICalFilteredEvent> filteredEvents = iCal.resolveData(calendar, month);
+
+        return filteredEvents;
     }
+
+
 }
 
