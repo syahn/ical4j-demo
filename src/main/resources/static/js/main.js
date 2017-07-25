@@ -20,6 +20,7 @@ function takeScreenShot(month) {
 
             // 추출한 URL을 서버에 저장한 후, 프리뷰 창을 띄운다.
             $.post("http://localhost:9000/save-url",
+
                 {
                     "previewUrl": dataUrl,
                     "month": month

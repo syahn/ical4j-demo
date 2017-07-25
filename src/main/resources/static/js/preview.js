@@ -28,7 +28,7 @@ $(document).ready(function () {
 
         optionApply();
 
-        $.post("http://localhost:8080/convert",
+        $.post("http://localhost:9000/convert",
             {
                 "startMonth": startMonth,
                 "endMonth": endMonth,
@@ -179,5 +179,6 @@ function makeDummyWindow(month) {
 }
 
 function generateNewUrl(month) {
+
     return "http://localhost:9000/month/" + month;
 }
