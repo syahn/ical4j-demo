@@ -7,35 +7,38 @@ import java.util.List;
  */
 public class ICalEvent {
 
+    private String uid;
     private String start;
     private String end;
-
     private String summary;
     private Boolean isRecur = false;
-
     private String startDay;
     private int startDate;
     private int startMonth;
     private int startYear;
-
     private String until;
     private String frequency;
     private String untilDay;
     private int untilDate;
     private int untilMonth;
     private int untilYear;
-
     private List<String> bydayList;
     private List<Integer> startDayList; // for weekly
     private int startDayNum;
     private int interval;
-
     private String location;
     private String organizer;
     private List<String> list;
-
     private int startIndex;
     private int endIndex;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 
     public String getStart() {
         return start;
