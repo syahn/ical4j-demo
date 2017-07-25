@@ -18,6 +18,7 @@ $(document).ready(function () {
     //select option 메인 페이지 달로 초기화
     $("#start_month").val($('#monthPreview').attr("value"));
     $("#end_month").val($('#monthPreview').attr("value"));
+
     initialStartMonth = startOption.options[startOption.selectedIndex].value;
 
     $("._close").click(function () {
@@ -25,7 +26,6 @@ $(document).ready(function () {
     });
 
     $("#button-print").click(function () {
-
         optionApply();
 
         $.post("http://localhost:8080/convert",
@@ -142,8 +142,9 @@ function checkBox() {
 
 function takeScreenShot(month, mode) {
 
-    if (document.getElementById("hiddenFrame") != null) {
+    if (document.getElementById("hiddenFrame") !== null) {
         var elem = document.getElementById("hiddenFrame");
+        alert("take!");
         elem.parentNode.removeChild(elem);
     }
 
@@ -151,17 +152,15 @@ function takeScreenShot(month, mode) {
 
     html2canvas(document.getElementById("hiddenFrame"), {
         onrendered: function (canvas) {
-
             //이미지
             var dataUrl = canvas.toDataURL();
             $("#previewImage").attr({
                 "src": dataUrl,
                 "style": mode === "landscape" ? printMode.landscape : printMode.portrait
             });
-
         }
     });
-    hiddenFrame.style.visibility = "hidden";
+    // hiddenFrame.style.visibility = "hidden";
 
 }
 

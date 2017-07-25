@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -26,12 +23,11 @@ public class PrintController {
     private PrintConverterService converter;
 
     @ResponseBody
-    @RequestMapping("/save-url")
+    @PostMapping("/save-url")
     public void saveUrl(
-            @RequestParam("previewUrl") String preview,
-            @RequestParam("month") String monthVal
+        @RequestParam("previewUrl") String preview,
+        @RequestParam("month") String monthVal
     ){
-
         tempUrl = preview;
         month = monthVal;
     }
@@ -46,11 +42,11 @@ public class PrintController {
     }
 
     //converter for pdf save and print
-    @RequestMapping(value = "/convert", method = RequestMethod.POST)
+    @PostMapping("/convert")
     public String convert(
-            @RequestParam("startMonth") int startMonth,
-            @RequestParam("endMonth") int endMonth,
-            @RequestParam("orientation") int orientation
+        @RequestParam("startMonth") int startMonth,
+        @RequestParam("endMonth") int endMonth,
+        @RequestParam("orientation") int orientation
     ){
         //converting html to pdf - by url
         try {
@@ -62,5 +58,4 @@ public class PrintController {
         }
         return "preview";
     }
-
 }
