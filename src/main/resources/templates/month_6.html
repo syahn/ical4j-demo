@@ -76,11 +76,11 @@
 
         <button class="btn btn_sub">구독</button>
 
-        <form id="form-print" th:action="@{preview}" method="post">
-            <button class="btn print" style="margin-left:420px" type="submit"
+
+            <button id="print-btn" class="btn print" style="margin-left:420px" type="submit"
                     name="month" value="6">인쇄
             </button>
-        </form>
+
 
         <!--<span th:each="data : ${dataList}">-->
         <!--<h3 th:text="'summary:'+${data.eventSummary}"></h3>-->
@@ -742,6 +742,6 @@
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="/js/main.js"></script>
-<script src="js/html2canvas.js"></script>
+<script src="/js/html2canvas.js"></script>
 <script src="/js/month.js"></script>
 </html>

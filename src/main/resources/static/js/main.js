@@ -19,7 +19,7 @@ function takeScreenShot(month) {
             var dataUrl = canvas.toDataURL();
 
             // 추출한 URL을 서버에 저장한 후, 프리뷰 창을 띄운다.
-            $.post("http://localhost:8080/save-url",
+            $.post("http://localhost:9000/save-url",
                 {
                     "previewUrl": dataUrl,
                     "month": month
@@ -42,9 +42,9 @@ function makeDummyWindow(month) {
 }
 
 function generateNewUrl(month) {
-    return "http://localhost:8080/month_" + month;
+    return "http://localhost:9000/month/" + month;
 }
 
 function openPreviewTap() {
-    window.open('http://localhost:8080/month/preview', '인쇄 프리뷰', 'resizable=1,width=526,height=715');
+    window.open('/preview', '인쇄 프리뷰', 'resizable=1,width=526,height=715');
 }

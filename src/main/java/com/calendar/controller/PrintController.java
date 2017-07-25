@@ -42,7 +42,7 @@ public class PrintController {
         model.addAttribute("previewurl", tempUrl);
         model.addAttribute("month", month);
 
-        return "month_preview";
+        return "preview";
     }
 
     //converter for pdf save and print

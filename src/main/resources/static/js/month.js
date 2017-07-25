@@ -4,7 +4,7 @@
 
 (function() {
     $(document).ready(function () {
-        $.get("http://localhost:8080/load-iCalData",
+        $.get("http://localhost:9000/load-iCalData",
             generateMonthObject()
         ).done(function (eventList) {
             renderingAllEvents(eventList);
