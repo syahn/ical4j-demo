@@ -3,75 +3,48 @@
  */
 
 
+var previewButton = document.getElementById("print-btn");
 
-$(document).ready(function () {
-
-
-    $("#create-new-calendar-file").click(function () {
-        $.post("http://localhost:8080/create-new-calendar-file")
-            .done(function (data) {
-                $("#result1").append(data);
-            });
-    });
-
-    $("#parse-calendar-string").click(function () {
-        var icalStrinng = $("#ical_string").val();
-
-        $.post("http://localhost:8080/parse-calendar-string", {
-            "ical_string": icalStrinng
-        }).done(function (data) {
-            $("#result2").append(data);
-        });
-    });
-
-    $("#parse-calendar-file").click(function () {
-        $.post("http://localhost:8080/parse-calendar-file")
-            .done(function (data) {
-                $("#result3").append(data);
-            });
-    });
-
-
-    $("#create-allday-event").click(function () {
-        $.post("http://localhost:8080/create-allday-event")
-            .done(function (data) {
-                $("#result4").append(data);
-            });
-    });
-
-    $("#create-fourhour-event").click(function () {
-        $.post("http://localhost:8080/create-fourhour-event")
-            .done(function (data) {
-                $("#result5").append(data);
-            });
-    });
-
-    $("#create-new-event").click(function () {
-        var event = $("#event").val();
-        var date = $("#date").val();
-
-        $.post("http://localhost:8080/create-new-event", {
-            "event": event,
-            "date": date
-        }).done(function (data) {
-            $("#result6").append(
-                "<h3>event: " + data.event + "</h3>" +
-                "<h3>date: " + data.date + "</h3>" +
-                "<p>iCal: </p>" +
-                "<p>" + data.iCal + "</p>");
-        });
-    });
-    $("#parse-meeting-event").click(function () {
-        var event = $("#ical_input_string").val();
-
-        $.post("http://localhost:8080/parse-meeting-event", {
-            "ical_string": event
-        }).done(function (data) {
-            $("#result-location").append("<span>" + data.location + "</span>");
-            $("#result-summary").append("<span>" + data.summary + "</span>");
-            $("#result-time").append("<span>" + data.start + ' - ' + data.end + "</span>");
-        });
-    });
-
-
+previewButton.addEventListener("click", function (e) {
+    var month = e.target.value;
+    makeDummyWindow(month);
+    takeScreenShot(month);
 });
+
+function takeScreenShot(month) {
+    html2canvas(document.getElementById("hiddenFrame"), {
+        onrendered: function (canvas) {
+
+            // 캔버스 URL 추출
+            var dataUrl = canvas.toDataURL();
+
+            // 추출한 URL을 서버에 저장한 후, 프리뷰 창을 띄운다.
+            $.post("http://localhost:8080/save-url",
+                {
+                    "previewUrl": dataUrl,
+                    "month": month
+                }
+            ).done(openPreviewTap);
+        }
+    });
+}
+
+function makeDummyWindow(month) {
+
+    var hiddenFrame = document.createElement("iframe");
+    hiddenFrame.setAttribute("id", "hiddenFrame");
+    hiddenFrame.setAttribute("width", "100%");
+    hiddenFrame.setAttribute("height", "100%");
+    hiddenFrame.setAttribute("frameBorder", "0");
+    document.body.appendChild(hiddenFrame);
+
+    $("#hiddenFrame").attr("src", generateNewUrl(month));
+}
+
+function generateNewUrl(month) {
+    return "http://localhost:8080/month_" + month;
+}
+
+function openPreviewTap() {
+    window.open('http://localhost:8080/month/preview', '인쇄 프리뷰', 'resizable=1,width=526,height=715');
+}
