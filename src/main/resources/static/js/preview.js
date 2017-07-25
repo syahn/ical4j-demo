@@ -179,6 +179,5 @@ function makeDummyWindow(month) {
 }
 
 function generateNewUrl(month) {
-
     return "http://localhost:9000/month/" + month;
 }

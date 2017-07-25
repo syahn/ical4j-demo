@@ -43,7 +43,7 @@ function makeDummyWindow(month) {
 }
 
 function generateNewUrl(month) {
-    return "http://localhost:9000/month/" + month;
+    return "http://localhost:9000/html/test.html";
 }
 
 function openPreviewTap() {
