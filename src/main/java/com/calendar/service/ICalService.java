@@ -24,9 +24,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
-import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
-
 /**
  * Created by NAVER on 2017-07-20.
  */
@@ -122,8 +119,6 @@ public class ICalService {
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
                     int startDayNum = dayOfWeek.getValue();
                     data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
-                    System.out.println(event.getSummary().getValue());
-                    System.out.println(startDayNum+1);
                 }
             }
             data.setStartIndex(calculateIndexOfDate(data, "start"));

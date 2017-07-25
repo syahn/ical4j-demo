@@ -39,18 +39,17 @@ function recurEventToDom(event) { // 요일 반복에 대한 고려해야함
     }
     else if (event.frequency === "WEEKLY") {
 
-
-
-
         var startDayList = event.startDayList;
 
         for(d=0;d<startDayList.length;d++){
+
             var diff = startDayList[d]-event.startDayNum;
             if(diff<0){
                 diff+=7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
             }
             for(j=event.startIndex;j<end;){
                 if(!(j+diff>=end)){
+                    console.log(j+diff);
                     addEventToDom(j+diff,event.summary,'red');
                 }
                 j+=event.interval*7;
