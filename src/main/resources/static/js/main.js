@@ -7,9 +7,18 @@
 
     previewButton.addEventListener("click", function (e) {
         var month = e.target.value;
+
+        notifyCurrentMonth(month);
         makeDummyWindow(month);
         takeScreenShot(month);
     });
+
+    function notifyCurrentMonth(month) {
+        $.post("/print-change-range", {
+            start: month,
+            end: month
+        });
+    }
 
     function makeDummyWindow(month) {
 

@@ -56,10 +56,12 @@ public class ICalService {
         int preMonth = currentMonth == 1 ? 12 : currentMonth - 1;
         int nextMonth = currentMonth == 12 ? 1 : currentMonth + 1;
 
+        System.out.println(Integer.toString(currentMonth) + " " + Integer.toString(preYear) + " " + Integer.toString(nextYear) + " " + Integer.toString(preMonth) + " " + Integer.toString(nextMonth));
         YearMonth yearMonth1 = YearMonth.of(preYear, preMonth);//java8
         YearMonth yearMonth2 = YearMonth.of(nextYear, nextMonth);
         LocalDate tempStart = yearMonth1.atDay(23);
         LocalDate tempEnd = yearMonth2.atDay(6);
+
         DateTime startDate = new DateTime(tempStart.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//전달 23일
         DateTime endDate = new DateTime(tempEnd.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//다음달 6일
 

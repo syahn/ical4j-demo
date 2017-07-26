@@ -1,6 +1,5 @@
 package com.calendar.controller;
 
-import com.calendar.data.ICalFilteredEvent;
 import com.calendar.service.ICalService;
 import com.calendar.service.JsoupService;
 import com.calendar.service.PrintConverterService;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.List;
 
 /**
  * Created by NAVER on 2017-07-25.
@@ -25,23 +23,20 @@ import java.util.List;
 @EnableAutoConfiguration
 public class PrintController {
 
+    private static int startMonth;
+    private static int endMonth;
     private JsoupService jSoup;
     private ICalService iCal;
-
+    private PrintConverterService converter;
     private String tempUrl;
     private String month;
 
-    private static int startMonth;
-    private static int endMonth;
-
     @Autowired
-    public PrintController(JsoupService jSoup, ICalService iCal) {
+    public PrintController(JsoupService jSoup, ICalService iCal, PrintConverterService converter) {
         this.iCal = iCal;
         this.jSoup = jSoup;
+        this.converter = converter;
     }
-
-    @Autowired
-    private PrintConverterService converter;
 
     @ResponseBody
     @PostMapping("/save-url")
@@ -53,13 +48,24 @@ public class PrintController {
         month = monthVal;
     }
 
+    @ResponseBody
+    @PostMapping("/print-change-range")
+    public void savePrintRange(
+            @RequestParam("start") String start,
+            @RequestParam("end") String end
+    ) {
+        System.out.println("range - changed" + start + end);
+        startMonth = Integer.parseInt(start);
+        endMonth = Integer.parseInt(end);
+    }
+
     @RequestMapping("/preview")
-    public String viewPreview(Model model) throws IOException, ParseException, ParserException {
+    public String viewPreview(Model model) throws ParseException, ParserException, IOException {
 
         model.addAttribute("previewurl", tempUrl);
         model.addAttribute("month", month);
 
-        jSoup.makeHTMLfiles(6, 8);
+        jSoup.makeHTMLfiles(startMonth, endMonth);
 
         return "preview";
     }
@@ -70,24 +76,11 @@ public class PrintController {
             @RequestParam("startMonth") int startMonth,
             @RequestParam("endMonth") int endMonth,
             @RequestParam("orientation") int orientation
-    ) {
+    ) throws ParseException, ParserException, IOException, InterruptedException {
         //converting html to pdf - by url
-        try {
-            converter.makeAPdf(startMonth, endMonth, orientation);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "preview";
-    }
+        jSoup.makeHTMLfiles(startMonth, endMonth);
+        converter.makeAPdf(startMonth, endMonth, orientation);
 
-    @PostMapping("/print-change-range")
-    public void savePrintRange(
-            @RequestParam("startMonth") int start,
-            @RequestParam("endMonth") int end
-    ) {
-        startMonth = start;
-        endMonth = end;
+        return "preview";
     }
 }

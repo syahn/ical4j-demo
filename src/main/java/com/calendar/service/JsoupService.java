@@ -32,20 +32,23 @@ public class JsoupService {
             int endMonth
     ) throws IOException, ParserException, ParseException {
 
-        Calendar calendar = iCal.parseFile(
-                "/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
-
+        Calendar calendar = parseIcalFile();
         for (int month = startMonth; month <= endMonth; month++) {
-//            System.out.println(Integer.toString(month) + Integer.toString(startMonth) + Integer.toString(endMonth));
             List<ICalFilteredEvent> filteredEvents = iCal.filterData(calendar, month);
-
-            File input = new File("C:/Users/NAVER/Desktop/ical4j-demo/src/main/resources/templates/month_" + month + ".html");
-
+            File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
-
-            drawEventsOnDom(doc, filteredEvents);
+            drawEventsOnHtml(doc, filteredEvents);
             exportHtml(doc, month);
         }
+    }
+
+    public Calendar parseIcalFile() throws IOException, ParserException {
+        return iCal.parseFile(
+                "/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+    }
+
+    private File readTemplateByMonth(int month) {
+        return new File("C:/Users/NAVER/Desktop/ical4j-demo/src/main/resources/templates/month_" + month + ".html");
     }
 
     private Document parseHtml(File input) throws IOException {
@@ -56,7 +59,7 @@ public class JsoupService {
         );
     }
 
-    private void drawEventsOnDom(Document doc, List<ICalFilteredEvent> filteredEvents) {
+    private void drawEventsOnHtml(Document doc, List<ICalFilteredEvent> filteredEvents) {
         for (ICalFilteredEvent event : filteredEvents) {
             Elements slot = doc.select(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.getIndex() + "]");
             slot.append("<div ><span>" + event.getSummary() + "</span></div>");
@@ -65,12 +68,10 @@ public class JsoupService {
 
     private void exportHtml(Document doc, int month ) throws IOException {
         //로컬에 새로운 html 파일로 저장
-        String output = "/Users/NAVER/Desktop/ical4j-demo/src/main/resources/static/html/" + Integer.toString(month) +".html";
+        String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month" + Integer.toString(month) +".html";
         BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
         htmlWriter.write(doc.toString());
         htmlWriter.flush();
         htmlWriter.close();
     }
-
-
 }
