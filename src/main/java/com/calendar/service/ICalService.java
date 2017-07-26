@@ -48,32 +48,33 @@ public class ICalService {
     }
 
     //일정리스트 만들기
-    public List<ICalFilteredEvent> filterData(Calendar calendar, int changedMonth) throws ParseException {
+    public List<ICalFilteredEvent> filterData(Calendar calendar, int month) throws ParseException {
 
-        currentMonth = changedMonth;
+        setCurrentDate(currentYear,month);//만약 기간 옵션이 연범위로 늘어나면 current year에 대한 인자도 받아야함
 
-        //전달 23일 부터 다음 달 6일까지
+        //전달 23일 부터 다음 달 6일까지의 기간 설정
+       Period validPeriod = makeValidPeriod(currentYear,month);
+
+        //해당 기간을 일정에 포함하는 이벤트들 리스트에 포함
+        List<VEvent> events = calendar.getComponents("VEVENT");
+
+        return filterValidEvents(events, validPeriod);
+    }
+
+    private Period makeValidPeriod(int year, int month) throws ParseException {
+
         int preYear = currentMonth == 1 ? currentYear - 1 : currentYear;
         int nextYear = currentMonth == 12 ? currentYear + 1 : currentYear;
         int preMonth = currentMonth == 1 ? 12 : currentMonth - 1;
         int nextMonth = currentMonth == 12 ? 1 : currentMonth + 1;
 
-        //System.out.println(Integer.toString(month) + " " + Integer.toString(preYear) + " " + Integer.toString(nextYear) + " " + Integer.toString(preMonth) + " " + Integer.toString(nextMonth));
-        YearMonth yearMonth1 = YearMonth.of(preYear, preMonth);//java8
-        YearMonth yearMonth2 = YearMonth.of(nextYear, nextMonth);
-        LocalDate tempStart = yearMonth1.atDay(23);
-        LocalDate tempEnd = yearMonth2.atDay(6);
-
+        LocalDate tempStart = YearMonth.of(preYear, preMonth).atDay(23);
+        LocalDate tempEnd = YearMonth.of(nextYear, nextMonth).atDay(6);
         DateTime startDate = new DateTime(tempStart.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//전달 23일
         DateTime endDate = new DateTime(tempEnd.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//다음달 6일
 
         //기간 만들기 - RRule 밑에 EXPIR있는 경우 인식 못함
-        Period period = new Period(startDate, endDate);
-
-        //해당 기간을 일정에 포함하는 이벤트들 리스트에 포함
-        List<VEvent> events = calendar.getComponents("VEVENT");
-
-        return filterValidEvents(events, period);
+        return new Period(startDate, endDate);
     }
 
     private List<ICalFilteredEvent> filterValidEvents(List<VEvent> events, Period period) {
@@ -85,7 +86,10 @@ public class ICalService {
     }
 
     private List<ICalEvent> storeDataToICalEvent(List<VEvent> events) {
+
         List<ICalEvent> eventList = new ArrayList<>();
+        List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
+
         for (VEvent event : events) {
 
             ICalEvent data = new ICalEvent();
@@ -128,9 +132,7 @@ public class ICalService {
                     data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
                 }
             }
-
             eventList.add(data);
-            //System.out.println(event.getSummary().getValue());
         }
         return eventList;
     }
