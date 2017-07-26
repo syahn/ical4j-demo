@@ -18,12 +18,12 @@
         });
     });
 
-    function notifyCurrentMonth(month) {
-        $.post("/print-change-range", {
-            start: month,
-            end: month
-        });
-    }
+    // function notifyCurrentMonth(month) {
+    //     $.post("/print-change-range", {
+    //         start: month,
+    //         end: month
+    //     });
+    // }
 
     function makeDummyWindow(month) {
 

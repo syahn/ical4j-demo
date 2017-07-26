@@ -20,30 +20,27 @@ $(document).ready(function () {
 
     initialStartMonth = startOption.options[startOption.selectedIndex].value;
 
-
-
     $("._close").click(function () {
         window.close();
     });
 
-    $.post("/print-change-range", {
-        start: startMonth,
-        end: endMonth
-    });
-
     $("#button-print").click(function () {
+
         optionApply();
+        $.post("/print-change-range", {
+            start: startMonth,
+            end: endMonth
+        }).done(function () {
+            $.post("http://localhost:9000/convert",
+                {
+                    "startMonth": startMonth,
+                    "endMonth": endMonth,
+                    "orientation": orientation
+                }).done(function () {
+                printPage("/tempPdf/month_result.pdf");
+            });
 
-
-        $.post("http://localhost:9000/convert",
-            {
-                "startMonth": startMonth,
-                "endMonth": endMonth,
-                "orientation": orientation
-            }).done(function () {
-            printPage("/tempPdf/month_result.pdf");
         });
-
         function closePrint() {
             document.body.removeChild(this.__container__);
         }
@@ -66,7 +63,7 @@ $(document).ready(function () {
             oHiddFrame.src = sURL;
             document.body.appendChild(oHiddFrame);
         }
-    })
+    });
 });
 
 function optionApply() {
@@ -157,7 +154,7 @@ function takeScreenShot(month, mode) {
         start: month,
         end: month
     }).done(function () {
-        $.post("/make-preview").done(function (){
+        $.post("/make-preview").done(function () {
             if (document.getElementById("hiddenFrame") !== null) {
                 var elem = document.getElementById("hiddenFrame");
                 elem.parentNode.removeChild(elem);
@@ -194,5 +191,5 @@ function makeDummyWindow(month) {
 }
 
 function generateNewUrl(month) {
-    return "/html/month" + month+".html";
+    return "/html/month" + month + ".html";
 }
