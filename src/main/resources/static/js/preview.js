@@ -27,6 +27,7 @@
         $("#button-print").click(function () {
 
             refreshOptions();
+            document.getElementById("loader").style.display = "block";
 
             $.post("/print-change-range", {
                 start: startMonth,
@@ -39,6 +40,7 @@
                         "orientation": orientation
                     }).done(function () {
                     printPage("/tempPdf/month_result.pdf");
+                    document.getElementById("loader").style.display = "none";
                 });
 
             });
@@ -62,7 +64,7 @@
     function requestSave() {
 
         refreshOptions();
-
+        document.getElementById("loader").style.display = "block";
         $.post("/print-change-range", {
             start: startMonth,
             end: endMonth
@@ -89,6 +91,8 @@
                     link.setAttribute("href", dataURI);
                     link.setAttribute("download", fileName);
                     link.click();
+
+                    document.getElementById("loader").style.display = "none";
                 }
             });
         });
