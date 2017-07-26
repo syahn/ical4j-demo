@@ -40,7 +40,6 @@
                     }).done(function () {
                     printPage("/tempPdf/month_result.pdf");
                 });
-
             });
         });
 
