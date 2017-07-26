@@ -26,10 +26,10 @@ $(document).ready(function () {
         window.close();
     });
 
-    $.post("/print-change-range", {
-        start: startMonth,
-        end: endMonth
-    });
+    // $.post("/print-change-range", {
+    //     start: startMonth,
+    //     end: endMonth
+    // });
 
     $("#button-print").click(function () {
         optionApply();

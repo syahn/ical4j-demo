@@ -7,6 +7,7 @@
 
     previewButton.addEventListener("click", function (e) {
         var month = e.target.value;
+
         $.post("/print-change-range", {
             start: month,
             end: month
@@ -18,12 +19,16 @@
         });
     });
 
-    function notifyCurrentMonth(month) {
-        $.post("/print-change-range", {
-            start: month,
-            end: month
-        });
-    }
+    // function notifyCurrentMonth(month) {
+    //     return $.post("/print-change-range", {
+    //         start: month,
+    //         end: month
+    //     });
+    // }
+    //
+    // function makePreviewImage() {
+    //
+    // }
 
     function makeDummyWindow(month) {
 

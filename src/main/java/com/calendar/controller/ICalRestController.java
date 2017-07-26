@@ -34,7 +34,7 @@ public class ICalRestController {
             @RequestParam("year") int year
     ) throws IOException, ParserException, ParseException {
 
-        iCal.setCurrenDate(year, month);
+        iCal.setCurrentDate(year, month);
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
         Calendar calendar = iCal.parseFile(
