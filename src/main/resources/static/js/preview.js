@@ -27,7 +27,6 @@
         $("#button-print").click(function () {
 
             refreshOptions();
-            document.getElementById("loader").style.display = "block";
 
             $.post("/print-change-range", {
                 start: startMonth,
@@ -42,16 +41,18 @@
                     printPage("/tempPdf/month_result.pdf");
                     document.getElementById("loader").style.display = "none";
                 });
-
             });
         });
 
         $("#button-save").click(requestSave);
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
+        $("._portrait, ._landscape").click(changeOrientation);
     });
 
     function refreshOptions() {
+
+        document.getElementById("loader").style.display = "block";
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
@@ -64,7 +65,6 @@
     function requestSave() {
 
         refreshOptions();
-        document.getElementById("loader").style.display = "block";
         $.post("/print-change-range", {
             start: startMonth,
             end: endMonth
@@ -105,7 +105,7 @@
         if (initialStartMonth !== startMonth) {
             //console.log("initial: " + initialStartMonth, "start: " + startMonth);
             initialStartMonth = startMonth;
-            checkBox();
+            changeOrientation();
         }
     }
 
@@ -133,7 +133,7 @@
     }
 
     //미리보기 세로방향, 가로방향 보여주기
-    function checkBox() {
+    function changeOrientation() {
 
         refreshOptions();
 
@@ -145,6 +145,14 @@
             takeScreenShot(startMonth, "landscape");
         }
     }
+
+    // function renderPortraitView() {
+    //     takeScreenShot(startMonth, "portrait");
+    // }
+    //
+    // function renderLandscapeView() {
+    //     takeScreenShot(startMonth, "landscape");
+    // }
 
     function takeScreenShot(month, mode) {
         $.post("/print-change-range", {
@@ -169,6 +177,7 @@
                         });
                     }
                 });
+                document.getElementById("loader").style.display = "none";
             });
         });
     }

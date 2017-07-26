@@ -12,6 +12,9 @@
             start: month,
             end: month
         }).done(function () {
+
+            openPreviewTap();
+
             $.post("/make-preview").done(function(){
                 makeDummyWindow(month);
                 takeScreenShot(month);
@@ -47,10 +50,26 @@
                         "previewUrl": dataUrl,
                         "month": month
                     }
-                ).done(openPreviewTap);
+                );
             }
         });
     }
+    // function takeScreenShot(month) {
+    //     html2canvas(document.getElementById("hiddenFrame"), {
+    //         onrendered: function (canvas) {
+    //             // 캔버스 URL 추출
+    //             var dataUrl = canvas.toDataURL();
+    //
+    //             // 추출한 URL을 서버에 저장한 후, 프리뷰 창을 띄운다.
+    //             $.post("http://localhost:9000/save-url",
+    //                 {
+    //                     "previewUrl": dataUrl,
+    //                     "month": month
+    //                 }
+    //             ).done(openPreviewTap);
+    //         }
+    //     });
+    // }
 
     function openPreviewTap() {
         window.open('/preview', '인쇄 프리뷰', 'resizable=1,width=526,height=715');
