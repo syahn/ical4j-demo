@@ -54,7 +54,6 @@ public class PrintController {
             @RequestParam("start") String start,
             @RequestParam("end") String end
     ) {
-        System.out.println("range - changed" + start + end);
         startMonth = Integer.parseInt(start);
         endMonth = Integer.parseInt(end);
     }

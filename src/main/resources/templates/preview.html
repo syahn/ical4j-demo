@@ -220,6 +220,7 @@
 
                         <select class="_font_size_select range_select"
                                 id="start_month"
+                                onchange="change()"
                         >
 
                             <option value="6" selected="">6월</option>
@@ -237,6 +238,7 @@
 
                         <select class="_font_size_select range_select"
                                 id="end_month"
+                                onchange="change()"
                         >
 
                             <option value="6" selected="">6월</option>
@@ -300,13 +302,13 @@
                     <ul>
                         <li>
                             <p><input type="radio" id="rdo2_0" name="rdo0"
-                                      class="radio01 _landscape orientation" checked=""
+                                      class="radio01 _landscape orientation" checked="" onclick="checkBox()"
                             > <label for="rdo2_0">가로</label>
                             </p>
                         </li>
                         <li>
                             <p><input type="radio" id="rdo2_1" name="rdo0"
-                                      class="radio01 _portrait"
+                                      class="radio01 _portrait" onclick="checkBox()"
                             > <label for="rdo2_1">세로</label>
                             </p>
 
