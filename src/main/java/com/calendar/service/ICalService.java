@@ -48,7 +48,7 @@ public class ICalService {
     }
 
     //일정리스트 만들기
-    public List<ICalFilteredEvent> resolveData(Calendar calendar, int currentMonth) throws ParseException {
+    public List<ICalFilteredEvent> filterData(Calendar calendar, int currentMonth) throws ParseException {
 
         //전달 23일 부터 다음 달 6일까지
         int preYear = currentMonth == 1 ? currentYear - 1 : currentYear;

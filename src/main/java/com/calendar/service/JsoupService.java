@@ -27,28 +27,50 @@ public class JsoupService {
         this.iCal = iCal;
     }
 
-    public void makeHTMLfiles(int startMonth, int endMonth) throws IOException, ParserException, ParseException {
+    public void makeHTMLfiles(
+            int startMonth,
+            int endMonth
+    ) throws IOException, ParserException, ParseException {
 
         Calendar calendar = iCal.parseFile(
                 "/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+
         for (int month = startMonth; month <= endMonth; month++) {
-            System.out.println(Integer.toString(month) + Integer.toString(startMonth) + Integer.toString(endMonth));
-            List<ICalFilteredEvent> filteredEvents = iCal.resolveData(calendar, month);
+//            System.out.println(Integer.toString(month) + Integer.toString(startMonth) + Integer.toString(endMonth));
+            List<ICalFilteredEvent> filteredEvents = iCal.filterData(calendar, month);
 
             File input = new File("C:/Users/NAVER/Desktop/ical4j-demo/src/main/resources/templates/month_" + month + ".html");
-            Document doc = Jsoup.parse(input, "UTF-8", "http://localhost:9000/");;
 
-            for (ICalFilteredEvent event : filteredEvents) {
-                Elements slot = doc.select(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.getIndex() + "]");
-                slot.append("<div ><span>" + event.getSummary() + "</span></div>");
-            }
+            Document doc = parseHtml(input);
 
-            //로컬에 새로운 html 파일로 저장
-            String output = "/Users/NAVER/Desktop/ical4j-demo/src/main/resources/static/html/" + Integer.toString(month) +".html";
-            BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
-            htmlWriter.write(doc.toString());
-            htmlWriter.flush();
-            htmlWriter.close();
+            drawEventsOnDom(doc, filteredEvents);
+            exportHtml(doc, month);
         }
     }
+
+    private Document parseHtml(File input) throws IOException {
+        return Jsoup.parse(
+                input,
+                "UTF-8",
+                "http://localhost:9000/"
+        );
+    }
+
+    private void drawEventsOnDom(Document doc, List<ICalFilteredEvent> filteredEvents) {
+        for (ICalFilteredEvent event : filteredEvents) {
+            Elements slot = doc.select(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.getIndex() + "]");
+            slot.append("<div ><span>" + event.getSummary() + "</span></div>");
+        }
+    }
+
+    private void exportHtml(Document doc, int month ) throws IOException {
+        //로컬에 새로운 html 파일로 저장
+        String output = "/Users/NAVER/Desktop/ical4j-demo/src/main/resources/static/html/" + Integer.toString(month) +".html";
+        BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
+        htmlWriter.write(doc.toString());
+        htmlWriter.flush();
+        htmlWriter.close();
+    }
+
+
 }

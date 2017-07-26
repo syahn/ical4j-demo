@@ -53,8 +53,6 @@ public class PrintController {
         month = monthVal;
     }
 
-
-
     @RequestMapping("/preview")
     public String viewPreview(Model model) throws IOException, ParseException, ParserException {
 
@@ -73,7 +71,6 @@ public class PrintController {
             @RequestParam("endMonth") int endMonth,
             @RequestParam("orientation") int orientation
     ) {
-        System.out.println("come");
         //converting html to pdf - by url
         try {
             converter.makeAPdf(startMonth, endMonth, orientation);

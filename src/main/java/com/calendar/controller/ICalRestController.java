@@ -40,11 +40,7 @@ public class ICalRestController {
         Calendar calendar = iCal.parseFile(
                 "/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
 
-        List<ICalFilteredEvent> filteredEvents = iCal.resolveData(calendar, month);
-
-        return filteredEvents;
+        return iCal.filterData(calendar, month);
     }
-
-
 }
 
