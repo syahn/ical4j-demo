@@ -33,12 +33,12 @@ public class ICalService {
     private static int currentYear;
     private static int currentMonth;
 
-    public static void setCurrenDate(int year, int month) {
+    public void setCurrentDate(int year, int month) {
         currentYear = year;
         currentMonth = month;
     }
 
-    public static Calendar parseFile(
+    public Calendar parseFile(
             String file
     ) throws IOException, ParserException {
         FileInputStream fin = new FileInputStream(file);
@@ -48,7 +48,9 @@ public class ICalService {
     }
 
     //일정리스트 만들기
-    public List<ICalFilteredEvent> filterData(Calendar calendar, int currentMonth) throws ParseException {
+    public List<ICalFilteredEvent> filterData(Calendar calendar, int changedMonth) throws ParseException {
+
+        currentMonth = changedMonth;
 
         //전달 23일 부터 다음 달 6일까지
         int preYear = currentMonth == 1 ? currentYear - 1 : currentYear;
@@ -56,7 +58,7 @@ public class ICalService {
         int preMonth = currentMonth == 1 ? 12 : currentMonth - 1;
         int nextMonth = currentMonth == 12 ? 1 : currentMonth + 1;
 
-        System.out.println(Integer.toString(currentMonth) + " " + Integer.toString(preYear) + " " + Integer.toString(nextYear) + " " + Integer.toString(preMonth) + " " + Integer.toString(nextMonth));
+        //System.out.println(Integer.toString(month) + " " + Integer.toString(preYear) + " " + Integer.toString(nextYear) + " " + Integer.toString(preMonth) + " " + Integer.toString(nextMonth));
         YearMonth yearMonth1 = YearMonth.of(preYear, preMonth);//java8
         YearMonth yearMonth2 = YearMonth.of(nextYear, nextMonth);
         LocalDate tempStart = yearMonth1.atDay(23);
@@ -112,7 +114,7 @@ public class ICalService {
                     data.setEndIndex(calculateIndexOfDate(data, "end"));//end index는 until있을 때만 필요
                 }
                 //요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6)
-                if(rule.getRecur().getDayList()!=null) {//요일 반복일때만 daylist 있음
+                if (rule.getRecur().getDayList() != null) {//요일 반복일때만 daylist 있음
                     ArrayList<Integer> tempDayList = new ArrayList<>();
                     for (WeekDay day : rule.getRecur().getDayList()) {
                         tempDayList.add(WeekDay.getCalendarDay(day));
@@ -136,7 +138,7 @@ public class ICalService {
     private List<ICalFilteredEvent> filterByIndex(List<ICalEvent> eventList) {
         List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
 
-        for(ICalEvent event : eventList) {
+        for (ICalEvent event : eventList) {
             String frequency = event.getFrequency();
             int startIndex = event.getStartIndex();
             int endIndex = event.getEndIndex();
@@ -154,20 +156,19 @@ public class ICalService {
                 addEventToFilteredEvents("DAY", event, filteredEventList);
             } else {
                 if (frequency.equals("DAILY")) {
-                    for (int j = startIndex; j < end;) {
+                    for (int j = startIndex; j < end; ) {
                         addEventToFilteredEvents("DAILY", event, filteredEventList);
                         j += interval;
                         event.setStartIndex(j);
                     }
-                }
-                else if (frequency.equals("WEEKLY")) {
+                } else if (frequency.equals("WEEKLY")) {
 
                     for (int d = 0; d < startDayList.size(); d++) {
                         int diff = startDayList.get(d) - startDayNum;
                         if (diff < 0) {
                             diff += 7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
                         }
-                        for (int j = startIndex; j < end;) {
+                        for (int j = startIndex; j < end; ) {
                             if (!(j + diff >= end)) {
                                 addEventToFilteredEvents("WEEKLY", event, filteredEventList);
                             }
@@ -175,14 +176,13 @@ public class ICalService {
                             event.setStartIndex(j + diff);
                         }
                     }
-                }
-                else if (frequency.equals("MONTHLY")) {
+                } else if (frequency.equals("MONTHLY")) {
 
                     int tempMonth = startMonth;
                     int tempYear = startYear;
                     int tempCount = 0;
 
-                    for (int j = startIndex; j < end;) {
+                    for (int j = startIndex; j < end; ) {
 
                         if (tempCount == interval || tempCount == 0) {
                             addEventToFilteredEvents("MONTHLY", event, filteredEventList);
@@ -200,12 +200,11 @@ public class ICalService {
                             tempYear++;
                         }
                     }
-                }
-                else if (frequency.equals("YEARLY")) {
+                } else if (frequency.equals("YEARLY")) {
 
                     int tempYear = startYear;
                     int tempCount = 0;
-                    for (int j = startIndex; j < end;) {
+                    for (int j = startIndex; j < end; ) {
 
                         if (tempCount == interval || tempCount == 0) {
                             addEventToFilteredEvents("YEARLY", event, filteredEventList);
@@ -224,7 +223,7 @@ public class ICalService {
         return filteredEventList;
     }
 
-    private void addEventToFilteredEvents(String type, ICalEvent event, List<ICalFilteredEvent> filteredEventList){
+    private void addEventToFilteredEvents(String type, ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
         int startIndex = event.getStartIndex();
         int endIndex = event.getEndIndex();
 
@@ -259,7 +258,7 @@ public class ICalService {
 
         //현재 달 이전에 이벤트가 시작시(얼마나 이전인지 한계 없음)
         else {
-            int tempMonth = currentMonth-1;
+            int tempMonth = currentMonth - 1;
             int tempYear = currentYear;
 
             while (tempYear > eventYear || (tempYear == eventYear && tempMonth >= eventMonth)) {
@@ -291,7 +290,7 @@ public class ICalService {
 
     private int daysOfMonth(int year, int month) {
         YearMonth ym = YearMonth.of(year, month);
-        return  ym.getMonth().length(isLeapYear(year));
+        return ym.getMonth().length(isLeapYear(year));
     }
 
     private int daysOfYear(int year) {
@@ -304,7 +303,7 @@ public class ICalService {
 
     private int getFirstDay(int year, int month) {
         YearMonth ym = YearMonth.of(year, month);
-        return  ym.atDay(1).getDayOfWeek().getValue();
+        return ym.atDay(1).getDayOfWeek().getValue();
     }
 
 }

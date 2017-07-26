@@ -82,30 +82,34 @@ function save() {
 
     optionApply();
 
-    var optionValue = {
-        'startMonth': startMonth,
-        'endMonth': endMonth,
-        'orientation': orientation
-    };
+    $.post("/print-change-range", {
+        start: startMonth,
+        end: endMonth
+    }).done(function () {
+        var optionValue = {
+            'startMonth': startMonth,
+            'endMonth': endMonth,
+            'orientation': orientation
+        };
 
-    $.ajax({
-        url: "http://localhost:9000/convert",
-        type: "POST",
-        data: optionValue,
-        success: function () {
+        $.ajax({
+            url: "http://localhost:9000/convert",
+            type: "POST",
+            data: optionValue,
+            success: function () {
 
-            // 서버 임시 pdf 변환 파일 불러온 후 save box 팝업
-            var dataURI = '/tempPdf/month_result.pdf';
+                // 서버 임시 pdf 변환 파일 불러온 후 save box 팝업
+                var dataURI = '/tempPdf/month_result.pdf';
 
-            var fileName = 'Calendar';
+                var fileName = 'Calendar';
 
-            var link = document.getElementById("saveLink");
+                var link = document.getElementById("saveLink");
 
-            link.setAttribute("href", dataURI);
-            link.setAttribute("download", fileName);
-            link.click();
-
-        }
+                link.setAttribute("href", dataURI);
+                link.setAttribute("download", fileName);
+                link.click();
+            }
+        });
     });
 }
 

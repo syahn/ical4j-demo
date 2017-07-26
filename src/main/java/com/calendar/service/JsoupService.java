@@ -23,7 +23,7 @@ public class JsoupService {
     private ICalService iCal;
 
     @Autowired
-    public JsoupService( ICalService iCal) {
+    public JsoupService(ICalService iCal) {
         this.iCal = iCal;
     }
 
@@ -33,8 +33,17 @@ public class JsoupService {
     ) throws IOException, ParserException, ParseException {
 
         Calendar calendar = parseIcalFile();
+
         for (int month = startMonth; month <= endMonth; month++) {
+            System.out.println(Integer.toString(month));
             List<ICalFilteredEvent> filteredEvents = iCal.filterData(calendar, month);
+
+            for (ICalFilteredEvent event : filteredEvents) {
+                System.out.println("event: " + Integer.toString(month) + event.getSummary().toString());
+
+            }
+
+
             File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
             drawEventsOnHtml(doc, filteredEvents);
@@ -48,7 +57,7 @@ public class JsoupService {
     }
 
     private File readTemplateByMonth(int month) {
-        return new File("C:/Users/NAVER/Desktop/ical4j-demo/src/main/resources/templates/month_" + month + ".html");
+        return new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/templates/month_" + month + ".html");
     }
 
     private Document parseHtml(File input) throws IOException {
@@ -61,15 +70,18 @@ public class JsoupService {
 
     private void drawEventsOnHtml(Document doc, List<ICalFilteredEvent> filteredEvents) {
         for (ICalFilteredEvent event : filteredEvents) {
+
             Elements slot = doc.select(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.getIndex() + "]");
             slot.append("<div ><span>" + event.getSummary() + "</span></div>");
         }
-        doc.select("script").remove();//스크립트 태그 제거 - 마크업 중복 방지
+
+        //스크립트 태그 제거 - 마크업 중복 방지
+        doc.select("script").remove();
     }
 
-    private void exportHtml(Document doc, int month ) throws IOException {
+    private void exportHtml(Document doc, int month) throws IOException {
         //로컬에 새로운 html 파일로 저장
-        String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month" + Integer.toString(month) +".html";
+        String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month" + Integer.toString(month) + ".html";
         BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
         htmlWriter.write(doc.toString());
         htmlWriter.flush();
