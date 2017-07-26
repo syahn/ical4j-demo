@@ -20,6 +20,14 @@
 
         initialStartMonth = startOption.options[startOption.selectedIndex].value;
 
+        var img = new Image();
+        img.onload = function() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('previewImage').style.display = 'inline';
+        };
+        img.src = document.getElementById('previewImage').src;
+        if (img.complete) img.onload();
+
         $("._close").click(function () {
             window.close();
         });

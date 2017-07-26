@@ -48,6 +48,19 @@
             background-color: #000;
             opacity: 0;
         }
+        #loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 
 
@@ -77,8 +90,9 @@
             <div class="print_type">
                 <p class="_preview preview" id="monthPreview"
                    th:value="${month}">
+                    <div id="loader"></div>
                     <img id="previewImage" th:src="${previewurl}"
-                         style="width: 343px; height: 252px;" alt="월간 인쇄 미리보기"
+                         style="display: none; width: 343px; height: 252px;" alt="월간 인쇄 미리보기"
                          title="월간 인쇄 미리보기">
 
                 <p class="_preview_desc desc" style="display: none;">
