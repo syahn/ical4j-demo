@@ -48,6 +48,7 @@
             background-color: #000;
             opacity: 0;
         }
+
         #loader {
             border: 16px solid #f3f3f3; /* Light grey */
             border-top: 16px solid #3498db; /* Blue */
@@ -58,8 +59,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 
@@ -88,13 +93,15 @@
         </div>
         <div id="content" class="_content">
             <div class="print_type">
+                <div id="loader"></div>
                 <p class="_preview preview" id="monthPreview"
                    th:value="${month}">
-                    <div id="loader"></div>
-                    <img id="previewImage" th:src="${previewurl}"
-                         style="display: none; width: 343px; height: 252px;" alt="월간 인쇄 미리보기"
-                         title="월간 인쇄 미리보기">
 
+                <img id="previewImage" th:src="${previewurl}"
+                     style="display: none; width: 343px; height: 252px;"
+                     alt="월간 인쇄 미리보기"
+                     title="월간 인쇄 미리보기" />
+                </p>
                 <p class="_preview_desc desc" style="display: none;">
                     <em><strong>가로 설정</strong>에 최적화된 스타일 입니다. 용지방향은 가로로
                         출력됩니다.</em></p>
@@ -442,7 +449,8 @@
 
 
             <!--저장 버튼-->
-            <button id="button-save" type="button" name="type" value="save" class="btn btn-lg btn-default m-progress">저장
+            <button id="button-save" type="button" name="type" value="save"
+                    class="btn btn-lg btn-default m-progress">저장
             </button>
             <a href="#" download="filname" id="saveLink" hidden>savelink</a>
 
