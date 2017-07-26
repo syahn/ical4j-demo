@@ -33,7 +33,7 @@
     }
 
     function generateNewUrl(month) {
-        return "http://localhost:9000/month/" + month;
+        return "/html/month" + month + ".html";
     }
 
     function takeScreenShot(month) {

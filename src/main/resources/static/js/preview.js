@@ -42,8 +42,9 @@
             requestNumOfPrint();
         });
 
-        $(".orientation").click(function() {
+        $(".orientation").click(function () {
             refreshOptionVal();
+            notifyMonthRange();
             changePreviewByOrientation();
         });
     });
@@ -115,6 +116,7 @@
         if (initialStartMonth !== startMonth) {
             //console.log("initial: " + initialStartMonth, "start: " + startMonth);
             initialStartMonth = startMonth;
+            changePreviewByOrientation();
         }
     }
 
@@ -131,24 +133,25 @@
     }
 
     function takeScreenShot(month, mode) {
-
-        if (document.getElementById("hiddenFrame") !== null) {
-            var elem = document.getElementById("hiddenFrame");
-            alert("take!");
-            elem.parentNode.removeChild(elem);
-        }
-
-        makeDummyWindow(month);
-
-        html2canvas(document.getElementById("hiddenFrame"), {
-            onrendered: function (canvas) {
-                //이미지
-                var dataUrl = canvas.toDataURL();
-                $("#previewImage").attr({
-                    "src": dataUrl,
-                    "style": mode === "landscape" ? printMode.landscape : printMode.portrait
-                });
+        $.post("/make-preview").done(function () {
+            if (document.getElementById("hiddenFrame") !== null) {
+                var elem = document.getElementById("hiddenFrame");
+                alert("take!");
+                elem.parentNode.removeChild(elem);
             }
+
+            makeDummyWindow(month);
+
+            html2canvas(document.getElementById("hiddenFrame"), {
+                onrendered: function (canvas) {
+                    //이미지
+                    var dataUrl = canvas.toDataURL();
+                    $("#previewImage").attr({
+                        "src": dataUrl,
+                        "style": mode === "landscape" ? printMode.landscape : printMode.portrait
+                    });
+                }
+            });
         });
     }
 
@@ -166,7 +169,7 @@
     }
 
     function generateNewUrl(month) {
-        return "http://localhost:9000/month/" + month;
+        return "/html/month" + month + ".html";
     }
 
     function closePrint() {

@@ -64,6 +64,7 @@ public class JsoupService {
             Elements slot = doc.select(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.getIndex() + "]");
             slot.append("<div ><span>" + event.getSummary() + "</span></div>");
         }
+        doc.select("script").remove();//스크립트 태그 제거 - 마크업 중복 방지
     }
 
     private void exportHtml(Document doc, int month ) throws IOException {

@@ -59,6 +59,13 @@ public class PrintController {
         endMonth = Integer.parseInt(end);
     }
 
+    @ResponseBody
+    @PostMapping("/make-preview")
+    public void saveUrl(
+    ) throws ParseException, ParserException, IOException {
+        jSoup.makeHTMLfiles(startMonth,endMonth);
+    }
+
     @RequestMapping("/preview")
     public String viewPreview(Model model) throws ParseException, ParserException, IOException {
 
