@@ -1,6 +1,5 @@
 package com.calendar.controller;
 
-import com.calendar.service.ICalService;
 import com.calendar.service.JsoupService;
 import com.calendar.service.PrintConverterService;
 import net.fortuna.ical4j.data.ParserException;
@@ -26,14 +25,12 @@ public class PrintController {
     private static int startMonth;
     private static int endMonth;
     private JsoupService jSoup;
-    private ICalService iCal;
     private PrintConverterService converter;
     private String tempUrl;
     private String month;
 
     @Autowired
-    public PrintController(JsoupService jSoup, ICalService iCal, PrintConverterService converter) {
-        this.iCal = iCal;
+    public PrintController(JsoupService jSoup, PrintConverterService converter) {
         this.jSoup = jSoup;
         this.converter = converter;
     }

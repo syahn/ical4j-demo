@@ -35,7 +35,9 @@ public class JsoupService {
         Calendar calendar = parseIcalFile();
 
         for (int month = startMonth; month <= endMonth; month++) {
+
             List<ICalFilteredEvent> filteredEvents = iCal.filterData(calendar, month);
+
             File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
             drawEventsOnHtml(doc, filteredEvents);
