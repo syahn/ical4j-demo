@@ -35,7 +35,7 @@
 
     function listenToStopLoader() {
         var img = new Image();
-        img.onload = function() {
+        img.onload = function () {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('previewImage').style.display = 'inline';
         };
@@ -91,25 +91,16 @@
                 'orientation': orientation
             };
 
-            $.ajax({
-                url: "http://localhost:9000/convert",
-                type: "POST",
-                data: optionValue,
-                success: function () {
+            $.post("http://localhost:9000/convert", optionValue).done(function () {
+                var dataURI = '/tempPdf/month_result.pdf';
+                var fileName = 'Calendar';
+                var link = document.getElementById("saveLink");
 
-                    // 서버 임시 pdf 변환 파일 불러온 후 save box 팝업
-                    var dataURI = '/tempPdf/month_result.pdf';
+                link.setAttribute("href", dataURI);
+                link.setAttribute("download", fileName);
+                link.click();
 
-                    var fileName = 'Calendar';
-
-                    var link = document.getElementById("saveLink");
-
-                    link.setAttribute("href", dataURI);
-                    link.setAttribute("download", fileName);
-                    link.click();
-
-                    document.getElementById("loader").style.display = "none";
-                }
+                document.getElementById("loader").style.display = "none";
             });
         });
     }
@@ -119,14 +110,12 @@
         changePeriod();
 
         if (initialStartMonth !== startMonth) {
-            //console.log("initial: " + initialStartMonth, "start: " + startMonth);
             initialStartMonth = startMonth;
             changeOrientation();
         }
     }
 
     function changePeriod() {
-
         var pageNum = document.getElementById("pageNum");
 
         refreshOptions();
@@ -197,8 +186,8 @@
     }
 
     function makeDummyWindow(month) {
-
         var hiddenFrame = document.createElement("iframe");
+
         hiddenFrame.setAttribute("id", "hiddenFrame");
         hiddenFrame.setAttribute("width", "1000");
         hiddenFrame.setAttribute("height", "1000");
