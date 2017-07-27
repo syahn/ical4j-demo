@@ -15,42 +15,23 @@
     $(document).ready(function () {
 
         //select option 메인 페이지 달로 초기화
-        $("#start_month").val($('#monthPreview').attr("value"));
-        $("#end_month").val($('#monthPreview').attr("value"));
-
-        initialStartMonth = startOption.options[startOption.selectedIndex].value;
-
+        initiatePeriod();
         listenToStopLoader();
 
-        $("._close").click(function () {
-            window.close();
-        });
-
-        $("#button-print").click(function () {
-
-            refreshOptions();
-
-            $.post("/print-change-range", {
-                start: startMonth,
-                end: endMonth
-            }).done(function () {
-                $.post("http://localhost:9000/convert",
-                    {
-                        "startMonth": startMonth,
-                        "endMonth": endMonth,
-                        "orientation": orientation
-                    }).done(function () {
-                    printPage("/tempPdf/month_result.pdf");
-                    document.getElementById("loader").style.display = "none";
-                });
-            });
-        });
-
+        $("._close").click(closeWindow);
+        $("#button-print").click(requestPrint);
         $("#button-save").click(requestSave);
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
         $("._portrait, ._landscape").click(changeOrientation);
     });
+
+    function initiatePeriod() {
+        $("#start_month").val($('#monthPreview').attr("value"));
+        $("#end_month").val($('#monthPreview').attr("value"));
+
+        initialStartMonth = startOption.options[startOption.selectedIndex].value;
+    }
 
     function listenToStopLoader() {
         var img = new Image();
@@ -62,8 +43,32 @@
         if (img.complete) img.onload();
     }
 
+    function closeWindow() {
+        window.close();
+    }
+
+    function requestPrint() {
+
+        refreshOptions();
+
+        $.post("/print-change-range", {
+            start: startMonth,
+            end: endMonth
+        }).done(function () {
+            $.post("http://localhost:9000/convert",
+                {
+                    "startMonth": startMonth,
+                    "endMonth": endMonth,
+                    "orientation": orientation
+                }).done(function () {
+                printPage("/tempPdf/month_result.pdf");
+                document.getElementById("loader").style.display = "none";
+            });
+        });
+    }
+
     function refreshOptions() {
-        document.getElementById("loader").style.display = "block";
+
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
@@ -121,10 +126,10 @@
     }
 
     function changePeriod() {
+
         var pageNum = document.getElementById("pageNum");
 
         refreshOptions();
-
         notifyPeriod();
 
         // 총 페이지 수 계산
@@ -162,14 +167,6 @@
         document.getElementById('loader').style.display = 'block';
         document.getElementById('previewImage').style.display = 'none';
     }
-
-    // function renderPortraitView() {
-    //     takeScreenShot(startMonth, "portrait");
-    // }
-    //
-    // function renderLandscapeView() {
-    //     takeScreenShot(startMonth, "landscape");
-    // }
 
     function takeScreenShot(month, mode) {
         $.post("/print-change-range", {
