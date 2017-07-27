@@ -145,7 +145,7 @@
 
     //미리보기 세로방향, 가로방향 보여주기
     function changeOrientation() {
-
+        enableLoader();
         refreshOptions();
 
         var vertical = document.getElementById("rdo2_1").checked;
@@ -155,6 +155,12 @@
         } else {
             takeScreenShot(startMonth, "landscape");
         }
+
+    }
+
+    function enableLoader() {
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('previewImage').style.display = 'none';
     }
 
     // function renderPortraitView() {
@@ -186,9 +192,9 @@
                             "src": dataUrl,
                             "style": mode === "landscape" ? printMode.landscape : printMode.portrait
                         });
+                        $("#loader").css("display", "none");
                     }
                 });
-                document.getElementById("loader").style.display = "none";
             });
         });
     }
