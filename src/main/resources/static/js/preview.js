@@ -15,11 +15,25 @@
     $(document).ready(function () {
 
         //select option 메인 페이지 달로 초기화
+        initiatePeriod();
+        listenToStopLoader();
+
+        $("._close").click(closeWindow);
+        $("#button-print").click(requestPrint);
+        $("#button-save").click(requestSave);
+        $("#start_month").on("change", changePreviewImage);
+        $("#end_month").on("change", changePeriod);
+        $("._portrait, ._landscape").click(changeOrientation);
+    });
+
+    function initiatePeriod() {
         $("#start_month").val($('#monthPreview').attr("value"));
         $("#end_month").val($('#monthPreview').attr("value"));
 
         initialStartMonth = startOption.options[startOption.selectedIndex].value;
+    }
 
+    function listenToStopLoader() {
         var img = new Image();
         img.onload = function() {
             document.getElementById('loader').style.display = 'none';
@@ -27,38 +41,32 @@
         };
         img.src = document.getElementById('previewImage').src;
         if (img.complete) img.onload();
+    }
 
-        $("._close").click(function () {
-            window.close();
-        });
+    function closeWindow() {
+        window.close();
+    }
+    function requestPrint() {
 
-        $("#button-print").click(function () {
-
-            refreshOptions();
-            document.getElementById("printText").style.display="none";
-            document.getElementById("print-loader").style.display = "block";
-            $.post("/print-change-range", {
-                start: startMonth,
-                end: endMonth
-            }).done(function () {
-                $.post("http://localhost:9000/convert",
-                    {
-                        "startMonth": startMonth,
-                        "endMonth": endMonth,
-                        "orientation": orientation
-                    }).done(function () {
-                    printPage("/tempPdf/month_result.pdf");
-                    document.getElementById("printText").style.display="block";
-                    document.getElementById("print-loader").style.display = "none";
-                });
+        refreshOptions();
+        document.getElementById("printText").style.display="none";
+        document.getElementById("print-loader").style.display = "block";
+        $.post("/print-change-range", {
+            start: startMonth,
+            end: endMonth
+        }).done(function () {
+            $.post("http://localhost:9000/convert",
+                {
+                    "startMonth": startMonth,
+                    "endMonth": endMonth,
+                    "orientation": orientation
+                }).done(function () {
+                printPage("/tempPdf/month_result.pdf");
+                document.getElementById("printText").style.display="block";
+                document.getElementById("print-loader").style.display = "none";
             });
         });
-
-        $("#button-save").click(requestSave);
-        $("#start_month").on("change", changePreviewImage);
-        $("#end_month").on("change", changePeriod);
-        $("._portrait, ._landscape").click(changeOrientation);
-    });
+    }
 
     function refreshOptions() {
 
@@ -122,10 +130,10 @@
     }
 
     function changePeriod() {
+
         var pageNum = document.getElementById("pageNum");
 
         refreshOptions();
-
         notifyPeriod();
 
         // 총 페이지 수 계산
@@ -146,7 +154,7 @@
 
     //미리보기 세로방향, 가로방향 보여주기
     function changeOrientation() {
-
+        enableLoader();
         refreshOptions();
 
         var vertical = document.getElementById("rdo2_1").checked;
@@ -156,15 +164,13 @@
         } else {
             takeScreenShot(startMonth, "landscape");
         }
+
     }
 
-    // function renderPortraitView() {
-    //     takeScreenShot(startMonth, "portrait");
-    // }
-    //
-    // function renderLandscapeView() {
-    //     takeScreenShot(startMonth, "landscape");
-    // }
+    function enableLoader() {
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('previewImage').style.display = 'none';
+    }
 
     function takeScreenShot(month, mode) {
         $.post("/print-change-range", {
@@ -187,6 +193,7 @@
                             "src": dataUrl,
                             "style": mode === "landscape" ? printMode.landscape : printMode.portrait
                         });
+                        $("#loader").css("display", "none");
                     }
                 });
             });

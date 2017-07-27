@@ -48,18 +48,69 @@
             background-color: #000;
             opacity: 0;
         }
-        #loader {
-            border: 16px solid #f3f3f3; /* Light grey */
-            border-top: 16px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            animation: spin 2s linear infinite;
-        }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        #loader {
+             font-size: 10px;
+             margin: 75px auto;
+             text-indent: -9999em;
+             width: 11em;
+             height: 11em;
+             border-radius: 50%;
+             background: #bebebe;
+             background: -moz-linear-gradient(left, #bebebe 10%, rgba(190,190,190, 0) 42%);
+             background: -webkit-linear-gradient(left, #bebebe 10%, rgba(190,190,190, 0) 42%);
+             background: -o-linear-gradient(left, #bebebe 10%, rgba(190,190,190, 0) 42%);
+             background: -ms-linear-gradient(left, #bebebe 10%, rgba(190,190,190, 0) 42%);
+             background: linear-gradient(to right, #bebebe 10%, rgba(190,190,190, 0) 42%);
+             position: relative;
+             -webkit-animation: load3 1.4s infinite linear;
+             animation: load3 1.4s infinite linear;
+             -webkit-transform: translateZ(0);
+             -ms-transform: translateZ(0);
+             transform: translateZ(0);
+         }
+        #loader:before {
+            width: 50%;
+            height: 50%;
+            background: #bebebe;
+            border-radius: 100% 0 0 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            content: '';
+        }
+        #loader:after {
+            background: #ffffff;
+            width: 75%;
+            height: 75%;
+            border-radius: 50%;
+            content: '';
+            margin: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+        }
+        @-webkit-keyframes load3 {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes load3 {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
         }
     </style>
 
@@ -88,13 +139,15 @@
         </div>
         <div id="content" class="_content">
             <div class="print_type">
+                <div id="loader"></div>
                 <p class="_preview preview" id="monthPreview"
                    th:value="${month}">
-                    <div id="loader"></div>
-                    <img id="previewImage" th:src="${previewurl}"
-                         style="display: none; width: 343px; height: 252px;" alt="월간 인쇄 미리보기"
-                         title="월간 인쇄 미리보기">
 
+                <img id="previewImage" th:src="${previewurl}"
+                     style="display: none; width: 343px; height: 252px;"
+                     alt="월간 인쇄 미리보기"
+                     title="월간 인쇄 미리보기" />
+                </p>
                 <p class="_preview_desc desc" style="display: none;">
                     <em><strong>가로 설정</strong>에 최적화된 스타일 입니다. 용지방향은 가로로
                         출력됩니다.</em></p>
@@ -234,7 +287,6 @@
 
                         <select class="_font_size_select range_select"
                                 id="start_month"
-
                         >
 
                             <option value="6" selected="">6월</option>
@@ -252,7 +304,6 @@
 
                         <select class="_font_size_select range_select"
                                 id="end_month"
-
                         >
 
                             <option value="6" selected="">6월</option>
