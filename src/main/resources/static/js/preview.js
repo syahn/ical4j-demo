@@ -20,13 +20,7 @@
 
         initialStartMonth = startOption.options[startOption.selectedIndex].value;
 
-        var img = new Image();
-        img.onload = function() {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('previewImage').style.display = 'inline';
-        };
-        img.src = document.getElementById('previewImage').src;
-        if (img.complete) img.onload();
+        listenToStopLoader();
 
         $("._close").click(function () {
             window.close();
@@ -58,8 +52,17 @@
         $("._portrait, ._landscape").click(changeOrientation);
     });
 
-    function refreshOptions() {
+    function listenToStopLoader() {
+        var img = new Image();
+        img.onload = function() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('previewImage').style.display = 'inline';
+        };
+        img.src = document.getElementById('previewImage').src;
+        if (img.complete) img.onload();
+    }
 
+    function refreshOptions() {
         document.getElementById("loader").style.display = "block";
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
