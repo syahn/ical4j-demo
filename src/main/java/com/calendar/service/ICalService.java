@@ -50,10 +50,10 @@ public class ICalService {
     //일정리스트 만들기
     public List<ICalFilteredEvent> filterData(Calendar calendar, int month) throws ParseException {
 
-        setCurrentDate(currentYear,month);//만약 기간 옵션이 연범위로 늘어나면 current year에 대한 인자도 받아야함
+        setCurrentDate(currentYear, month);//만약 기간 옵션이 연범위로 늘어나면 current year에 대한 인자도 받아야함
 
         //전달 23일 부터 다음 달 6일까지의 기간 설정
-       Period validPeriod = makeValidPeriod(currentYear,month);
+        Period validPeriod = makeValidPeriod(currentYear, month);
 
         //해당 기간을 일정에 포함하는 이벤트들 리스트에 포함
         List<VEvent> events = calendar.getComponents("VEVENT");
@@ -117,7 +117,7 @@ public class ICalService {
 
                     data.setEndIndex(calculateIndexOfDate(data, "end"));//end index는 until있을 때만 필요
                 }
-                //요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6)
+                /* 요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6) */
                 if (rule.getRecur().getDayList() != null) {//요일 반복일때만 daylist 있음
                     ArrayList<Integer> tempDayList = new ArrayList<>();
                     for (WeekDay day : rule.getRecur().getDayList()) {
@@ -130,6 +130,15 @@ public class ICalService {
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
                     int startDayNum = dayOfWeek.getValue();
                     data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
+                }
+
+                //연반복중 마지막 날이 조건인 경우 - BYMONTHDAY = -1
+                if (rule.getRecur().getMonthDayList().size() > 0) {
+                    data.setByMonthDay(rule.getRecur().getMonthDayList().get(0));
+                }
+
+                if (rule.getRecur().getSetPosList().size() > 0) {
+                    data.setBySetPos(rule.getRecur().getSetPosList().get(0));
                 }
             }
             eventList.add(data);
@@ -166,11 +175,16 @@ public class ICalService {
                 } else if (frequency.equals("WEEKLY")) {
 
                     for (int d = 0; d < startDayList.size(); d++) {
+
                         int diff = startDayList.get(d) - startDayNum;
                         if (diff < 0) {
                             diff += 7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
                         }
+
+                        event.setStartIndex(startIndex + diff);//첫 요일 이후 다른 요일들 시작일 계산
+
                         for (int j = startIndex; j < end; ) {
+                            //System.out.println(j+diff);
                             if (!(j + diff >= end)) {
                                 addEventToFilteredEvents("WEEKLY", event, filteredEventList);
                             }
@@ -205,19 +219,33 @@ public class ICalService {
                 } else if (frequency.equals("YEARLY")) {
 
                     int tempYear = startYear;
-                    int tempCount = 0;
-                    for (int j = startIndex; j < end; ) {
 
-                        if (tempCount == interval || tempCount == 0) {
-                            addEventToFilteredEvents("YEARLY", event, filteredEventList);
-                            tempCount = 0;
+                    int firstIndex = getFirstDay(currentYear, currentMonth);
+                    if (event.getBySetPos() != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
+                        if(currentMonth==startMonth){
+                            if (startDayNum > firstIndex) { // 테이블의 0번째 row에 해당 요일이 포함되는 경우
+                                int targetIndex = startDayNum + 7 * (event.getBySetPos() - 1)-1;
+                                event.setStartIndex(targetIndex);
+                                addEventToFilteredEvents("YEARLY", event, filteredEventList);
+                            }else {//아닌경우
+                                int targetIndex = startDayNum + 7 * event.getBySetPos()-1;
+                                event.setStartIndex(targetIndex);
+                                addEventToFilteredEvents("YEARLY", event, filteredEventList);
+                            }
+                        } else if(currentMonth-1==startMonth){
+                            //마지막째주 요일이라면 표시
                         }
+                    } else {// 일반 연 반복
+                        for (int j = startIndex; j < end; ) {
 
-                        int daysForInterval = daysOfYear(tempYear);
-                        j += daysForInterval;
-                        event.setStartIndex(j);
-                        tempYear++;
-                        tempCount++;
+                            addEventToFilteredEvents("YEARLY", event, filteredEventList);
+
+                            int daysForInterval = daysOfYear(startMonth <= 2 ? tempYear : tempYear + 1);
+
+                            j += daysForInterval;
+                            event.setStartIndex(j);
+                            tempYear++;
+                        }
                     }
                 }
             }
@@ -269,6 +297,7 @@ public class ICalService {
                     tempMonth = 12;
                     tempYear--;
                 }
+//                System.out.println(event.getSummary()+" : "+tempYear+"."+tempMonth+":"+daysOfMonth(tempYear,tempMonth));
                 eventDate -= daysOfMonth(tempYear, tempMonth);
                 tempMonth--;
             }

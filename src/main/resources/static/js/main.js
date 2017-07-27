@@ -37,13 +37,12 @@
     }
 
     function takeScreenShot(month) {
+
         html2canvas(document.getElementById("hiddenFrame"), {
             onrendered: function (canvas) {
                 // 캔버스 URL 추출
                 var dataUrl = canvas.toDataURL();
-
                 openPreviewTap();
-
                 // 추출한 URL을 서버에 저장한 후, 프리뷰 창을 띄운다.
                 $.post("http://localhost:9000/save-url",
                     {

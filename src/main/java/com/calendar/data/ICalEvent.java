@@ -31,6 +31,8 @@ public class ICalEvent {
     private List<String> list;
     private int startIndex;
     private int endIndex;
+    private int byMonthDay;
+    private int bySetPos;
 
     public String getUid() {
         return uid;
@@ -222,5 +224,21 @@ public class ICalEvent {
 
     public void setEndIndex(int endIndex) {
         this.endIndex = endIndex;
+    }
+
+    public int getByMonthDay() {
+        return byMonthDay;
+    }
+
+    public void setByMonthDay(int byMonthDay) {
+        this.byMonthDay = byMonthDay;
+    }
+
+    public int getBySetPos() {
+        return bySetPos;
+    }
+
+    public void setBySetPos(int bySetPos) {
+        this.bySetPos = bySetPos;
     }
 }
