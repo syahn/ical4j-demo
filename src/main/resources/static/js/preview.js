@@ -35,7 +35,8 @@
         $("#button-print").click(function () {
 
             refreshOptions();
-
+            document.getElementById("printText").style.display="none";
+            document.getElementById("print-loader").style.display = "block";
             $.post("/print-change-range", {
                 start: startMonth,
                 end: endMonth
@@ -47,7 +48,8 @@
                         "orientation": orientation
                     }).done(function () {
                     printPage("/tempPdf/month_result.pdf");
-                    document.getElementById("loader").style.display = "none";
+                    document.getElementById("printText").style.display="block";
+                    document.getElementById("print-loader").style.display = "none";
                 });
             });
         });
@@ -60,7 +62,6 @@
 
     function refreshOptions() {
 
-        document.getElementById("loader").style.display = "block";
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
@@ -72,6 +73,8 @@
     //convert url request
     function requestSave() {
 
+        document.getElementById("saveText").style.display="none";
+        document.getElementById("save-loader").style.display = "block";
         refreshOptions();
         $.post("/print-change-range", {
             start: startMonth,
@@ -100,7 +103,8 @@
                     link.setAttribute("download", fileName);
                     link.click();
 
-                    document.getElementById("loader").style.display = "none";
+                    document.getElementById("save-loader").style.display = "none";
+                    document.getElementById("saveText").style.display="block";
                 }
             });
         });
@@ -185,7 +189,6 @@
                         });
                     }
                 });
-                document.getElementById("loader").style.display = "none";
             });
         });
     }

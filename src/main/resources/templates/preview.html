@@ -436,13 +436,14 @@
         </div>
         <div id="footer" class="_footer">
 
-            <button id="button-print" type="button" class="_print normal"
-                    name="type" value="print">인쇄하기
+            <button id="button-print" type="button" class="_print normal btn"
+                    name="type" value="print"><div  id="print-loader" style="display: none;"></div><span id="printText">인쇄하기</span>
             </button>
 
 
             <!--저장 버튼-->
-            <button id="button-save" type="button" name="type" value="save" class="btn btn-lg btn-default m-progress">저장
+            <button id="button-save" type="button" name="type" value="save" class="btn"><div  id="save-loader" style="display: none;">
+            </div><span id="saveText">저장</span>
             </button>
             <a href="#" download="filname" id="saveLink" hidden>savelink</a>
 
