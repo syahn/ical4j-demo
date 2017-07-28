@@ -159,6 +159,7 @@ public class ICalService {
             int startYear = event.getStartYear();
             int startMonth = event.getStartMonth();
             int untilDate = event.getUntilDate();
+            int setPos = event.getBySetPos();
             boolean recur = event.getRecur();
 
             int end = untilDate == 0 ? 42 : endIndex + 1;
@@ -218,41 +219,42 @@ public class ICalService {
                     }
                 } else if (frequency.equals("YEARLY")) {
 
-                    int preYear = currentMonth == 1 ? currentYear - 1 : currentYear;
-                    int nextYear = currentMonth == 12 ? currentYear + 1 : currentYear;
-                    int preMonth = currentMonth == 1 ? 12 : currentMonth - 1;
-                    int nextMonth = currentMonth == 12 ? 1 : currentMonth + 1;
+                    if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
 
-                    if (event.getBySetPos() != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
+                        int preYear = getYearOfPreMonth(currentYear, currentMonth);
+                        int nextYear = getYearOfNextMonth(currentYear, currentMonth);
+                        int preMonth = getPreMonth(currentYear, currentMonth);
+                        int nextMonth = getNextMonth(currentYear, currentMonth);
 
                         if (startMonth == currentMonth) {
 
                             int firstIndex = getFirstDay(currentYear, currentMonth);
 
                             if (startDayNum > firstIndex) { // 테이블의 0번째 row에 해당 요일이 포함되는 경우
-                                int targetIndex = startDayNum + 7 * (event.getBySetPos() - 1) - 1;
+                                int targetIndex = startDayNum + 7 * (setPos - 1) - 1;
                                 event.setStartIndex(targetIndex);
                                 addEventToFilteredEvents("YEARLY", event, filteredEventList);
                             } else {//아닌경우
-                                int targetIndex = startDayNum + 7 * event.getBySetPos() - 1;
+                                int targetIndex = startDayNum + 7 * setPos - 1;
                                 event.setStartIndex(targetIndex);
                                 addEventToFilteredEvents("YEARLY", event, filteredEventList);
                             }
+
                         } else if (startMonth == preMonth) {
                             //4,5째주면 표시가능
-                            if (event.getBySetPos() == 4 || event.getBySetPos() == 5) {
+                            if (setPos == 4 || setPos == 5) {
 
                                 int firstIndex = getFirstDay(preYear, startMonth);
 
                                 //그 일주일 내의 기간에 포함되면 요일을 찾아 찍어주기?
                                 if (startDayNum > firstIndex) { // 테이블의 0번째 row에 해당 요일이 포함되는 경우
-                                    int targetIndex = startDayNum + 7 * (event.getBySetPos() - 1) - 1;
+                                    int targetIndex = startDayNum + 7 * (setPos - 1) - 1;
                                     if (targetIndex >= 28 && targetIndex < 34) {
                                         event.setStartIndex(startDayNum - 1);
                                         addEventToFilteredEvents("YEARLY", event, filteredEventList);
                                     }
                                 } else {//아닌경우
-                                    int targetIndex = startDayNum + 7 * event.getBySetPos() - 1;
+                                    int targetIndex = startDayNum + 7 * setPos - 1;
                                     if (targetIndex >= 28 && targetIndex < 34) {
                                         event.setStartIndex(startDayNum - 1);
                                         addEventToFilteredEvents("YEARLY", event, filteredEventList);
@@ -261,7 +263,7 @@ public class ICalService {
                             }
                         } else if (startMonth == nextMonth) {
                             //그 일주일 내의 기간에 포함되면 요일을 찾아 찍어주기?
-                            if (event.getBySetPos() == 1) {
+                            if (setPos == 1) {
 
                                 int firstIndex = getFirstDay(nextYear, startMonth);
                                 int currentFirstIndex = getFirstDay(currentYear, currentMonth);
@@ -341,7 +343,7 @@ public class ICalService {
                     tempMonth = 12;
                     tempYear--;
                 }
-//                System.out.println(event.getSummary()+" : "+tempYear+"."+tempMonth+":"+daysOfMonth(tempYear,tempMonth));
+
                 eventDate -= daysOfMonth(tempYear, tempMonth);
                 tempMonth--;
             }
@@ -386,20 +388,23 @@ public class ICalService {
         return ym.atDay(daysOfMonth(year, month)).getDayOfWeek().getValue();
     }
 
-    private int getPreYear(int year, int month) {
+    private int getYearOfPreMonth(int year, int month) {
         int preYear = month == 1 ? year - 1 : year;
         return preYear;
     }
 
-//    private int getNextYear(int year, int month) {
-//
-//    }
-//
-//    private int getPreMonth(int year, int month) {
-//
-//    }
-//
-//    private int getNextMonth(int year, int month) {
-//
-//    }
+    private int getYearOfNextMonth(int year, int month) {
+        int nextYear = month == 12 ? year + 1 : year;
+        return nextYear;
+    }
+
+    private int getPreMonth(int year, int month) {
+        int preMonth = month == 1 ? 12 : month - 1;
+        return preMonth;
+    }
+
+    private int getNextMonth(int year, int month) {
+        int nextMonth = month == 12 ? 1 : month + 1;
+        return nextMonth;
+    }
 }
