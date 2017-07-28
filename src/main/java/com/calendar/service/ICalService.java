@@ -147,6 +147,7 @@ public class ICalService {
             int untilDate = event.getUntilDate();
             int setPos = event.getBySetPos();
             boolean recur = event.getRecur();
+            int byMonthDay = event.getByMonthDay();
             int end = untilDate == 0 ? 42 : endIndex + 1;
 
             if (recur == false) {
@@ -178,7 +179,12 @@ public class ICalService {
                 } else if (frequency.equals("MONTHLY")) {
                     if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
                         addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY");
-                    } else {
+                    }
+                    else if (byMonthDay != 0){
+                        event.setStartIndex(getFirstDay(currentYear, currentMonth) + daysOfMonth(currentYear, currentMonth) - 1);
+                        addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                    }
+                    else {
                         int tempMonth = startMonth;
                         int tempYear = startYear;
                         int tempCount = 0;
