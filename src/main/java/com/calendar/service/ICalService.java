@@ -18,12 +18,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 /**
  * Created by NAVER on 2017-07-20.
@@ -111,7 +108,6 @@ public class ICalService {
                     ArrayList<Integer> tempDayList = new ArrayList<>();
                     for (WeekDay day : rule.getRecur().getDayList()) {
                         tempDayList.add(WeekDay.getCalendarDay(day));
-//                        System.out.println(event.getSummary()+day.toString());
                     }
                     data.setStartDayList(tempDayList);
 
@@ -120,7 +116,6 @@ public class ICalService {
                     LocalDate date = LocalDate.of(data.getStartYear(), data.getStartMonth(), data.getStartDate());
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
                     int startDayNum = dayOfWeek.getValue();
-                    System.out.println(event.getSummary()+Integer.toString(startDayNum));
                     data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
                 }
 
@@ -155,8 +150,6 @@ public class ICalService {
             boolean recur = event.getRecur();
             int byMonthDay = event.getByMonthDay();
             WeekDayList byDayList = event.getByDayList();
-
-            int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
             int end = untilDate == 0 ? 42 : endIndex + 1;
 
             if (recur == false) {
@@ -189,23 +182,18 @@ public class ICalService {
                     if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
                         addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY");
                     }
-                    // 몇 번째 요일
-                    else if (byMonthDay != 0){
-                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth));
+                    // 마지막 날
+                    else if (byMonthDay != 0) {
+                        int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
+                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth)-1);
                         addEventToFilteredEvents("MONTHLY", event, filteredEventList);
                     }
                     // 마지막 무슨 요일
                     else if (byDayList.size() > 0) {
-                        int day = byDayList.get(0).getDay().ordinal();
-                        DayOfWeek[] dayOfWeeks = DayOfWeek.values();
-                        DayOfWeek dayOfWeek = dayOfWeeks[day-1];
-                        LocalDate date = LocalDate.of(currentYear, currentMonth, 1);
-                        int lastDateInMonth = date.with(TemporalAdjusters.lastInMonth(dayOfWeek)).getDayOfMonth();
-                        int calculatedIdx = firstDayOfMonth +  lastDateInMonth - 1;
-                        event.setStartIndex(calculatedIdx);
-                        addEventToFilteredEvents("MONTHLY", event, filteredEventList);
-                    }
-                    else {
+
+                        addLastWeekRecurEventToFilteredEvents("MONTHLY",event,filteredEventList);
+
+                    } else {
                         int tempMonth = startMonth;
                         int tempYear = startYear;
                         int tempCount = 0;
@@ -232,6 +220,17 @@ public class ICalService {
                 } else if (frequency.equals("YEARLY")) {
                     if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
                         addDayRecurEventToFilteredEvents(event, filteredEventList, "YEARLY");
+                    } // 마지막 날
+                    else if (byMonthDay != 0 && startMonth == currentMonth) {
+                        int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
+                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth)-1);
+                        addEventToFilteredEvents("YEARLY", event, filteredEventList);
+                    }
+                    // 마지막 무슨 요일 - setPos가 안들어감
+                    else if (byDayList.size() > 0 && startMonth == currentMonth) {
+
+                        addLastWeekRecurEventToFilteredEvents("YEARLY", event, filteredEventList);
+
                     } else { // 일반 연 반복
                         int tempYear = startYear;
                         int j = startIndex;
@@ -251,6 +250,30 @@ public class ICalService {
         return filteredEventList;
     }
 
+    //마지막째 주 요일 반복
+    private void addLastWeekRecurEventToFilteredEvents(
+            String type,
+            ICalEvent event,
+            List<ICalFilteredEvent> filteredEventList
+
+    ) {
+
+        WeekDayList byDayList = event.getByDayList();
+
+        int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
+
+        int day = byDayList.get(0).getDay().ordinal();
+        DayOfWeek[] dayOfWeeks = DayOfWeek.values();
+        DayOfWeek dayOfWeek = dayOfWeeks[day - 1];
+        LocalDate date = LocalDate.of(currentYear, currentMonth, 1);
+        int lastDateInMonth = date.with(TemporalAdjusters.lastInMonth(dayOfWeek)).getDayOfMonth();
+        int calculatedIdx = firstDayOfMonth + lastDateInMonth - 1;
+        event.setStartIndex(calculatedIdx);
+        addEventToFilteredEvents(type, event, filteredEventList);
+
+    }
+
+    //몇째 주 요일 반복
     private void addDayRecurEventToFilteredEvents(
             ICalEvent event,
             List<ICalFilteredEvent> filteredEventList,
