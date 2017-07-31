@@ -31,21 +31,38 @@
         var color = selectColorByType(event.type);
 
         if(event.period>1){
-            //1. 해당 인덱스의 weekrow 찾기
 
-        
-            $(".table_container div:nth-child("+(event.weekRow+1)+")>.schedule_list>tbody").append("<tr></tr>");
-            for(var i=event.weekRow*7;i<event.weekRow*7+7;i++){
-                console.log(event.index);
-                if(i==event.index){
-                    console.log(event.index);
-                    $(".table_container div:nth-child("+(event.weekRow+1)+")>.schedule_list>tbody>tr:nth-child(3)").append("<td dayindex='" + event.index + "' colspan = '"+event.period+"'><div style='background: " + color + ";'><span style='color: white;'>" + event.summary + "</span></div></td>");
-                    i+=(event.period-1);
-                }else{
-                    $(".table_container div:nth-child("+(event.weekRow+1)+")>.schedule_list>tbody>tr:nth-child(3)").append("<td dayindex='"+i+"' colspan = '1'");
-                // <td dayindex='" + event.index + "' colspan = '"+event.period+"'><div style='background: " + color + ";'><span style='color: white;'>" + event.summary + "</span></div></td>
+            var startIndex = event.index;
+            var tempPeriod = event.period;
+            console.log(tempPeriod);
+            var currentWeekRow = event.weekRow;
+            while(tempPeriod!=0){
+                $(".table_container div:nth-child("+(currentWeekRow+1)+")>.schedule_list>tbody").append("<tr></tr>");
+                for(var i=currentWeekRow*7;i<currentWeekRow*7+7;i++){
+
+                    if(i==startIndex){
+
+                        //만약 일정이 한 주에 이미 모두 꽉 채워지면 다음주로 넘겨야함
+                        if(startIndex+tempPeriod-1>currentWeekRow*7+7){
+                            $(".table_container div:nth-child("+(currentWeekRow+1)+")>.schedule_list>tbody>tr:nth-child(3)").append("<td dayindex='" + startIndex + "' colspan = '"+(currentWeekRow*7+7-startIndex)+"'><div style='background: " + color + ";'><span style='color: white;'>" + event.summary + "</span></div></td>");
+                            tempPeriod-=(currentWeekRow*7+7-startIndex);// 뿌려줄 남은 기간
+                            startIndex=currentWeekRow*7+7;
+                            currentWeekRow+=1;
+                            break;
+                        }
+                        //일주일안에 모두 그리기 가능해지면
+                        else{
+                            $(".table_container div:nth-child("+(currentWeekRow+1)+")>.schedule_list>tbody>tr:nth-child(3)").append("<td dayindex='" + startIndex + "' colspan = '"+tempPeriod+"'><div style='background: " + color + ";'><span style='color: white;'>" + event.summary + "</span></div></td>");
+                            i+=(tempPeriod-1);
+                            tempPeriod=0;
+                        }
+                    }else{
+                        $(".table_container div:nth-child("+(currentWeekRow+1)+")>.schedule_list>tbody>tr:nth-child(3)").append("<td dayindex='"+i+"' colspan = '1'");
+                        // <td dayindex='" + event.index + "' colspan = '"+event.period+"'><div style='background: " + color + ";'><span style='color: white;'>" + event.summary + "</span></div></td>
+                    }
                 }
             }
+
         }
         else{
             $(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.index + "]")

@@ -90,6 +90,7 @@ public class ICalService {
             data.setEndMonth(extractMonth(data.getEnd()));
             data.setEndYear(extractYear(data.getEnd()));
             data.setStartIndex(calculateIndexOfDate(data, "start"));//모든 이벤트 필수
+            data.setEndIndex(calculateIndexOfDate(data, "end"));//기간 일정만
             data.setPeriod(calculatePeriod(
                     data.getStartYear(),
                     data.getStartMonth(),
@@ -111,7 +112,7 @@ public class ICalService {
                     data.setUntilDate(extractDate(data.getUntil()));
                     data.setUntilMonth(extractMonth(data.getUntil()));
                     data.setUntilYear(extractYear(data.getUntil()));
-                    data.setEndIndex(calculateIndexOfDate(data, "end")); //end index는 until있을 때만 필요
+                    data.setEndIndex(calculateIndexOfDate(data, "untilEnd")); //until 존재시 endIndex를 until date에 맞춰줌
                 }
                 /* 요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6) */
                 if (rule.getRecur().getDayList() != null) {//요일 반복일때만 daylist 있음
@@ -360,6 +361,7 @@ public class ICalService {
             data.setPeriod(period);
             data.setUid(event.getUid());
             data.setType(type);
+            data.setEndIndex(endIndex);
             if(startIndex<7){
                 data.setWeekRow(0);
             }else if(startIndex<14){
@@ -384,6 +386,13 @@ public class ICalService {
         int eventYear = mode.equals("start") ? event.getStartYear() : event.getUntilYear();
         int eventMonth = mode.equals("start") ? event.getStartMonth() : event.getUntilMonth();
         int eventDate = mode.equals("start") ? event.getStartDate() : event.getUntilDate();
+
+        //기간 일정의 종료날자 (DTEND)
+        if(mode.equals("end")){
+            eventYear = event.getEndYear();
+            eventMonth = event.getEndMonth();
+            eventDate = event.getEndDate();
+        }
 
         //현재 달에서 이벤트 시작시
         if (eventMonth == currentMonth && eventYear == currentYear) {

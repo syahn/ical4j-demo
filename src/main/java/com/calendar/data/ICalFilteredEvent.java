@@ -10,6 +10,7 @@ public class ICalFilteredEvent {
     private String uid;
     private int period;
     private int weekRow;
+    private int endIndex;
 
     public int getPeriod() {
         return period;
@@ -57,5 +58,13 @@ public class ICalFilteredEvent {
 
     public void setWeekRow(int weekRow) {
         this.weekRow = weekRow;
+    }
+
+    public int getEndIndex() {
+        return endIndex;
+    }
+
+    public void setEndIndex(int endIndex) {
+        this.endIndex = endIndex;
     }
 }
