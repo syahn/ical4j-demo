@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -99,6 +100,26 @@ public class ICalService {
                     data.getEndMonth(),
                     data.getEndDate())
             );
+
+            //시간 데이터 포함
+            if(event.getStartDate().getTimeZone()!=null){
+                SimpleDateFormat hdf = new SimpleDateFormat("HH");
+                SimpleDateFormat mdf = new SimpleDateFormat("mm");
+                data.setStartHour(Integer.parseInt(hdf.format(event.getStartDate().getDate())));
+                data.setStartMinute(Integer.parseInt(mdf.format(event.getStartDate().getDate())));
+                data.setEndHour(Integer.parseInt(hdf.format(event.getEndDate().getDate())));
+                data.setEndMinute(Integer.parseInt(mdf.format(event.getEndDate().getDate())));
+                String timeLabel;
+                if(data.getStartHour()>11){
+                    int hour = data.getStartHour() == 12 ? 12 : data.getStartHour()-12;
+                    timeLabel = "(오후 "+ hour+":"+data.getStartMinute()+") ";
+                }else{
+                    int hour = data.getStartHour() == 0 ? 12 : data.getStartHour();
+                    timeLabel = "(오전 "+ hour+":"+data.getStartMinute()+") ";
+                }
+                data.setTimeLabel(timeLabel);
+                data.setSummary(timeLabel+data.getSummary());//이벤트 내용 앞에 기본적으로 붙이기
+            }
 
             //반복있는 이벤트의 경우 추가 정보 삽입
             if (event.getProperty("RRULE") != null) {
@@ -361,7 +382,7 @@ public class ICalService {
             data.setPeriod(period);
             data.setUid(event.getUid());
             data.setType(type);
-            data.setEndIndex(endIndex);
+            //data.setEndIndex(endIndex);
             if(startIndex<7){
                 data.setWeekRow(0);
             }else if(startIndex<14){
