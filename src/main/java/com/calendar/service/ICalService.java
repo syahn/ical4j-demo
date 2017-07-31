@@ -152,7 +152,7 @@ public class ICalService {
             WeekDayList byDayList = event.getByDayList();
             int end = untilDate == 0 ? 42 : endIndex + 1;
 
-            if (recur == false) {
+            if (recur == false) {//기간일정도 여기 포함
                 addEventToFilteredEvents("DAY", event, filteredEventList);
             } else {
                 if (frequency.equals("DAILY")) {
