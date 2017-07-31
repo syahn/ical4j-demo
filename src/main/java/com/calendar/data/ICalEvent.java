@@ -39,6 +39,15 @@ public class ICalEvent {
     private int endIndex;
     private int byMonthDay;
     private int bySetPos;
+    private int weekRow;
+
+    public int getWeekRow() {
+        return weekRow;
+    }
+
+    public void setWeekRow(int weekRow) {
+        this.weekRow = weekRow;
+    }
     private int startHour;
     private int startMinute;
     private int endHour;
@@ -285,14 +294,6 @@ public class ICalEvent {
         this.bySetPos = bySetPos;
     }
 
-    public String getTimeLabel() {
-        return timeLabel;
-    }
-
-    public void setTimeLabel(String timeLabel) {
-        this.timeLabel = timeLabel;
-    }
-
     public int getStartHour() {
         return startHour;
     }
@@ -323,5 +324,13 @@ public class ICalEvent {
 
     public void setEndMinute(int endMinute) {
         this.endMinute = endMinute;
+    }
+
+    public String getTimeLabel() {
+        return timeLabel;
+    }
+
+    public void setTimeLabel(String timeLabel) {
+        this.timeLabel = timeLabel;
     }
 }
