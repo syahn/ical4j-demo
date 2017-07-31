@@ -105,16 +105,20 @@ public class ICalService {
                 }
                 /* 요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6) */
                 if (rule.getRecur().getDayList() != null) {//요일 반복일때만 daylist 있음
+
                     ArrayList<Integer> tempDayList = new ArrayList<>();
                     for (WeekDay day : rule.getRecur().getDayList()) {
                         tempDayList.add(WeekDay.getCalendarDay(day));
+//                        System.out.println(event.getSummary()+day.toString());
                     }
                     data.setStartDayList(tempDayList);
+
 
                     //시작 날짜의 요일 dayofWeek 포함( 나중에 시작일 구분 시 필요) - 시작일이 요일이면
                     LocalDate date = LocalDate.of(data.getStartYear(), data.getStartMonth(), data.getStartDate());
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
                     int startDayNum = dayOfWeek.getValue();
+                    System.out.println(event.getSummary()+Integer.toString(startDayNum));
                     data.setStartDayNum(startDayNum + 1);//하나 더해야 ical4j의 weekDay와 매칭됨
                 }
 
