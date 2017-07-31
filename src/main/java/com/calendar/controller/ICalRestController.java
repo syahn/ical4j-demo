@@ -37,8 +37,7 @@ public class ICalRestController {
         iCal.setCurrentDate(year, month);
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
-        Calendar calendar = iCal.parseFile(
-                "/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData2.ics");
+        Calendar calendar = iCal.parseFile("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/period.ics");
 
         return iCal.filterData(calendar, month);
     }

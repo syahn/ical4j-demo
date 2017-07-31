@@ -86,7 +86,18 @@ public class ICalService {
             data.setStartMonth(extractMonth(data.getStart()));
             data.setStartYear(extractYear(data.getStart()));
             data.setEnd(event.getEndDate().getValue());
+            data.setEndDate(extractDate(data.getEnd()));
+            data.setEndMonth(extractMonth(data.getEnd()));
+            data.setEndYear(extractYear(data.getEnd()));
             data.setStartIndex(calculateIndexOfDate(data, "start"));//모든 이벤트 필수
+            data.setPeriod(calculatePeriod(
+                    data.getStartYear(),
+                    data.getStartMonth(),
+                    data.getStartDate(),
+                    data.getEndYear(),
+                    data.getEndMonth(),
+                    data.getEndDate())
+            );
 
             //반복있는 이벤트의 경우 추가 정보 삽입
             if (event.getProperty("RRULE") != null) {
@@ -100,7 +111,7 @@ public class ICalService {
                     data.setUntilDate(extractDate(data.getUntil()));
                     data.setUntilMonth(extractMonth(data.getUntil()));
                     data.setUntilYear(extractYear(data.getUntil()));
-                    data.setEndIndex(calculateIndexOfDate(data, "end"));//end index는 until있을 때만 필요
+                    data.setEndIndex(calculateIndexOfDate(data, "end")); //end index는 until있을 때만 필요
                 }
                 /* 요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6) */
                 if (rule.getRecur().getDayList() != null) {//요일 반복일때만 daylist 있음
@@ -340,13 +351,28 @@ public class ICalService {
     ) {
         int startIndex = event.getStartIndex();
         int endIndex = event.getEndIndex();
+        int period = event.getPeriod();
 
         if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
             ICalFilteredEvent data = new ICalFilteredEvent();
             data.setSummary(event.getSummary());
             data.setIndex(startIndex);
+            data.setPeriod(period);
             data.setUid(event.getUid());
             data.setType(type);
+            if(startIndex<7){
+                data.setWeekRow(0);
+            }else if(startIndex<14){
+                data.setWeekRow(1);
+            }else if(startIndex<21){
+                data.setWeekRow(2);
+            }else if(startIndex<28){
+                data.setWeekRow(3);
+            }else if(startIndex<35){
+                data.setWeekRow(4);
+            }else if(startIndex<42){
+                data.setWeekRow(5);
+            }
             filteredEventList.add(data);
         }
     }
@@ -375,7 +401,6 @@ public class ICalService {
             int tempYear = currentYear;
 
             while (tempYear > eventYear || (tempYear == eventYear && tempMonth >= eventMonth)) {
-
                 if (tempMonth == 0) {
                     tempMonth = 12;
                     tempYear--;
@@ -431,6 +456,26 @@ public class ICalService {
 
     private int getYearOfNextMonth(int year, int month) {
         return month == 12 ? year + 1 : year;
+    }
+
+    private int calculatePeriod(
+            int startYear,
+            int startMonth,
+            int startDate,
+            int endYear,
+            int endMonth,
+            int endDate
+    ) {
+        if (startYear == endYear) {
+            if (startMonth == endMonth) {
+                return endDate - startDate;
+            } else {
+                return daysOfMonth(startYear, startMonth) - startDate + endDate;
+            }
+        } else {
+        // TODO: 연 계산하기
+        }
+        return -1;
     }
 
     private int getPreMonth(int month) {

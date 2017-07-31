@@ -18,6 +18,10 @@ public class ICalEvent {
     private int startDate;
     private int startMonth;
     private int startYear;
+    private int endDate;
+    private int endMonth;
+    private int endYear;
+    private int period;
     private String until;
     private String frequency;
     private String untilDay;
@@ -35,6 +39,38 @@ public class ICalEvent {
     private int endIndex;
     private int byMonthDay;
     private int bySetPos;
+
+    public int getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(int period) {
+        this.period = period;
+    }
+
+    public int getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(int endDate) {
+        this.endDate = endDate;
+    }
+
+    public int getEndMonth() {
+        return endMonth;
+    }
+
+    public void setEndMonth(int endMonth) {
+        this.endMonth = endMonth;
+    }
+
+    public int getEndYear() {
+        return endYear;
+    }
+
+    public void setEndYear(int endYear) {
+        this.endYear = endYear;
+    }
 
     public WeekDayList getByDayList() {
         return byDayList;
