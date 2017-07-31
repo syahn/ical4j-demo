@@ -1,7 +1,5 @@
 package com.calendar.data;
 
-import java.util.List;
-
 /**
  * Created by NAVER on 2017-07-19.
  */
@@ -10,6 +8,15 @@ public class ICalFilteredEvent {
     private String summary;
     private String type;
     private String uid;
+    private int period;
+
+    public int getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(int period) {
+        this.period = period;
+    }
 
     public int getIndex() {
         return index;

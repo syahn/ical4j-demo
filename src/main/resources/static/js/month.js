@@ -7,6 +7,7 @@
         $.get("http://localhost:9000/load-iCalData",
             generateMonthObject()
         ).done(function (eventList) {
+            console.log(eventList);
             renderingAllEvents(eventList);
         });
     });
@@ -28,8 +29,10 @@
 
     function addEventToDom(event) {
         var color = selectColorByType(event.type);
+
         $(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.index + "]")
             .append("<div style='background: " + color + ";'><span style='color: white;'>" + event.summary + "</span></div>");
+        $(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.index + "]").attr("colspan", event.period);
     }
 
     function selectColorByType(type) {
