@@ -1,5 +1,7 @@
 package com.calendar.data;
 
+import net.fortuna.ical4j.model.WeekDayList;
+
 import java.util.List;
 
 /**
@@ -22,7 +24,7 @@ public class ICalEvent {
     private int untilDate;
     private int untilMonth;
     private int untilYear;
-    private List<String> bydayList;
+    private WeekDayList byDayList;
     private List<Integer> startDayList; // for weekly
     private int startDayNum;
     private int interval;
@@ -33,6 +35,14 @@ public class ICalEvent {
     private int endIndex;
     private int byMonthDay;
     private int bySetPos;
+
+    public WeekDayList getByDayList() {
+        return byDayList;
+    }
+
+    public void setByDayList(WeekDayList byDayList) {
+        this.byDayList = byDayList;
+    }
 
     public String getUid() {
         return uid;
@@ -152,14 +162,6 @@ public class ICalEvent {
 
     public void setUntilYear(int untilYear) {
         this.untilYear = untilYear;
-    }
-
-    public List<String> getBydayList() {
-        return bydayList;
-    }
-
-    public void setBydayList(List<String> bydayList) {
-        this.bydayList = bydayList;
     }
 
     public List<Integer> getStartDayList() {

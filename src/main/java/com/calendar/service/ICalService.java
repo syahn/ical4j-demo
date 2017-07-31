@@ -6,10 +6,7 @@ import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Period;
-import net.fortuna.ical4j.model.WeekDay;
+import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RRule;
 import org.springframework.stereotype.Service;
@@ -21,8 +18,12 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 /**
  * Created by NAVER on 2017-07-20.
@@ -96,6 +97,7 @@ public class ICalService {
                 data.setRecur(true);
                 data.setInterval(rule.getRecur().getInterval());
                 data.setFrequency(rule.getRecur().getFrequency());
+                data.setByDayList(rule.getRecur().getDayList());
                 if (rule.getRecur().getUntil() != null) {
                     data.setUntil(rule.getRecur().getUntil().toString());
                     data.setUntilDate(extractDate(data.getUntil()));
@@ -148,6 +150,9 @@ public class ICalService {
             int setPos = event.getBySetPos();
             boolean recur = event.getRecur();
             int byMonthDay = event.getByMonthDay();
+            WeekDayList byDayList = event.getByDayList();
+
+            int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
             int end = untilDate == 0 ? 42 : endIndex + 1;
 
             if (recur == false) {
@@ -180,8 +185,20 @@ public class ICalService {
                     if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
                         addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY");
                     }
+                    // 몇 번째 요일
                     else if (byMonthDay != 0){
-                        event.setStartIndex(getFirstDay(currentYear, currentMonth) + daysOfMonth(currentYear, currentMonth) - 1);
+                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth));
+                        addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                    }
+                    // 마지막 무슨 요일
+                    else if (byDayList.size() > 0) {
+                        int day = byDayList.get(0).getDay().ordinal();
+                        DayOfWeek[] dayOfWeeks = DayOfWeek.values();
+                        DayOfWeek dayOfWeek = dayOfWeeks[day-1];
+                        LocalDate date = LocalDate.of(currentYear, currentMonth, 1);
+                        int lastDateInMonth = date.with(TemporalAdjusters.lastInMonth(dayOfWeek)).getDayOfMonth();
+                        int calculatedIdx = firstDayOfMonth +  lastDateInMonth - 1;
+                        event.setStartIndex(calculatedIdx);
                         addEventToFilteredEvents("MONTHLY", event, filteredEventList);
                     }
                     else {
