@@ -39,6 +39,15 @@ public class ICalEvent {
     private int endIndex;
     private int byMonthDay;
     private int bySetPos;
+    private int weekRow;
+
+    public int getWeekRow() {
+        return weekRow;
+    }
+
+    public void setWeekRow(int weekRow) {
+        this.weekRow = weekRow;
+    }
 
     public int getPeriod() {
         return period;

@@ -91,6 +91,7 @@ public class ICalService {
             data.setEndYear(extractYear(data.getEnd()));
             data.setStartIndex(calculateIndexOfDate(data, "start"));//모든 이벤트 필수
             data.setEndIndex(calculateIndexOfDate(data, "end"));//기간 일정만
+            data.setWeekRow(calculateWeekRow(data.getStartIndex()));
             data.setPeriod(calculatePeriod(
                     data.getStartYear(),
                     data.getStartMonth(),
@@ -161,11 +162,58 @@ public class ICalService {
             int setPos = event.getBySetPos();
             boolean recur = event.getRecur();
             int byMonthDay = event.getByMonthDay();
+            int period = event.getPeriod();
+            int weekRow = event.getWeekRow();
+
             WeekDayList byDayList = event.getByDayList();
             int end = untilDate == 0 ? 42 : endIndex + 1;
 
-            if (recur == false) {//기간일정도 여기 포함
-                addEventToFilteredEvents("DAY", event, filteredEventList);
+            // 기간일정도 여기 포함
+            if (recur == false) {
+                if (period > 1) {
+                    int tempPeriod = period;
+                    int currentWeekRow = weekRow;
+                    while (tempPeriod != 0) {
+
+                        if(startIndex<0){
+                            tempPeriod+=(startIndex);
+                            startIndex=0;
+                        }
+
+                        for (int i = currentWeekRow * 7; i < currentWeekRow * 7 + 7; i++) {
+                            if (i == startIndex) {
+
+                                //만약 일정이 한 주에 이미 모두 꽉 채워지면 다음주로 넘겨야함
+                                if (startIndex + tempPeriod - 1 > currentWeekRow * 7 + 7) {
+                                    event.setStartIndex(startIndex);
+                                    event.setPeriod(currentWeekRow * 7 + 7 - startIndex);
+                                    event.setWeekRow(currentWeekRow);
+                                    addEventToFilteredEvents("PERIOD", event, filteredEventList);
+
+                                    tempPeriod -= (currentWeekRow * 7 + 7 - startIndex); // 뿌려줄 남은 기간
+                                    startIndex = currentWeekRow * 7 + 7;
+
+                                    currentWeekRow += 1;
+                                    break;
+                                }
+                                //일주일안에 모두 그리기 가능해지면
+                                else {
+
+                                    event.setStartIndex(startIndex);
+                                    event.setPeriod(tempPeriod);
+                                    event.setWeekRow(currentWeekRow);
+                                    addEventToFilteredEvents("PERIOD", event, filteredEventList);
+
+                                    i += (tempPeriod - 1);
+                                    tempPeriod = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    addEventToFilteredEvents("DAY", event, filteredEventList);
+                }
             } else {
                 if (frequency.equals("DAILY")) {
                     int j = startIndex;
@@ -197,13 +245,13 @@ public class ICalService {
                     // 마지막 날
                     else if (byMonthDay != 0) {
                         int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
-                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth)-1);
+                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth) - 1);
                         addEventToFilteredEvents("MONTHLY", event, filteredEventList);
                     }
                     // 마지막 무슨 요일
                     else if (byDayList.size() > 0) {
 
-                        addLastWeekRecurEventToFilteredEvents("MONTHLY",event,filteredEventList);
+                        addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList);
 
                     } else {
                         int tempMonth = startMonth;
@@ -235,7 +283,7 @@ public class ICalService {
                     } // 마지막 날
                     else if (byMonthDay != 0 && startMonth == currentMonth) {
                         int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
-                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth)-1);
+                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth) - 1);
                         addEventToFilteredEvents("YEARLY", event, filteredEventList);
                     }
                     // 마지막 무슨 요일 - setPos가 안들어감
@@ -262,14 +310,20 @@ public class ICalService {
         return filteredEventList;
     }
 
+    private void addPeriodEventToFilteredEvents(
+            String type,
+            ICalEvent event,
+            List<ICalFilteredEvent> filteredEventList
+    ) {
+
+    }
+
     //마지막째 주 요일 반복
     private void addLastWeekRecurEventToFilteredEvents(
             String type,
             ICalEvent event,
             List<ICalFilteredEvent> filteredEventList
-
     ) {
-
         WeekDayList byDayList = event.getByDayList();
 
         int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
@@ -362,20 +416,27 @@ public class ICalService {
             data.setUid(event.getUid());
             data.setType(type);
             data.setEndIndex(endIndex);
-            if(startIndex<7){
-                data.setWeekRow(0);
-            }else if(startIndex<14){
-                data.setWeekRow(1);
-            }else if(startIndex<21){
-                data.setWeekRow(2);
-            }else if(startIndex<28){
-                data.setWeekRow(3);
-            }else if(startIndex<35){
-                data.setWeekRow(4);
-            }else if(startIndex<42){
-                data.setWeekRow(5);
-            }
+            data.setWeekRow(calculateWeekRow(startIndex));
+
             filteredEventList.add(data);
+        }
+    }
+
+    private int calculateWeekRow(int startIndex) {
+        if (startIndex < 7) {
+            return 0;
+        } else if (startIndex < 14) {
+            return 1;
+        } else if (startIndex < 21) {
+            return 2;
+        } else if (startIndex < 28) {
+            return 3;
+        } else if (startIndex < 35) {
+            return 4;
+        } else if (startIndex < 42) {
+            return 5;
+        } else {
+            return -1;
         }
     }
 
@@ -388,7 +449,7 @@ public class ICalService {
         int eventDate = mode.equals("start") ? event.getStartDate() : event.getUntilDate();
 
         //기간 일정의 종료날자 (DTEND)
-        if(mode.equals("end")){
+        if (mode.equals("end")) {
             eventYear = event.getEndYear();
             eventMonth = event.getEndMonth();
             eventDate = event.getEndDate();
@@ -482,7 +543,7 @@ public class ICalService {
                 return daysOfMonth(startYear, startMonth) - startDate + endDate;
             }
         } else {
-        // TODO: 연 계산하기
+            // TODO: 연 계산하기
         }
         return -1;
     }
