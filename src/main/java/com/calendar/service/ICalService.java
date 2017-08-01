@@ -442,6 +442,10 @@ public class ICalService {
             }
 
         }
+        //다시 우선순위별로 재정령?
+        for(ICalFilteredEvent data : filteredEventList){
+
+        }
     }
 
     private int calculateWeekRow(int startIndex) {
