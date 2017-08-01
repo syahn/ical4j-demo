@@ -228,6 +228,8 @@ public class ICalService {
                                     i += (tempPeriod - 1);
                                     tempPeriod = 0;
                                 }
+                            }else{//빈칸 만들기
+
                             }
                         }
                     }
@@ -431,7 +433,14 @@ public class ICalService {
             data.setEndIndex(endIndex);
             data.setWeekRow(calculateWeekRow(startIndex));
 
-            filteredEventList.add(data);
+            //정렬순서위한 리스트 순서 재조정필요
+            if(data.getType().equals("PERIOD")){
+                filteredEventList.add(0,data);
+            }
+            else{
+                filteredEventList.add(data);
+            }
+
         }
     }
 

@@ -28,13 +28,7 @@
     }
 
     function addEventToDom(event) {
-        if (event.period > 1) {
-            appendEvent("row", event);
-
-            var offset = event.index - event.weekRow * 7;
-            for (var i = 0; i < offset; i++) {
-                appendEvent("blank", event);
-            }
+        if (event.type==="PERIOD") {
             appendEvent("period", event);
         }
         else {
@@ -64,25 +58,73 @@
         var weekRow = event.weekRow;
 
         if (type === "period") {
-            $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child(3)")
-                .append("<td dayindex='" + event.index + "' colspan = '" +
-                    event.period + "'>" +
-                    "<div style='background: " + color + ";'>" +
+            appendEvent("row", event);
+            //해당 인덱스 자리에 삽입 후 period만큼 기간 확장
+            for(j=weekRow*7;j<weekRow*7+7;j++) {
+                if(event.index==j){
+                    $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child(3)")
+                        .append("<td dayindex='" + event.index + "' colspan = '" +
+                            event.period + "'>" +
+                            "<div style='background: " + color + ";'>" +
+                            "<span style='color: white;'>" +
+                            event.summary +
+                            "</span></div></td>"
+                        );
+                    j+=(event.period-1);
+                }else{
+                    //빈공간 &nbsp부여
+                    $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child(3)").append("<td dayindex='" + j + "' colspan = '1'>&nbsp;</td>");
+                }
+            }
+
+        } else if (type === "oneday") {
+
+            console.log(event.summary+(weekRow+1));
+            var exist=false;
+            var tempLocation;
+            var lastLine=1;
+            for(i=0;i<5;i++) {
+                //tr 존재하고 빈칸 있을경우 - 마지막 tr 기준
+                if ($(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+i+")").length != 0) {
+                    exist=false;
+                    if($(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+i+")>td[dayindex=" + event.index + "]").html()=="&nbsp;"){
+                        tempLocation = i;
+                        exist=true;
+                        break;// - 상위 2줄이 모두 &nbsp면 가장 위의 줄로 가야하므로 break;!
+                    }
+                    lastLine++;
+                }
+            }
+
+            if(exist){ // 빈공간 존재시
+                $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+tempLocation+")>td[dayindex=" + event.index + "]").empty();
+                $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+tempLocation+")>td[dayindex=" + event.index + "]").append("<div style='background: " + color + ";'>" +
                     "<span style='color: white;'>" +
                     event.summary +
-                    "</span></div></td>"
-                );
-        } else if (type === "blank") {
-            $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child(3)")
-                .append("<td dayindex='" + event.index + "' colspan = '1'>&nbsp;</td>");
-        } else if (type === "oneday") {
-            $(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.index + "]")
+                    "</span></div>");
+                return;
+            }
+
+            // for(i=0;i<5;i++){
+                //tr4 존재 안하면 생성
+                if($(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+lastLine+")").length==0){
+                    appendEvent("row", event);
+                    //dayIndex부여한 tr로 갱신
+                    for(j=weekRow*7;j<weekRow*7+7;j++) {
+                        $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+lastLine+")").append("<td dayindex='" + j + "' colspan = '1'>&nbsp;</td>");
+                    }
+                }
+           // }
+
+            //&nbsp지우고 넣어야 css 깔끔
+            $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+lastLine+")>td[dayindex=" + event.index + "]").empty();
+            $(".schedule_list>tbody>tr:nth-child("+lastLine+")>td[dayindex=" + event.index + "]")
                 .append("<div style='background: " + color + ";'>" +
                     "<span style='color: white;'>" +
                     event.summary +
                     "</span></div>");
-            $(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.index + "]")
-                .attr("colspan", event.period);
+            $(".schedule_list>tbody>tr:nth-child("+lastLine+")>td[dayindex=" + event.index + "]")
+                .attr("colspan", 1);
         } else {
             $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody")
                 .append("<tr></tr>");
