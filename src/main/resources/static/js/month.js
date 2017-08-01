@@ -58,7 +58,7 @@
         var weekRow = event.weekRow;
 
         if (type === "period") {
-            appendEvent("row", event);
+            appendEvent("row", event);//빈 tr생성
             //해당 인덱스 자리에 삽입 후 period만큼 기간 확장
             for(j=weekRow*7;j<weekRow*7+7;j++) {
                 if(event.index==j){
@@ -81,16 +81,19 @@
 
             console.log(event.summary+(weekRow+1));
             var exist=false;
-            var tempLocation;
+            var tempLocation=0;
             var lastLine=1;
-            for(i=0;i<5;i++) {
+            for(i=1;i<6;i++) {
                 //tr 존재하고 빈칸 있을경우 - 마지막 tr 기준
                 if ($(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+i+")").length != 0) {
-                    exist=false;
-                    if($(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+i+")>td[dayindex=" + event.index + "]").html()=="&nbsp;"){
-                        tempLocation = i;
+
+                    var slot = $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody>tr:nth-child("+i+")>td[dayindex=" + event.index + "]");
+                    if(slot.html()=="&nbsp;"){
+                        tempLocation = tempLocation==0? i : tempLocation;//빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                         exist=true;
-                        break;// - 상위 2줄이 모두 &nbsp면 가장 위의 줄로 가야하므로 break;!
+                    }else{// 빈자리 없는  tr이 라인에 존재한다면 다시 초기화
+                        tempLocation=0;
+                        exist=false;
                     }
                     lastLine++;
                 }

@@ -46,7 +46,7 @@ public class JsoupService {
     }
 
     public Calendar parseIcalFile() throws IOException, ParserException {
-        return iCal.parseFile("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/iCalData.ics");
+        return iCal.parseFile("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/period.ics");
     }
 
     private File readTemplateByMonth(int month) {
