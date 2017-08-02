@@ -169,6 +169,7 @@ public class ICalService {
 
     private List<ICalFilteredEvent> filterByIndex(List<ICalEvent> eventList) {
         List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
+        List<ICalFilteredEvent> periodList = new ArrayList<>();
 
         for (ICalEvent event : eventList) {
             String frequency = event.getFrequency();
@@ -191,13 +192,19 @@ public class ICalService {
 
             // 기간일정도 여기 포함
             if (recur == false) {
+
                 if (period > 1) {
                     int tempPeriod = period;
                     int currentWeekRow = weekRow;
+
                     while (tempPeriod != 0) {
 
                         if(startIndex<0){
                             tempPeriod+=(startIndex);
+                            //전달의 23일부터 불러오는 기간 일정 데이터가 만약 현재달에 걸치지않으면 예외임
+                            if(tempPeriod<=0){
+                                break;
+                            }
                             startIndex=0;
                         }
 
@@ -212,6 +219,7 @@ public class ICalService {
                                     addEventToFilteredEvents("PERIOD", event, filteredEventList);
 
                                     tempPeriod -= (currentWeekRow * 7 + 7 - startIndex); // 뿌려줄 남은 기간
+                                    System.out.println(event.getSummary()+tempPeriod);
                                     startIndex = currentWeekRow * 7 + 7;
 
                                     currentWeekRow += 1;
@@ -330,6 +338,29 @@ public class ICalService {
                 }
             }
         }
+
+//        boolean flag = true;
+//        while(flag){
+//            flag=false;
+//            for(int i=0;i<periodList.size()-1;i++){
+//                //1. 앞선 요일 순 (startIndex 앞서면 먼저넣기)
+//                int index1=periodList.get(i).getIndex();
+//                int index2=periodList.get(i+1).getIndex();
+//                if(index2<index1){
+//                    flag=true;
+//                    ICalFilteredEvent temp = periodList.get(i+1);
+//                    periodList.remove(i+1);
+//                    periodList.add(i,temp);
+//                }
+//            }
+//        }
+//
+//        for(int i=0;i<periodList.size();i++) {
+//            filteredEventList.add(i,periodList.get(i));
+//            System.out.println(periodList.size());
+//        }
+
+
         return filteredEventList;
     }
 
@@ -414,6 +445,8 @@ public class ICalService {
         }
     }
 
+//    List<ICalFilteredEvent> periodList = new ArrayList<>();
+
     private void addEventToFilteredEvents(
             String type,
             ICalEvent event,
@@ -422,6 +455,7 @@ public class ICalService {
         int startIndex = event.getStartIndex();
         int endIndex = event.getEndIndex();
         int period = event.getPeriod();
+
 
         if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
             ICalFilteredEvent data = new ICalFilteredEvent();
@@ -433,17 +467,8 @@ public class ICalService {
             data.setEndIndex(endIndex);
             data.setWeekRow(calculateWeekRow(startIndex));
 
-            //정렬순서위한 리스트 순서 재조정필요
-            if(data.getType().equals("PERIOD")){
-                filteredEventList.add(0,data);
-            }
-            else{
-                filteredEventList.add(data);
-            }
 
-        }
-        //다시 우선순위별로 재정령?
-        for(ICalFilteredEvent data : filteredEventList){
+            filteredEventList.add(data);
 
         }
     }
