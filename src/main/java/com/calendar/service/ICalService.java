@@ -212,7 +212,7 @@ public class ICalService {
                             if (i == startIndex) {
 
                                 //만약 일정이 한 주에 이미 모두 꽉 채워지면 다음주로 넘겨야함
-                                if (startIndex + tempPeriod - 1 > currentWeekRow * 7 + 7) {
+                                if (startIndex + tempPeriod - 1 >= currentWeekRow * 7 + 7) {
                                     event.setStartIndex(startIndex);
                                     event.setPeriod(currentWeekRow * 7 + 7 - startIndex);
                                     event.setWeekRow(currentWeekRow);
