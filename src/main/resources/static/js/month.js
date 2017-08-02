@@ -165,9 +165,6 @@
                     if (slot.html() == "&nbsp;") {
                         tempLocation = tempLocation == 0 ? i : tempLocation;//빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                         exist = true;
-                    } else {// 빈자리 없는  tr이 라인에 존재한다면 다시 초기화
-                        tempLocation = 0;
-                        exist = false;
                     }
                     lastLine++;
                 }

@@ -11,6 +11,8 @@ public class ICalFilteredEvent {
     private int period;
     private int weekRow;
     private int endIndex;
+    private int startHour;
+    private int startMinute;
 
     public int getPeriod() {
         return period;
@@ -66,5 +68,21 @@ public class ICalFilteredEvent {
 
     public void setEndIndex(int endIndex) {
         this.endIndex = endIndex;
+    }
+
+    public int getStartHour() {
+        return startHour;
+    }
+
+    public void setStartHour(int startHour) {
+        this.startHour = startHour;
+    }
+
+    public int getStartMinute() {
+        return startMinute;
+    }
+
+    public void setStartMinute(int startMinute) {
+        this.startMinute = startMinute;
     }
 }

@@ -103,7 +103,7 @@ public class ICalService {
             );
 
             //시간 데이터 포함
-            if(event.getStartDate().getTimeZone()!=null){
+            if (event.getStartDate().getTimeZone() != null) {
                 SimpleDateFormat hdf = new SimpleDateFormat("HH");
                 SimpleDateFormat mdf = new SimpleDateFormat("mm");
                 data.setStartHour(Integer.parseInt(hdf.format(event.getStartDate().getDate())));
@@ -111,15 +111,15 @@ public class ICalService {
                 data.setEndHour(Integer.parseInt(hdf.format(event.getEndDate().getDate())));
                 data.setEndMinute(Integer.parseInt(mdf.format(event.getEndDate().getDate())));
                 String timeLabel;
-                if(data.getStartHour()>11){
-                    int hour = data.getStartHour() == 12 ? 12 : data.getStartHour()-12;
-                    timeLabel = "(오후 "+ hour+":"+data.getStartMinute()+") ";
-                }else{
+                if (data.getStartHour() > 11) {
+                    int hour = data.getStartHour() == 12 ? 12 : data.getStartHour() - 12;
+                    timeLabel = "(오후 " + hour + ":" + data.getStartMinute() + ") ";
+                } else {
                     int hour = data.getStartHour() == 0 ? 12 : data.getStartHour();
-                    timeLabel = "(오전 "+ hour+":"+data.getStartMinute()+") ";
+                    timeLabel = "(오전 " + hour + ":" + data.getStartMinute() + ") ";
                 }
                 data.setTimeLabel(timeLabel);
-                data.setSummary(timeLabel+data.getSummary());//이벤트 내용 앞에 기본적으로 붙이기
+                data.setSummary(timeLabel + data.getSummary());//이벤트 내용 앞에 기본적으로 붙이기
             }
 
             //반복있는 이벤트의 경우 추가 정보 삽입
@@ -199,13 +199,13 @@ public class ICalService {
 
                     while (tempPeriod != 0) {
 
-                        if(startIndex<0){
-                            tempPeriod+=(startIndex);
+                        if (startIndex < 0) {
+                            tempPeriod += (startIndex);
                             //전달의 23일부터 불러오는 기간 일정 데이터가 만약 현재달에 걸치지않으면 예외임
-                            if(tempPeriod<=0){
+                            if (tempPeriod <= 0) {
                                 break;
                             }
-                            startIndex=0;
+                            startIndex = 0;
                         }
 
                         for (int i = currentWeekRow * 7; i < currentWeekRow * 7 + 7; i++) {
@@ -219,7 +219,7 @@ public class ICalService {
                                     addEventToFilteredEvents("PERIOD", event, filteredEventList);
 
                                     tempPeriod -= (currentWeekRow * 7 + 7 - startIndex); // 뿌려줄 남은 기간
-                                    System.out.println(event.getSummary()+tempPeriod);
+                                    System.out.println(event.getSummary() + tempPeriod);
                                     startIndex = currentWeekRow * 7 + 7;
 
                                     currentWeekRow += 1;
@@ -236,13 +236,12 @@ public class ICalService {
                                     i += (tempPeriod - 1);
                                     tempPeriod = 0;
                                 }
-                            }else{//빈칸 만들기
+                            } else {//빈칸 만들기
 
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     addEventToFilteredEvents("DAY", event, filteredEventList);
                 }
             } else {
@@ -455,6 +454,8 @@ public class ICalService {
         int startIndex = event.getStartIndex();
         int endIndex = event.getEndIndex();
         int period = event.getPeriod();
+        int startHour = event.getStartHour();
+        int startMinute = event.getStartMinute();
 
 
         if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
@@ -466,7 +467,8 @@ public class ICalService {
             data.setType(type);
             data.setEndIndex(endIndex);
             data.setWeekRow(calculateWeekRow(startIndex));
-
+            data.setStartHour(startHour);
+            data.setStartMinute(startMinute);
 
             filteredEventList.add(data);
 
