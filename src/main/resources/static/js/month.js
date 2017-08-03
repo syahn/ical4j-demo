@@ -146,6 +146,9 @@
                             break;
                         }
                     }
+                    if(isEmpty){
+                        break;
+                    }
                     lastLine++;
                 }
             }
