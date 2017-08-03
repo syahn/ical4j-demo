@@ -38,24 +38,20 @@
     function appendPeriodEvent(event) {
         var color = selectColorByType(event.type);
         var weekRow = event.weekRow;
+        var firstIdxOfWeek = weekRow * 7;
+        var lastIdxOfWeek = weekRow * 7 + 7;
 
         //기간일정 들어갈 tr존재하지 않는다면
         if (selectTr(weekRow, 2).length == 0) {
             addNewRow(weekRow);
             //해당 인덱스 자리에 삽입 후 period만큼 기간 확장
-            for (var j = weekRow * 7; j < weekRow * 7 + 7; j++) {
-                if (event.index == j) {
-                    selectTr(weekRow, 2).append("<td dayindex='" + event.index + "' colspan = '" +
-                        event.period + "'>" +
-                        "<div style='background: " + color + ";'>" +
-                        "<span style='color: white;'>" +
-                        event.summary +
-                        "</span></div></td>"
-                    );
-                    j += (event.period - 1);
+            for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
+                if (event.index == idx) {
+                    selectTr(weekRow, 2).append(periodEvent(event, color));
+                    idx += (event.period - 1);
                 } else {
                     //빈공간 &nbsp부여
-                    selectTr(weekRow, 2).append("<td dayindex='" + j + "' colspan = '1'>&nbsp;</td>");
+                    selectTr(weekRow, 2).append(blankEvent(idx));
                 }
             }
         }
@@ -66,13 +62,14 @@
             var isSlotFilled = false;
             var lastLine = 2;
 
-            for (var i = 2; i < 6; i++) {
+            for (var rowIdx = 2; rowIdx < 6; rowIdx++) {
                 //tr 존재하고 빈칸 있을경우 - 마지막 tr 기준
-                if (selectTr(weekRow, i).length != 0) {
+                if (selectTr(weekRow, rowIdx).length != 0) {
 
-                    var slot = selectTd(weekRow, i, event.index);
+                    var slot = selectTd(weekRow, rowIdx, event.index);
                     if (slot.html() == "&nbsp;") {
-                        tempLocation = tempLocation == 0 ? i : tempLocation;//빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
+                        //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
+                        tempLocation = tempLocation === 0 ? rowIdx : tempLocation;
                         isSlotFilled = true;
                     } else {// 빈자리 없는  tr이 라인에 존재한다면 다시 초기화
                         tempLocation = 0;
@@ -92,8 +89,7 @@
                 selectTd(weekRow, tempLocation, event.index)
                     .empty();
                 selectTd(weekRow, tempLocation, event.index)
-                    .append("<div style='background: " + color + ";'>" +
-                        "<span style='color: white;'>" + event.summary + "</span></div>");
+                    .append(ondDayEvent(event, color));
                 selectTd(weekRow, tempLocation, event.index)
                     .attr("colspan", event.period);
 
@@ -102,22 +98,14 @@
             } else {
                 addNewRow(weekRow);
 
-                //해당 인덱스 자리에 삽입 후 period만큼 기간 확장
-                for (j = weekRow * 7; j < weekRow * 7 + 7; j++) {
-                    if (event.index == j) {
-                        selectTr(weekRow, lastLine)
-                            .append("<td dayindex='" + event.index + "' colspan = '" +
-                                event.period + "'>" +
-                                "<div style='background: " + color + ";'>" +
-                                "<span style='color: white;'>" +
-                                event.summary +
-                                "</span></div></td>"
-                            );
-                        j += (event.period - 1);
+                //해당 인덱스 자리에 삽입 후 peri`od만큼 기간 확장
+                for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
+                    if (event.index == idx) {
+                        selectTr(weekRow, lastLine).append(periodEvent(event, color));
+                        idx += (event.period - 1);
                     } else {
                         //빈공간 &nbsp부여
-                        selectTr(weekRow, lastLine)
-                            .append("<td dayindex='" + j + "' colspan = '1'>&nbsp;</td>");
+                        selectTr(weekRow, lastLine).append(blankEvent(idx));
                     }
                 }
             }
@@ -127,18 +115,20 @@
     function appendOneDayEvent(event) {
         var color = selectColorByType(event.type);
         var weekRow = event.weekRow;
+        var firstIdxOfWeek = weekRow * 7;
+        var lastIdxOfWeek = weekRow * 7 + 7;
         var isSlotFilled = false;
         var tempLocation = 0;
         var lastLine = 2;
 
-        for (var i = 2; i < 6; i++) {
+        for (var rowIdx = 2; rowIdx < 6; rowIdx++) {
             //tr 존재하고 빈칸 있을경우 - 마지막 tr 기준
-            if (selectTr(weekRow, i).length != 0) {
-
-                var slot = selectTd(weekRow, i, event.index);
+            if (selectTr(weekRow, rowIdx).length != 0) {
+                ``
+                var slot = selectTd(weekRow, rowIdx, event.index);
                 if (slot.html() == "&nbsp;") {
                     //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
-                    tempLocation = tempLocation == 0 ? i : tempLocation;
+                    tempLocation = tempLocation == 0 ? rowIdx : tempLocation;
                     isSlotFilled = true;
                 }
                 lastLine++;
@@ -149,8 +139,7 @@
             selectTd(weekRow, tempLocation, event.index)
                 .empty();
             selectTd(weekRow, tempLocation, event.index)
-                .append("<div style='background: " + color + ";'>" +
-                    "<span style='color: white;'>" + event.summary + "</span></div>");
+                .append(ondDayEvent(event, color));
             return;
         }
 
@@ -159,9 +148,8 @@
             addNewRow(weekRow);
 
             //dayIndex 부여한 tr로 갱신
-            for (var j = weekRow * 7; j < weekRow * 7 + 7; j++) {
-                selectTr(weekRow, lastLine)
-                    .append("<td dayindex='" + j + "' colspan = '1'>&nbsp;</td>");
+            for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
+                selectTr(weekRow, lastLine).append(blankEvent(idx));
             }
         }
 
@@ -169,8 +157,7 @@
         selectTd(weekRow, lastLine, event.index)
             .empty();
         selectTd(weekRow, lastLine, event.index)
-            .append("<div style='background: " + color + ";'>" +
-                "<span style='color: white;'>" + event.summary + "</span></div>");
+            .append(ondDayEvent(event, color));
         selectTd(weekRow, lastLine, event.index)
             .attr("colspan", 1);
     }
@@ -189,6 +176,31 @@
         $(".table_container div:nth-child(" + (weekRow + 1) + ")>" +
             ".schedule_list>tbody")
             .append("<tr></tr>");
+    }
+
+
+    function periodEvent(event, color) {
+        var index = event.index;
+        var period = event.period;
+        var summary = event.summary;
+
+        return "<td dayindex='" + index + "' colspan = '" + period + "'>" +
+            "<div style='background: " + color + ";'>" +
+            "<span style='color: white;'>" + summary + "</span>" +
+            "</div>" +
+            "</td>";
+    }
+
+    function ondDayEvent(event, color) {
+        var summary = event.summary;
+
+        return "<div style='background: " + color + ";'>" +
+            "<span style='color: white;'>" + summary + "</span>" +
+            "</div>"
+    }
+
+    function blankEvent(index) {
+        return "<td dayindex='" + index + "' colspan = '1'>&nbsp;</td>";
     }
 
     function compare(a, b) {
@@ -217,7 +229,5 @@
                 return "MediumPurple";
         }
     }
-
-
 })();
 
