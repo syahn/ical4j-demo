@@ -92,7 +92,7 @@
                     lastLine++;
                 }
             }
-            if (isEmpty) {ㅓ
+            if (isEmpty) {
                 //뒤에 nbsp있는 td모두 제거
                 for (var k = eventIdx + 1; k < eventIdx + period; k++) {
                     selectTd(weekRow, tempLocation, k).remove();
