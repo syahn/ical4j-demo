@@ -106,7 +106,7 @@ public class ICalService {
             );
 
             //기념일 컴포넌트
-            if(event.getProperty("X-NAVER-ANNIVERSARY")!=null){
+            if (event.getProperty("X-NAVER-ANNIVERSARY") != null) {
                 data.setIsAnniversary(Integer.parseInt(event.getProperty("X-NAVER-ANNIVERSARY").getValue()));
             }
 
@@ -272,8 +272,6 @@ public class ICalService {
                                     i += (tempPeriod - 1);
                                     tempPeriod = 0;
                                 }
-                            } else {//빈칸 만들기
-
                             }
                         }
                     }
@@ -310,12 +308,42 @@ public class ICalService {
                     }
                     // 마지막 날
                     else if (byMonthDay != 0) {
+                        if (startMonth <= currentMonth-1 || startYear < currentYear) {
+
+                            int firstIndexForPre = getFirstDay(currentYear, currentMonth - 1);
+                            int targetIndexForPre = firstIndexForPre + daysOfMonth(currentYear, currentMonth-1) - 1;
+
+                            int lastIndexForPre = firstIndexForPre + daysOfMonth(currentYear, currentMonth - 1);
+                            if (targetIndexForPre >= lastIndexForPre - getFirstDay(currentYear, currentMonth) && targetIndexForPre < firstIndexForPre + daysOfMonth(currentYear, currentMonth-1)) {
+                                event.setStartIndex(getLastDay(currentYear,currentMonth-1));
+                                addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                            }
+
+                        }
+
                         int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
                         event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth) - 1);
                         addEventToFilteredEvents("MONTHLY", event, filteredEventList);
                     }
                     // 마지막 무슨 요일
                     else if (byDayList.size() > 0) {
+                        if (startMonth <= currentMonth-1 || startYear < currentYear) {
+
+                            int firstDayOfMonth = getFirstDay(currentYear, currentMonth-1);
+
+                            int day = byDayList.get(0).getDay().ordinal();
+                            DayOfWeek[] dayOfWeeks = DayOfWeek.values();
+                            DayOfWeek dayOfWeek = dayOfWeeks[day - 1];
+                            LocalDate date = LocalDate.of(currentYear, currentMonth-1, 1);
+                            int lastDateInMonth = date.with(TemporalAdjusters.lastInMonth(dayOfWeek)).getDayOfMonth();
+                            int calculatedIdx = firstDayOfMonth + lastDateInMonth - 1;
+
+                            int lastIndexForPre = firstDayOfMonth + daysOfMonth(currentYear, currentMonth - 1);
+                            if (calculatedIdx >= lastIndexForPre - getFirstDay(currentYear, currentMonth) && calculatedIdx < firstDayOfMonth + daysOfMonth(currentYear, currentMonth-1)) {
+                                event.setStartIndex(startDayNum == 8 ? 0 : startDayNum - 1);
+                                addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                            }
+                        }
 
                         addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList);
 
@@ -447,10 +475,10 @@ public class ICalService {
                     }
                 }
             }
-            if (setPos == 1) {
+            if (setPos == 1) {//다음달 이벤트중 현재월뷰에 표시될 것
 
                 int targetIndexForNext = targetIndex + 7 * 4;
-                targetIndexForNext = targetIndexForNext<=(firstIndex + daysOfMonth(currentYear, currentMonth) - 1) ? targetIndex + 7 * 5 : targetIndexForNext;
+                targetIndexForNext = targetIndexForNext <= (firstIndex + daysOfMonth(currentYear, currentMonth) - 1) ? targetIndex + 7 * 5 : targetIndexForNext;
                 if (firstIndex + daysOfMonth(currentYear, currentMonth) - 1 < targetIndexForNext) {
                     event.setStartIndex(targetIndexForNext);
                     addEventToFilteredEvents(type, event, filteredEventList);

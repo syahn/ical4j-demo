@@ -1,7 +1,6 @@
 package com.calendar.controller;
 
 import com.calendar.data.ICalFilteredData;
-import com.calendar.data.ICalFilteredEvent;
 import com.calendar.service.ICalService;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.List;
 
 /**
  * Created by NAVER on 2017-07-17.
