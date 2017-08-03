@@ -1,7 +1,5 @@
 package com.calendar.data;
 
-import java.util.List;
-
 /**
  * Created by NAVER on 2017-07-19.
  */
@@ -16,6 +14,7 @@ public class ICalFilteredEvent {
     private int startHour;
     private int startMinute;
     private int isAnniversary;
+    private String timeLabel=null;
 
 
     public int getPeriod() {
@@ -96,5 +95,13 @@ public class ICalFilteredEvent {
 
     public void setIsAnniversary(int isAnniversary) {
         this.isAnniversary = isAnniversary;
+    }
+
+    public String getTimeLabel() {
+        return timeLabel;
+    }
+
+    public void setTimeLabel(String timeLabel) {
+        this.timeLabel = timeLabel;
     }
 }

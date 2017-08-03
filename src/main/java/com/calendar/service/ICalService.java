@@ -533,6 +533,7 @@ public class ICalService {
             data.setStartHour(startHour);
             data.setStartMinute(startMinute);
             data.setIsAnniversary(event.getIsAnniversary());
+            data.setTimeLabel(event.getTimeLabel());
 
             filteredEventList.add(data);
 

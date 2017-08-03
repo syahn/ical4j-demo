@@ -205,6 +205,9 @@
                     //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                     tempLocation = tempLocation == 0 ? rowIdx : tempLocation;
                     isEmpty = true;
+                } else if (event.timeLabel!=null) {//시간 일정이면 최하의 우선순위임으로 위에 채우지 못함
+                    tempLocation = 0;
+                    isEmpty = false;
                 }
                 lastLine++;
             }
@@ -277,7 +280,7 @@
     }
 
     function compare(a, b) {
-        if(a.isAnniversary > b.isAnniversary) return -1;
+        if (a.isAnniversary > b.isAnniversary) return -1;
         else if (a.index < b.index) return -1;
         else if (a.index > b.index) return 1;
         else if (a.period > b.period) return -1;
