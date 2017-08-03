@@ -40,6 +40,12 @@ public class ICalEvent {
     private int byMonthDay;
     private int bySetPos;
     private int weekRow;
+    private int startHour;
+    private int startMinute;
+    private int endHour;
+    private int endMinute;
+    private String timeLabel;
+    private int isAnniversary=0;
 
     public int getWeekRow() {
         return weekRow;
@@ -48,11 +54,6 @@ public class ICalEvent {
     public void setWeekRow(int weekRow) {
         this.weekRow = weekRow;
     }
-    private int startHour;
-    private int startMinute;
-    private int endHour;
-    private int endMinute;
-    private String timeLabel;
 
     public int getPeriod() {
         return period;
@@ -332,5 +333,13 @@ public class ICalEvent {
 
     public void setTimeLabel(String timeLabel) {
         this.timeLabel = timeLabel;
+    }
+
+    public int getIsAnniversary() {
+        return isAnniversary;
+    }
+
+    public void setIsAnniversary(int isAnniversary) {
+        this.isAnniversary = isAnniversary;
     }
 }

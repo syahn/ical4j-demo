@@ -205,6 +205,9 @@
                     //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                     tempLocation = tempLocation == 0 ? rowIdx : tempLocation;
                     isEmpty = true;
+                } else if (event.timeLabel!=null) {//시간 일정이면 최하의 우선순위임으로 위에 채우지 못함
+                    tempLocation = 0;
+                    isEmpty = false;
                 }
                 lastLine++;
             }
@@ -218,10 +221,9 @@
             return;
         }
 
-        //tr4 존재 안하면 생성
+        //tr 존재 안하면 생성
         if (selectTr(weekRow, lastLine).length == 0) {
             addNewRow(weekRow);
-
             //dayIndex 부여한 tr로 갱신
             for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
                 selectTr(weekRow, lastLine).append(blankEvent(idx));
@@ -278,7 +280,8 @@
     }
 
     function compare(a, b) {
-        if (a.index < b.index) return -1;
+        if (a.isAnniversary > b.isAnniversary) return -1;
+        else if (a.index < b.index) return -1;
         else if (a.index > b.index) return 1;
         else if (a.period > b.period) return -1;
         else if (a.period < b.period) return 1;
