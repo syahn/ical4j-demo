@@ -1,5 +1,7 @@
 package com.calendar.data;
 
+import java.util.List;
+
 /**
  * Created by NAVER on 2017-07-19.
  */
@@ -14,6 +16,7 @@ public class ICalFilteredEvent {
     private int startHour;
     private int startMinute;
     private int isAnniversary;
+
 
     public int getPeriod() {
         return period;
