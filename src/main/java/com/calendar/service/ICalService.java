@@ -195,13 +195,16 @@ public class ICalService {
             ICalTodo todoData = new ICalTodo();
             todoData.setUid(uid);
             todoData.setSummary(summary);
-            todoData.setDueYear(dueYear);
-            todoData.setDueMonth(dueMonth);
-            todoData.setDueDate(dueDate);
-            todoData.setIndex(index);
-            todoData.setWeekRow(weekRow);
-            todoData.setType("TODO");
-            filteredTodoList.add(todoData);
+
+            if (dueYear == currentYear && dueMonth == currentMonth) {
+                todoData.setDueYear(dueYear);
+                todoData.setDueMonth(dueMonth);
+                todoData.setDueDate(dueDate);
+                todoData.setIndex(index);
+                todoData.setWeekRow(weekRow);
+                todoData.setType("TODO");
+                filteredTodoList.add(todoData);
+            }
         }
 
 
