@@ -72,10 +72,6 @@ public class ICalService {
         Filter filter = new Filter(new PeriodRule(period));
         events = (List<VEvent>) filter.filter(events);
 
-        for (int i = 0; i < events.size(); i++) {
-            System.out.println(events.get(i).getSummary());
-        }
-
         return filterByIndex(storeDataToICalEvent(events));
     }
 
@@ -105,6 +101,13 @@ public class ICalService {
                     data.getEndMonth(),
                     data.getEndDate())
             );
+
+            //기념일 컴포넌트
+            if(event.getProperty("X-NAVER-ANNIVERSARY")!=null){
+                System.out.println(event.getProperty("X-NAVER-ANNIVERSARY").getValue());
+                data.setIsAnniversary(Integer.parseInt(event.getProperty("X-NAVER-ANNIVERSARY").getValue()));
+            }
+
 
             //시간 데이터 포함
             if (event.getStartDate().getTimeZone() != null) {
@@ -140,6 +143,7 @@ public class ICalService {
                     data.setUntilYear(extractYear(data.getUntil()));
                     data.setEndIndex(calculateIndexOfDate(data, "untilEnd")); //until 존재시 endIndex를 until date에 맞춰줌
                 }
+
                 /* 요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6) */
                 if (rule.getRecur().getDayList() != null) {//요일 반복일때만 daylist 있음
 
@@ -497,6 +501,7 @@ public class ICalService {
             data.setWeekRow(calculateWeekRow(startIndex));
             data.setStartHour(startHour);
             data.setStartMinute(startMinute);
+            data.setIsAnniversary(event.getIsAnniversary());
 
             filteredEventList.add(data);
 

@@ -44,75 +44,7 @@
         var firstIdxOfWeek = weekRow * 7;
         var lastIdxOfWeek = weekRow * 7 + 7;
 
-        //기간일정 들어갈 tr존재하지 않는다면
-        if (selectTr(weekRow, 2).length == 0) {
-            addNewRow(weekRow);
-            //해당 인덱스 자리에 삽입 후 period만큼 기간 확장
-            for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
-                if (idx === eventIdx) {
-                    selectTr(weekRow, 2).append(periodEvent(event, color));
-                    idx += (period - 1);
-                } else {
-                    //빈공간 &nbsp부여
-                    selectTr(weekRow, 2).append(blankEvent(idx));
-                }
-            }
-        }
-        //기간일정 tr이 존재한다면 더 하위 tr생성 or 빈공간 들어갈 수 있으면 채우기
-        else {
-            //이미 생성된 상위 우선순위의 기간 일정의 tr라인 중 들어갈 자리 있는지
-            var tempLocation = 0;
-            var isSlotFilled = false;
-            var lastLine = 2;
-
-            for (var rowIdx = 2; rowIdx < 6; rowIdx++) {
-                //tr 존재하고 빈칸 있을경우 - 마지막 tr 기준
-                if (selectTr(weekRow, rowIdx).length != 0) {
-
-                    var slot = selectTd(weekRow, rowIdx, eventIdx);
-                    if (slot.html() == "&nbsp;") {
-                        //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
-                        tempLocation = tempLocation === 0 ? rowIdx : tempLocation;
-                        isSlotFilled = true;
-                    } else {// 빈자리 없는  tr이 라인에 존재한다면 다시 초기화
-                        tempLocation = 0;
-                        isSlotFilled = false;
-                    }
-                    lastLine++;
-                }
-            }
-
-            if (isSlotFilled) {
-                //뒤에 nbsp있는 td모두 제거
-                for (var k = eventIdx + 1; k < eventIdx + period; k++) {
-                    selectTd(weekRow, tempLocation, k).remove();
-                }
-
-                //해당 인덱스는 nbsp만 지우고 td남겨놓아야 추가가능
-                selectTd(weekRow, tempLocation, eventIdx)
-                    .empty();
-                selectTd(weekRow, tempLocation, eventIdx)
-                    .append(ondDayEvent(event, color));
-                selectTd(weekRow, tempLocation, eventIdx)
-                    .attr("colspan", period);
-
-                return;
-
-            } else {
-                addNewRow(weekRow);
-
-                //해당 인덱스 자리에 삽입 후 peri`od만큼 기간 확장
-                for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
-                    if (idx === eventIdx) {
-                        selectTr(weekRow, lastLine).append(periodEvent(event, color));
-                        idx += (period - 1);
-                    } else {
-                        //빈공간 &nbsp부여
-                        selectTr(weekRow, lastLine).append(blankEvent(idx));
-                    }
-                }
-            }
-        }
+        
     }
 
     function appendOneDayEvent(event) {
@@ -121,7 +53,7 @@
         var eventIdx = event.index;
         var firstIdxOfWeek = weekRow * 7;
         var lastIdxOfWeek = weekRow * 7 + 7;
-        var isSlotFilled = false;
+        var isSlotExist = false;
         var tempLocation = 0;
         var lastLine = 2;
 
@@ -133,13 +65,13 @@
                 if (slot.html() == "&nbsp;") {
                     //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                     tempLocation = tempLocation == 0 ? rowIdx : tempLocation;
-                    isSlotFilled = true;
+                    isSlotExist = true;
                 }
                 lastLine++;
             }
         }
 
-        if (isSlotFilled) { // 빈공간 존재시
+        if (isSlotExist) { // 빈공간 존재시
             selectTd(weekRow, tempLocation, eventIdx)
                 .empty();
             selectTd(weekRow, tempLocation, eventIdx)
@@ -147,10 +79,9 @@
             return;
         }
 
-        //tr4 존재 안하면 생성
+        //tr 존재 안하면 생성
         if (selectTr(weekRow, lastLine).length == 0) {
             addNewRow(weekRow);
-
             //dayIndex 부여한 tr로 갱신
             for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
                 selectTr(weekRow, lastLine).append(blankEvent(idx));
@@ -208,7 +139,8 @@
     }
 
     function compare(a, b) {
-        if (a.index < b.index) return -1;
+        if(a.isAnniversary > b.isAnniversary) return -1;
+        else if (a.index < b.index) return -1;
         else if (a.index > b.index) return 1;
         else if (a.period > b.period) return -1;
         else if (a.period < b.period) return 1;

@@ -13,6 +13,7 @@ public class ICalFilteredEvent {
     private int endIndex;
     private int startHour;
     private int startMinute;
+    private int isAnniversary;
 
     public int getPeriod() {
         return period;
@@ -84,5 +85,13 @@ public class ICalFilteredEvent {
 
     public void setStartMinute(int startMinute) {
         this.startMinute = startMinute;
+    }
+
+    public int getIsAnniversary() {
+        return isAnniversary;
+    }
+
+    public void setIsAnniversary(int isAnniversary) {
+        this.isAnniversary = isAnniversary;
     }
 }
