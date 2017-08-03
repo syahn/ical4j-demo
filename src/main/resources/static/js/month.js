@@ -1,3 +1,4 @@
+
 /**
  * Created by NAVER on 2017-07-20.
  */
@@ -38,6 +39,8 @@
     function appendPeriodEvent(event) {
         var color = selectColorByType(event.type);
         var weekRow = event.weekRow;
+        var eventIdx = event.index;
+        var period = event.period;
         var firstIdxOfWeek = weekRow * 7;
         var lastIdxOfWeek = weekRow * 7 + 7;
 
@@ -46,9 +49,9 @@
             addNewRow(weekRow);
             //해당 인덱스 자리에 삽입 후 period만큼 기간 확장
             for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
-                if (event.index == idx) {
+                if (idx === eventIdx) {
                     selectTr(weekRow, 2).append(periodEvent(event, color));
-                    idx += (event.period - 1);
+                    idx += (period - 1);
                 } else {
                     //빈공간 &nbsp부여
                     selectTr(weekRow, 2).append(blankEvent(idx));
@@ -66,7 +69,7 @@
                 //tr 존재하고 빈칸 있을경우 - 마지막 tr 기준
                 if (selectTr(weekRow, rowIdx).length != 0) {
 
-                    var slot = selectTd(weekRow, rowIdx, event.index);
+                    var slot = selectTd(weekRow, rowIdx, eventIdx);
                     if (slot.html() == "&nbsp;") {
                         //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                         tempLocation = tempLocation === 0 ? rowIdx : tempLocation;
@@ -81,17 +84,17 @@
 
             if (isSlotFilled) {
                 //뒤에 nbsp있는 td모두 제거
-                for (var k = event.index + 1; k < event.index + event.period; k++) {
+                for (var k = eventIdx + 1; k < eventIdx + period; k++) {
                     selectTd(weekRow, tempLocation, k).remove();
                 }
 
                 //해당 인덱스는 nbsp만 지우고 td남겨놓아야 추가가능
-                selectTd(weekRow, tempLocation, event.index)
+                selectTd(weekRow, tempLocation, eventIdx)
                     .empty();
-                selectTd(weekRow, tempLocation, event.index)
+                selectTd(weekRow, tempLocation, eventIdx)
                     .append(ondDayEvent(event, color));
-                selectTd(weekRow, tempLocation, event.index)
-                    .attr("colspan", event.period);
+                selectTd(weekRow, tempLocation, eventIdx)
+                    .attr("colspan", period);
 
                 return;
 
@@ -100,9 +103,9 @@
 
                 //해당 인덱스 자리에 삽입 후 peri`od만큼 기간 확장
                 for (var idx = firstIdxOfWeek; idx < lastIdxOfWeek; idx++) {
-                    if (event.index == idx) {
+                    if (idx === eventIdx) {
                         selectTr(weekRow, lastLine).append(periodEvent(event, color));
-                        idx += (event.period - 1);
+                        idx += (period - 1);
                     } else {
                         //빈공간 &nbsp부여
                         selectTr(weekRow, lastLine).append(blankEvent(idx));
@@ -115,6 +118,7 @@
     function appendOneDayEvent(event) {
         var color = selectColorByType(event.type);
         var weekRow = event.weekRow;
+        var eventIdx = eventIdx;
         var firstIdxOfWeek = weekRow * 7;
         var lastIdxOfWeek = weekRow * 7 + 7;
         var isSlotFilled = false;
@@ -124,8 +128,8 @@
         for (var rowIdx = 2; rowIdx < 6; rowIdx++) {
             //tr 존재하고 빈칸 있을경우 - 마지막 tr 기준
             if (selectTr(weekRow, rowIdx).length != 0) {
-                ``
-                var slot = selectTd(weekRow, rowIdx, event.index);
+
+                var slot = selectTd(weekRow, rowIdx, eventIdx);
                 if (slot.html() == "&nbsp;") {
                     //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                     tempLocation = tempLocation == 0 ? rowIdx : tempLocation;
@@ -136,9 +140,9 @@
         }
 
         if (isSlotFilled) { // 빈공간 존재시
-            selectTd(weekRow, tempLocation, event.index)
+            selectTd(weekRow, tempLocation, eventIdx)
                 .empty();
-            selectTd(weekRow, tempLocation, event.index)
+            selectTd(weekRow, tempLocation, eventIdx)
                 .append(ondDayEvent(event, color));
             return;
         }
@@ -154,11 +158,11 @@
         }
 
         //&nbsp지우고 넣어야 css 깔끔
-        selectTd(weekRow, lastLine, event.index)
+        selectTd(weekRow, lastLine, eventIdx)
             .empty();
-        selectTd(weekRow, lastLine, event.index)
+        selectTd(weekRow, lastLine, eventIdx)
             .append(ondDayEvent(event, color));
-        selectTd(weekRow, lastLine, event.index)
+        selectTd(weekRow, lastLine, eventIdx)
             .attr("colspan", 1);
     }
 
@@ -230,4 +234,3 @@
         }
     }
 })();
-
