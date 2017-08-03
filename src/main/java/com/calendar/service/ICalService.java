@@ -75,9 +75,7 @@ public class ICalService {
     private ICalFilteredData filterValidData(List<VEvent> events, List<VToDo> todos, Period period) {
         Filter filter = new Filter(new PeriodRule(period));
         events = (List<VEvent>) filter.filter(events);
-//        for (int i = 0; i < events.size(); i++) {
-//            System.out.println(events.get(i).getSummary());
-//        }
+
         return filterByIndex(storeDataToICalEvent(events), todos);
 
 
@@ -102,14 +100,7 @@ public class ICalService {
             data.setStartIndex(calculateIndexOfDate(data, "start"));//모든 이벤트 필수
             data.setEndIndex(calculateIndexOfDate(data, "end"));//기간 일정만
             data.setWeekRow(calculateWeekRow(data.getStartIndex()));
-            data.setPeriod(calculatePeriod(
-                    data.getStartYear(),
-                    data.getStartMonth(),
-                    data.getStartDate(),
-                    data.getEndYear(),
-                    data.getEndMonth(),
-                    data.getEndDate())
-            );
+            data.setPeriod(calculatePeriod(data, event));
 
             //시간 데이터 포함
             if (event.getStartDate().getTimeZone() != null) {
@@ -386,9 +377,7 @@ public class ICalService {
             List<ICalFilteredEvent> filteredEventList
     ) {
         WeekDayList byDayList = event.getByDayList();
-
         int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
-
         int day = byDayList.get(0).getDay().ordinal();
         DayOfWeek[] dayOfWeeks = DayOfWeek.values();
         DayOfWeek dayOfWeek = dayOfWeeks[day - 1];
@@ -397,7 +386,6 @@ public class ICalService {
         int calculatedIdx = firstDayOfMonth + lastDateInMonth - 1;
         event.setStartIndex(calculatedIdx);
         addEventToFilteredEvents(type, event, filteredEventList);
-
     }
 
     //몇째 주 요일 반복
@@ -520,7 +508,6 @@ public class ICalService {
         int startHour = event.getStartHour();
         int startMinute = event.getStartMinute();
 
-
         if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
             ICalFilteredEvent data = new ICalFilteredEvent();
             data.setSummary(event.getSummary());
@@ -534,7 +521,6 @@ public class ICalService {
             data.setStartMinute(startMinute);
 
             filteredEventList.add(data);
-
         }
     }
 
@@ -644,19 +630,20 @@ public class ICalService {
         return month == 12 ? year + 1 : year;
     }
 
-    private int calculatePeriod(
-            int startYear,
-            int startMonth,
-            int startDate,
-            int endYear,
-            int endMonth,
-            int endDate
-    ) {
+    private int calculatePeriod(ICalEvent data, VEvent event) {
+        int startYear = data.getStartYear();
+        int startMonth = data.getStartMonth();
+        int startDate = data.getStartDate();
+        int endYear = data.getEndYear();
+        int endMonth = data.getEndMonth();
+        int endDate = data.getEndDate();
+        // 종일 이벤트가 아닌 시간 이벤트면 1 더해주기
+        int offset = event.getStartDate().getTimeZone() != null ? 1 : 0;
         if (startYear == endYear) {
             if (startMonth == endMonth) {
-                return endDate - startDate;
+                return endDate - startDate + offset;
             } else {
-                return daysOfMonth(startYear, startMonth) - startDate + endDate;
+                return daysOfMonth(startYear, startMonth) - startDate + endDate + offset;
             }
         } else {
             // TODO: 연 계산하기
