@@ -7,6 +7,7 @@
         $.get("http://localhost:9000/load-iCalData",
             generateMonthObject()
         ).done(function (dataList) {
+            console.log(dataList);
             renderingAllEvents(dataList);
         });
     });
@@ -198,6 +199,8 @@
             if (selectTr(weekRow, rowIdx).length != 0) {
 
                 var slot = selectTd(weekRow, rowIdx, eventIdx);
+                console.log(event.summary, rowIdx, tempLocation, eventIdx, slot.html());
+
                 if (slot.html() == "&nbsp;") {
                     //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
                     tempLocation = tempLocation == 0 ? rowIdx : tempLocation;
