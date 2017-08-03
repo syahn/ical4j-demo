@@ -1,5 +1,6 @@
 package com.calendar.controller;
 
+import com.calendar.data.ICalFilteredData;
 import com.calendar.data.ICalFilteredEvent;
 import com.calendar.service.ICalService;
 import net.fortuna.ical4j.data.ParserException;
@@ -29,7 +30,7 @@ public class ICalRestController {
     }
 
     @GetMapping("/load-iCalData")
-    public List<ICalFilteredEvent> resolveICalData(
+    public ICalFilteredData resolveICalData(
             @RequestParam("month") int month,
             @RequestParam("year") int year
     ) throws IOException, ParserException, ParseException {

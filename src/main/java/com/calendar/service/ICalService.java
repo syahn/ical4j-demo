@@ -1,13 +1,16 @@
 package com.calendar.service;
 
 import com.calendar.data.ICalEvent;
+import com.calendar.data.ICalFilteredData;
 import com.calendar.data.ICalFilteredEvent;
+import com.calendar.data.ICalTodo;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.RRule;
 import org.springframework.stereotype.Service;
 
@@ -39,13 +42,14 @@ public class ICalService {
     }
 
     //일정리스트 만들기
-    public List<ICalFilteredEvent> filterData(Calendar calendar, int month) throws ParseException {
+    public ICalFilteredData filterData(Calendar calendar, int month) throws ParseException {
         setCurrentDate(currentYear, month);//만약 기간 옵션이 연범위로 늘어나면 current year에 대한 인자도 받아야함
 
         Period validPeriod = makeValidPeriod(currentYear, month); //전달 23일 부터 다음 달 6일까지의 기간 설정
         List<VEvent> events = calendar.getComponents("VEVENT"); //해당 기간을 일정에 포함하는 이벤트들 리스트에 포함
+        List<VToDo> todos = calendar.getComponents("VTODO"); //해당 기간을 일정에 포함하는 이벤트들 리스트에 포함
 
-        return filterValidEvents(events, validPeriod);
+        return filterValidData(events, todos, validPeriod);
     }
 
     public void setCurrentDate(int year, int month) {
@@ -68,11 +72,11 @@ public class ICalService {
         return new Period(startDate, endDate);
     }
 
-    private List<ICalFilteredEvent> filterValidEvents(List<VEvent> events, Period period) {
+    private ICalFilteredData filterValidData(List<VEvent> events, List<VToDo> todos, Period period) {
         Filter filter = new Filter(new PeriodRule(period));
         events = (List<VEvent>) filter.filter(events);
 
-        return filterByIndex(storeDataToICalEvent(events));
+        return filterByIndex(storeDataToICalEvent(events), todos);
     }
 
     private List<ICalEvent> storeDataToICalEvent(List<VEvent> events) {
@@ -167,9 +171,34 @@ public class ICalService {
         return eventList;
     }
 
-    private List<ICalFilteredEvent> filterByIndex(List<ICalEvent> eventList) {
+    private ICalFilteredData filterByIndex(List<ICalEvent> eventList, List<VToDo> todoList) {
+        ICalFilteredData filteredData = new ICalFilteredData();
         List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
-        List<ICalFilteredEvent> periodList = new ArrayList<>();
+        List<ICalTodo> filteredTodoList = new ArrayList<>();
+
+        for (VToDo todo : todoList) {
+            String uid = todo.getUid().getValue();
+            String due = todo.getDue().getValue();
+            String summary = todo.getSummary().getValue();
+
+            int dueYear = extractYear(due);
+            int dueMonth = extractMonth(due);
+            int dueDate = extractDate(due);
+            int index = getFirstDay(currentYear, currentMonth) + dueDate - 1;
+            int weekRow = calculateWeekRow(index);
+
+            ICalTodo todoData = new ICalTodo();
+            todoData.setUid(uid);
+            todoData.setSummary(summary);
+            todoData.setDueYear(dueYear);
+            todoData.setDueMonth(dueMonth);
+            todoData.setDueDate(dueDate);
+            todoData.setIndex(index);
+            todoData.setWeekRow(weekRow);
+            todoData.setType("TODO");
+            filteredTodoList.add(todoData);
+        }
+
 
         for (ICalEvent event : eventList) {
             String frequency = event.getFrequency();
@@ -219,7 +248,6 @@ public class ICalService {
                                     addEventToFilteredEvents("PERIOD", event, filteredEventList);
 
                                     tempPeriod -= (currentWeekRow * 7 + 7 - startIndex); // 뿌려줄 남은 기간
-                                    System.out.println(event.getSummary() + tempPeriod);
                                     startIndex = currentWeekRow * 7 + 7;
 
                                     currentWeekRow += 1;
@@ -337,30 +365,9 @@ public class ICalService {
                 }
             }
         }
-
-//        boolean flag = true;
-//        while(flag){
-//            flag=false;
-//            for(int i=0;i<periodList.size()-1;i++){
-//                //1. 앞선 요일 순 (startIndex 앞서면 먼저넣기)
-//                int index1=periodList.get(i).getIndex();
-//                int index2=periodList.get(i+1).getIndex();
-//                if(index2<index1){
-//                    flag=true;
-//                    ICalFilteredEvent temp = periodList.get(i+1);
-//                    periodList.remove(i+1);
-//                    periodList.add(i,temp);
-//                }
-//            }
-//        }
-//
-//        for(int i=0;i<periodList.size();i++) {
-//            filteredEventList.add(i,periodList.get(i));
-//            System.out.println(periodList.size());
-//        }
-
-
-        return filteredEventList;
+        filteredData.setTodoList(filteredTodoList);
+        filteredData.setEventList(filteredEventList);
+        return filteredData;
     }
 
     //마지막째 주 요일 반복

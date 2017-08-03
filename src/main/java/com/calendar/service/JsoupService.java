@@ -4,6 +4,7 @@ package com.calendar.service;
  * Created by NAVER on 2017-07-25.
  */
 
+import com.calendar.data.ICalFilteredData;
 import com.calendar.data.ICalFilteredEvent;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
@@ -36,11 +37,11 @@ public class JsoupService {
 
         for (int month = startMonth; month <= endMonth; month++) {
 
-            List<ICalFilteredEvent> filteredEvents = iCal.filterData(calendar, month);
+            ICalFilteredData filteredData = iCal.filterData(calendar, month);
 
             File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
-            drawEventsOnHtml(doc, filteredEvents);
+            drawEventsOnHtml(doc, filteredData);
             exportHtml(doc, month);
         }
     }
@@ -61,7 +62,8 @@ public class JsoupService {
         );
     }
 
-    private void drawEventsOnHtml(Document doc, List<ICalFilteredEvent> filteredEvents) {
+    private void drawEventsOnHtml(Document doc, ICalFilteredData filteredData) {
+        List<ICalFilteredEvent> filteredEvents = filteredData.getEventList();
         for (ICalFilteredEvent event : filteredEvents) {
 
             Elements slot = doc.select(".schedule_list>tbody>tr:nth-child(2)>td[dayindex=" + event.getIndex() + "]");
