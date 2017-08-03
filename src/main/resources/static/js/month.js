@@ -118,7 +118,7 @@
     function appendOneDayEvent(event) {
         var color = selectColorByType(event.type);
         var weekRow = event.weekRow;
-        var eventIdx = eventIdx;
+        var eventIdx = event.index;
         var firstIdxOfWeek = weekRow * 7;
         var lastIdxOfWeek = weekRow * 7 + 7;
         var isSlotFilled = false;
