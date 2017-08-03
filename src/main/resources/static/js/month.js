@@ -43,7 +43,6 @@
         var period = event.period;
         var firstIdxOfWeek = weekRow * 7;
         var lastIdxOfWeek = weekRow * 7 + 7;
-
         
     }
 
