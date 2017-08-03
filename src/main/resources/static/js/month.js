@@ -92,7 +92,6 @@
         }
 
         //&nbsp지우고 넣어야 css 깔끔
-
         selectTd(weekRow, lastLine, todoIdx)
             .empty();
         selectTd(weekRow, lastLine, todoIdx)
@@ -150,7 +149,7 @@
                     lastLine++;
                 }
             }
-
+            console.log(event.summary, tempLocation, isEmpty);
             if (isEmpty) {
 
                 //뒤에 nbsp있는 td모두 제거
@@ -200,7 +199,7 @@
             if (selectTr(weekRow, rowIdx).length != 0) {
 
                 var slot = selectTd(weekRow, rowIdx, eventIdx);
-                console.log(event.summary, rowIdx, tempLocation, eventIdx, slot.html());
+                console.log(event.summary, rowIdx, tempLocation, eventIdx, selectTr(weekRow, rowIdx).html(), slot.html());
 
                 if (slot.html() == "&nbsp;") {
                     //빈자리있는 tr라인을 이미 찾았을 경우 templocation유지
