@@ -1,9 +1,6 @@
 package com.calendar.service;
 
-import com.calendar.data.ICalEvent;
-import com.calendar.data.ICalFilteredData;
-import com.calendar.data.ICalFilteredEvent;
-import com.calendar.data.ICalTodo;
+import com.calendar.data.*;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
@@ -24,6 +21,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -397,6 +395,7 @@ public class ICalService {
         }
 
         filteredData.setTodoList(filteredTodoList);
+        Collections.sort(filteredEventList,new ICalComparator());
         filteredData.setEventList(filteredEventList);
         return filteredData;
     }
@@ -691,4 +690,5 @@ public class ICalService {
     private int getNextMonth(int month) {
         return month == 12 ? 1 : month + 1;
     }
+
 }

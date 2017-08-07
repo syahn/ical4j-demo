@@ -7,7 +7,6 @@
         $.get("http://localhost:9000/load-iCalData",
             generateMonthObject()
         ).done(function (dataList) {
-            console.log(dataList);
             renderingAllEvents(dataList);
         });
     });
@@ -29,7 +28,6 @@
             addEventToDom(todoList[i]);
         }
 
-        eventList.sort(compare);
         for (var i = 0; i < eventList.length; i++) {
             addEventToDom(eventList[i]);
         }
@@ -275,22 +273,11 @@
         var summary = event.summary;
         return "<div colspan='1' style='background: " + color + ";'>" +
             "<span style='color: white;'>" + summary + "</span>" +
-            "</div>"
+            "</div>";
     }
 
     function blankEvent(index) {
         return "<td dayindex='" + index + "' colspan = '1'>&nbsp;</td>";
-    }
-
-    function compare(a, b) {
-        if (a.isAnniversary > b.isAnniversary) return -1;
-        else if (a.index < b.index) return -1;
-        else if (a.index > b.index) return 1;
-        else if (a.period > b.period) return -1;
-        else if (a.period < b.period) return 1;
-        else if (a.startHour < b.startHour) return -1;
-        else if (a.startHour > b.startHour) return 1;
-        return 0;
     }
 
     function selectColorByType(type) {
