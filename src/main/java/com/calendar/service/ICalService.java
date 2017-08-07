@@ -1,5 +1,6 @@
 package com.calendar.service;
 
+import com.calendar.data.*;
 import biweekly.component.VTodo;
 import com.calendar.data.ICalEvent;
 import com.calendar.data.ICalFilteredData;
@@ -25,6 +26,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -158,6 +160,7 @@ public class ICalService {
                         tempDayList.add(WeekDay.getCalendarDay(day));
                     }
                     data.setStartDayList(tempDayList);
+
 
                     //시작 날짜의 요일 dayofWeek 포함( 나중에 시작일 구분 시 필요) - 시작일이 요일이면
                     LocalDate date = LocalDate.of(data.getStartYear(), data.getStartMonth(), data.getStartDate());
@@ -431,6 +434,11 @@ public class ICalService {
                 }
             }
         }
+
+        filteredData.setTodoList(filteredTodoList);
+        Collections.sort(filteredEventList,new ICalComparator());
+        filteredData.setEventList(filteredEventList);
+        return filteredData;
         return filteredEventList;
     }
 

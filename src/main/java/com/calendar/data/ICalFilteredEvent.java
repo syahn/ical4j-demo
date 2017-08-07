@@ -3,7 +3,7 @@ package com.calendar.data;
 /**
  * Created by NAVER on 2017-07-19.
  */
-public class ICalFilteredEvent {
+public class ICalFilteredEvent{
     private int index;
     private String summary;
     private String type;
@@ -104,4 +104,17 @@ public class ICalFilteredEvent {
     public void setTimeLabel(String timeLabel) {
         this.timeLabel = timeLabel;
     }
+
+//    @Override
+//    public int compareTo(ICalFilteredEvent o) {
+//        if(isAnniversary > o.isAnniversary) return -1;
+//        else if(isAnniversary < o.isAnniversary) return 1;
+//        else if(index < o.index) return -1;
+//        else if(index > o.index) return 1;
+//        else if(period < o.period) return 1;
+//        else if(period > o.period) return -1;
+//        else if(startHour < o.startHour) return -1;
+//        else if(startHour > o.startHour) return 1;
+//        return 0;
+//    }
 }

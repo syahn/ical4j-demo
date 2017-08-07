@@ -15,7 +15,6 @@
     $(document).ready(function () {
 
         //select option 메인 페이지 달로 초기화
-        initiatePeriod();
         listenToStopLoader();
 
         $("._close").click(closeWindow);
@@ -24,6 +23,8 @@
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
         $("._portrait, ._landscape").click(changeOrientation);
+
+        setTimeout(initiatePeriod(), 1000);
     });
 
     function initiatePeriod() {
@@ -55,12 +56,14 @@
             start: startMonth,
             end: endMonth
         }).done(function () {
+            console.log("print");
             $.post("http://localhost:9000/convert",
                 {
                     "startMonth": startMonth,
                     "endMonth": endMonth,
                     "orientation": orientation
                 }).done(function () {
+
                 printPage("/tempPdf/month_result.pdf");
                 document.getElementById("printText").style.display="block";
                 document.getElementById("print-loader").style.display = "none";
