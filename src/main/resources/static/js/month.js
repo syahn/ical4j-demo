@@ -14,9 +14,10 @@
     function generateMonthObject() {
         var currentYear = parseInt($("._title").text().toString().substring(0, 5));
         var currentMonth = parseInt($(".print").attr("value"));
+
         return {
-            "month": currentMonth,
-            "year": currentYear
+            "year": currentYear,
+            "month": currentMonth
         };
     }
 

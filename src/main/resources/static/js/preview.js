@@ -1,5 +1,5 @@
 //option variables
-(function () {
+// (function () {
 
     var startOption = document.getElementById("start_month");
     var endOption = document.getElementById("end_month");
@@ -47,28 +47,25 @@
     function closeWindow() {
         window.close();
     }
+
     function requestPrint() {
 
         refreshOptions();
-        document.getElementById("printText").style.display="none";
+        document.getElementById("printText").style.display = "none";
         document.getElementById("print-loader").style.display = "block";
-        $.post("/print-change-range", {
-            start: startMonth,
-            end: endMonth
-        }).done(function () {
-            console.log("print");
-            $.post("http://localhost:9000/convert",
-                {
-                    "startMonth": startMonth,
-                    "endMonth": endMonth,
-                    "orientation": orientation
-                }).done(function () {
 
-                printPage("/tempPdf/month_result.pdf");
-                document.getElementById("printText").style.display="block";
-                document.getElementById("print-loader").style.display = "none";
-            });
+        $.post("http://localhost:9000/convert",
+            {
+                "startMonth": startMonth,
+                "endMonth": endMonth,
+                "orientation": orientation
+            }).done(function () {
+
+            printPage("/tempPdf/month_result.pdf");
+            document.getElementById("printText").style.display = "block";
+            document.getElementById("print-loader").style.display = "none";
         });
+
     }
 
     function refreshOptions() {
@@ -84,39 +81,35 @@
     //convert url request
     function requestSave() {
 
-        document.getElementById("saveText").style.display="none";
+        document.getElementById("saveText").style.display = "none";
         document.getElementById("save-loader").style.display = "block";
         refreshOptions();
-        $.post("/print-change-range", {
-            start: startMonth,
-            end: endMonth
-        }).done(function () {
-            var optionValue = {
-                'startMonth': startMonth,
-                'endMonth': endMonth,
-                'orientation': orientation
-            };
 
-            $.post("http://localhost:9000/convert", optionValue).done(function () {
-                var dataURI = '/tempPdf/month_result.pdf';
-                var fileName = 'Calendar';
-                var link = document.getElementById("saveLink");
+        var optionValue = {
+            'startMonth': startMonth,
+            'endMonth': endMonth,
+            'orientation': orientation
+        };
 
-                link.setAttribute("href", dataURI);
-                link.setAttribute("download", fileName);
-                link.click();
+        $.post("http://localhost:9000/convert", optionValue).done(function () {
+            var dataURI = '/tempPdf/month_result.pdf';
+            var fileName = 'Calendar';
+            var link = document.getElementById("saveLink");
+
+            link.setAttribute("href", dataURI);
+            link.setAttribute("download", fileName);
+            link.click();
 
 
-                document.getElementById("save-loader").style.display = "none";
-                document.getElementById("saveText").style.display="block";
-                });
+            document.getElementById("save-loader").style.display = "none";
+            document.getElementById("saveText").style.display = "block";
         });
+        // });
     }
 
     //총 페이지 수 표시 및 프리뷰 이미지 첫달로 변경
     function changePreviewImage() {
         changePeriod();
-
         if (initialStartMonth !== startMonth) {
             initialStartMonth = startMonth;
             changeOrientation();
@@ -166,31 +159,30 @@
     }
 
     function takeScreenShot(month, mode) {
-        $.post("/print-change-range", {
-            start: month,
-            end: month
+
+        $.post("/make-preview", {
+            month: month
         }).done(function () {
-            $.post("/make-preview").done(function () {
-                if (document.getElementById("hiddenFrame") !== null) {
-                    var elem = document.getElementById("hiddenFrame");
-                    elem.parentNode.removeChild(elem);
+            if (document.getElementById("hiddenFrame") !== null) {
+                var elem = document.getElementById("hiddenFrame");
+                elem.parentNode.removeChild(elem);
+            }
+
+            makeDummyWindow(month);
+
+            html2canvas(document.getElementById("hiddenFrame"), {
+                onrendered: function (canvas) {
+                    //이미지
+                    var dataUrl = canvas.toDataURL();
+                    $("#previewImage").attr({
+                        "src": dataUrl,
+                        "style": mode === "landscape" ? printMode.landscape : printMode.portrait
+                    });
+                    $("#loader").css("display", "none");
                 }
-
-                makeDummyWindow(month);
-
-                html2canvas(document.getElementById("hiddenFrame"), {
-                    onrendered: function (canvas) {
-                        //이미지
-                        var dataUrl = canvas.toDataURL();
-                        $("#previewImage").attr({
-                            "src": dataUrl,
-                            "style": mode === "landscape" ? printMode.landscape : printMode.portrait
-                        });
-                        $("#loader").css("display", "none");
-                    }
-                });
             });
         });
+
     }
 
     function makeDummyWindow(month) {
@@ -232,5 +224,5 @@
         oHiddFrame.src = sURL;
         document.body.appendChild(oHiddFrame);
     }
-
-})();
+//
+// })();

@@ -25,23 +25,26 @@ import java.util.List;
 public class JsoupService {
 
     private ICalService iCal;
+    private SettingService setting;
 
     @Autowired
-    public JsoupService(ICalService iCal) {
+    public JsoupService(ICalService iCal, SettingService setting) {
         this.iCal = iCal;
+        this.setting = setting;
     }
 
-    public void makeHTMLfiles(
-            int startMonth,
-            int endMonth
-    ) throws IOException, ParserException, ParseException {
+    public void makeHTMLfiles() throws IOException, ParserException, ParseException {
+        int startMonth = setting.getStartMonth();
+        int endMonth = setting.getEndMonth();
+//
+        System.out.printf("%d%d\n", startMonth, endMonth);
 
         Calendar calendar = parseIcalFile();
 
         for (int month = startMonth; month <= endMonth; month++) {
+            System.out.printf("month: %d \n", month);
 
             ICalFilteredData filteredData = iCal.filterData(calendar, month);
-
             File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
             drawEventsOnHtml(doc, filteredData);
@@ -68,6 +71,7 @@ public class JsoupService {
     private void drawEventsOnHtml(Document doc, ICalFilteredData filteredData) {
         List<ICalTodo> todoList = filteredData.getTodoList();
         List<ICalFilteredEvent> eventList = filteredData.getEventList();
+
         Collections.sort(eventList,new ICalComparator());
 
         renderingAllEvents(doc, todoList);
@@ -91,15 +95,15 @@ public class JsoupService {
         for(int i=0;i<list.size();i++){
 
             if(list.get(i) instanceof ICalTodo){
-                System.out.println("list of ICalTODO"+((ICalTodo) list.get(i)).getSummary());
+//                System.out.println("list of ICalTODO"+((ICalTodo) list.get(i)).getSummary());
                 appendTodoEvent(doc, (ICalTodo) list.get(i));
             }
             else if(list.get(i) instanceof ICalFilteredEvent){
                 if(((ICalFilteredEvent) list.get(i)).getType().equals("PERIOD")){
-                    System.out.println("list of period"+((ICalFilteredEvent) list.get(i)).getSummary());
+//                    System.out.println("list of period"+((ICalFilteredEvent) list.get(i)).getSummary());
                     appendPeriodEvent(doc, (ICalFilteredEvent) list.get(i));
                 }else{
-                    System.out.println("list of oneDay"+((ICalFilteredEvent) list.get(i)).getSummary());
+//                    System.out.println("list of oneDay"+((ICalFilteredEvent) list.get(i)).getSummary());
                     appenOneDayEvent(doc, (ICalFilteredEvent) list.get(i));
                 }
             }

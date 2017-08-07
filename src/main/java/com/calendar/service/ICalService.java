@@ -14,6 +14,7 @@ import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.RRule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -34,8 +35,14 @@ import java.util.List;
  */
 @Service
 public class ICalService {
-    private static int currentYear;
-    private static int currentMonth;
+
+
+    private SettingService setting;
+
+    @Autowired
+    public ICalService(SettingService setting) {
+        this.setting = setting;
+    }
 
     public Calendar parseFile(String file) throws IOException, ParserException {
         FileInputStream fin = new FileInputStream(file);
@@ -46,8 +53,8 @@ public class ICalService {
 
     //일정리스트 만들기
     public ICalFilteredData filterData(Calendar calendar, int month) throws ParseException {
-        //만약 기간 옵션이 연범위로 늘어나면 current year에 대한 인자도 받아야함
-        setCurrentDate(currentYear, month);
+
+        setting.setCurrentMonth(month);
 
         List<VEvent> events = calendar.getComponents("VEVENT");
         List<VToDo> todos = calendar.getComponents("VTODO");
@@ -55,10 +62,6 @@ public class ICalService {
         return filterValidData(events, todos);
     }
 
-    public void setCurrentDate(int year, int month) {
-        currentYear = year;
-        currentMonth = month;
-    }
 
     private Period makeValidPeriod(int year, int month) throws ParseException {
         int preYear = getYearOfPreMonth(year, month);
@@ -81,6 +84,8 @@ public class ICalService {
             List<VEvent> events,
             List<VToDo> todos
     ) throws ParseException {
+        int currentYear = setting.getCurrentYear();
+        int currentMonth = setting.getCurrentMonth();
 
         // 전달 23일 부터 다음 달 6일까지의 기간 설정
         Period period = makeValidPeriod(currentYear, currentMonth);
@@ -196,6 +201,8 @@ public class ICalService {
     }
 
     private List<ICalTodo> filterTodoListByIndex(List<VToDo> todoList) {
+        int currentYear = setting.getCurrentYear();
+        int currentMonth = setting.getCurrentMonth();
         List<ICalTodo> filteredTodoList = new ArrayList<>();
 
         for (VToDo todo : todoList) {
@@ -227,6 +234,8 @@ public class ICalService {
     }
 
     private List<ICalFilteredEvent> filterEventListByIndex(List<ICalEvent> eventList) {
+        int currentYear = setting.getCurrentYear();
+        int currentMonth = setting.getCurrentMonth();
         List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
 
         for (ICalEvent event : eventList) {
@@ -435,10 +444,9 @@ public class ICalService {
             }
         }
 
-        filteredData.setTodoList(filteredTodoList);
+
         Collections.sort(filteredEventList,new ICalComparator());
-        filteredData.setEventList(filteredEventList);
-        return filteredData;
+
         return filteredEventList;
     }
 
@@ -448,6 +456,8 @@ public class ICalService {
             ICalEvent event,
             List<ICalFilteredEvent> filteredEventList
     ) {
+        int currentYear = setting.getCurrentYear();
+        int currentMonth = setting.getCurrentMonth();
         WeekDayList byDayList = event.getByDayList();
         int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
         int day = byDayList.get(0).getDay().ordinal();
@@ -466,6 +476,8 @@ public class ICalService {
             List<ICalFilteredEvent> filteredEventList,
             String type
     ) {
+        int currentYear = setting.getCurrentYear();
+        int currentMonth = setting.getCurrentMonth();
         int startDayNum = event.getStartDayNum();
         int startMonth = event.getStartMonth();
         int setPos = event.getBySetPos();
@@ -617,6 +629,8 @@ public class ICalService {
 
     private int calculateIndexOfDate(ICalEvent event, String mode) {
         int index;
+        int currentYear = setting.getCurrentYear();
+        int currentMonth = setting.getCurrentMonth();
         int firstIndex = getFirstDay(currentYear, currentMonth);
 
         int eventYear = mode.equals("start") ? event.getStartYear() : event.getUntilYear();

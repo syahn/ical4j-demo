@@ -2,6 +2,7 @@ package com.calendar.controller;
 
 import com.calendar.data.ICalFilteredData;
 import com.calendar.service.ICalService;
+import com.calendar.service.SettingService;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,13 @@ import java.text.ParseException;
 public class ICalRestController {
 
     private ICalService iCal;
+    private SettingService setting;
+
 
     @Autowired
-    public ICalRestController(ICalService iCal) {
+    public ICalRestController(ICalService iCal, SettingService setting) {
         this.iCal = iCal;
+        this.setting = setting;
     }
 
     @GetMapping("/load-iCalData")
@@ -32,8 +36,8 @@ public class ICalRestController {
             @RequestParam("month") int month,
             @RequestParam("year") int year
     ) throws IOException, ParserException, ParseException {
-
-        iCal.setCurrentDate(year, month);
+        setting.setCurrentYear(year);
+        setting.setCurrentMonth(month);
 
         //사용자 기존 캘린더 입력정보 ics로부터 불러오기
         Calendar calendar = iCal.parseFile("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/period.ics");

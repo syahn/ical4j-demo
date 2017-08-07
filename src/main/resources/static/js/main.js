@@ -2,21 +2,17 @@
  * Created by NAVER on 2017-07-14.
  */
 
-(function() {
+(function () {
     var previewButton = document.getElementById("print-btn");
 
     previewButton.addEventListener("click", function (e) {
         var month = e.target.value;
 
-        $.post("/print-change-range", {
-            start: month,
-            end: month
+        $.post("/make-preview", {
+            month: month
         }).done(function () {
-
-            $.post("/make-preview").done(function(){
-                makeDummyWindow(month);
-                takeScreenShot(month);
-            });
+            makeDummyWindow(month);
+            takeScreenShot(month);
         });
     });
 
@@ -53,6 +49,7 @@
             }
         });
     }
+
     // function takeScreenShot(month) {
     //     html2canvas(document.getElementById("hiddenFrame"), {
     //         onrendered: function (canvas) {
