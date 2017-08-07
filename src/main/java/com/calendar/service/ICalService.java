@@ -1,5 +1,6 @@
 package com.calendar.service;
 
+import biweekly.component.VTodo;
 import com.calendar.data.ICalEvent;
 import com.calendar.data.ICalFilteredData;
 import com.calendar.data.ICalFilteredEvent;
@@ -43,13 +44,13 @@ public class ICalService {
 
     //일정리스트 만들기
     public ICalFilteredData filterData(Calendar calendar, int month) throws ParseException {
-        setCurrentDate(currentYear, month);//만약 기간 옵션이 연범위로 늘어나면 current year에 대한 인자도 받아야함
+        //만약 기간 옵션이 연범위로 늘어나면 current year에 대한 인자도 받아야함
+        setCurrentDate(currentYear, month);
 
-        Period validPeriod = makeValidPeriod(currentYear, month); //전달 23일 부터 다음 달 6일까지의 기간 설정
-        List<VEvent> events = calendar.getComponents("VEVENT"); //해당 기간을 일정에 포함하는 이벤트들 리스트에 포함
-        List<VToDo> todos = calendar.getComponents("VTODO"); //해당 기간을 일정에 포함하는 이벤트들 리스트에 포함
+        List<VEvent> events = calendar.getComponents("VEVENT");
+        List<VToDo> todos = calendar.getComponents("VTODO");
 
-        return filterValidData(events, todos, validPeriod);
+        return filterValidData(events, todos);
     }
 
     public void setCurrentDate(int year, int month) {
@@ -65,21 +66,31 @@ public class ICalService {
 
         LocalDate tempStart = YearMonth.of(preYear, preMonth).atDay(23);
         LocalDate tempEnd = YearMonth.of(nextYear, nextMonth).atDay(6);
-        DateTime startDate = new DateTime(tempStart.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//전달 23일
-        DateTime endDate = new DateTime(tempEnd.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//다음달 6일
+        DateTime startDate = new DateTime(tempStart
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//전달 23일
+        DateTime endDate = new DateTime(tempEnd
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//다음달 6일
 
         //기간 만들기 - RRule 밑에 EXPIR있는 경우 인식 못함
         return new Period(startDate, endDate);
     }
 
-    private ICalFilteredData filterValidData(List<VEvent> events, List<VToDo> todos, Period period) {
-        Filter filter = new Filter(new PeriodRule(period));
-        events = (List<VEvent>) filter.filter(events);
+    private ICalFilteredData filterValidData(
+            List<VEvent> events,
+            List<VToDo> todos
+    ) throws ParseException {
 
-        return filterByIndex(storeDataToICalEvent(events), todos);
+        // 전달 23일 부터 다음 달 6일까지의 기간 설정
+        Period period = makeValidPeriod(currentYear, currentMonth);
+        Filter filter = new Filter(new PeriodRule(period));
+
+        events = (List<VEvent>) filter.filter(events);
+        List<ICalEvent> resolvedEventList = resolveDataToICalEvent(events);
+
+        return filterByIndex(resolvedEventList, todos);
     }
 
-    private List<ICalEvent> storeDataToICalEvent(List<VEvent> events) {
+    private List<ICalEvent> resolveDataToICalEvent(List<VEvent> events) {
         List<ICalEvent> eventList = new ArrayList<>();
 
         for (VEvent event : events) {
@@ -148,7 +159,6 @@ public class ICalService {
                     }
                     data.setStartDayList(tempDayList);
 
-
                     //시작 날짜의 요일 dayofWeek 포함( 나중에 시작일 구분 시 필요) - 시작일이 요일이면
                     LocalDate date = LocalDate.of(data.getStartYear(), data.getStartMonth(), data.getStartDate());
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
@@ -172,7 +182,17 @@ public class ICalService {
 
     private ICalFilteredData filterByIndex(List<ICalEvent> eventList, List<VToDo> todoList) {
         ICalFilteredData filteredData = new ICalFilteredData();
-        List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
+
+        List<ICalTodo> filteredTodoList = filterTodoListByIndex(todoList);
+        List<ICalFilteredEvent> filteredEventList = filterEventListByIndex(eventList);
+
+        filteredData.setTodoList(filteredTodoList);
+        filteredData.setEventList(filteredEventList);
+
+        return filteredData;
+    }
+
+    private List<ICalTodo> filterTodoListByIndex(List<VToDo> todoList) {
         List<ICalTodo> filteredTodoList = new ArrayList<>();
 
         for (VToDo todo : todoList) {
@@ -200,13 +220,18 @@ public class ICalService {
                 filteredTodoList.add(todoData);
             }
         }
+        return filteredTodoList;
+    }
 
+    private List<ICalFilteredEvent> filterEventListByIndex(List<ICalEvent> eventList) {
+        List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
 
         for (ICalEvent event : eventList) {
+            List<Integer> startDayList = event.getStartDayList();
+            WeekDayList byDayList = event.getByDayList();
             String frequency = event.getFrequency();
             int startIndex = event.getStartIndex();
             int endIndex = event.getEndIndex();
-            List<Integer> startDayList = event.getStartDayList();
             int startDayNum = event.getStartDayNum();
             int interval = event.getInterval();
             int startYear = event.getStartYear();
@@ -217,188 +242,196 @@ public class ICalService {
             int byMonthDay = event.getByMonthDay();
             int period = event.getPeriod();
             int weekRow = event.getWeekRow();
-
-            WeekDayList byDayList = event.getByDayList();
             int end = untilDate == 0 ? 42 : endIndex + 1;
+            int daysOfMonth = daysOfMonth(currentYear, currentMonth-1);
 
-            // 기간일정도 여기 포함
+            // 반복 없는 일정
             if (recur == false) {
-
-                if (period > 1) {
+                // 당일 일정
+                if (period == 1) {
+                    addEventToFilteredEvents("DAY", event, filteredEventList);
+                }
+                // 여러날 일정
+                else if (period > 1) {
                     int tempPeriod = period;
                     int currentWeekRow = weekRow;
 
                     while (tempPeriod != 0) {
-
                         if (startIndex < 0) {
-                            tempPeriod += (startIndex);
+                            tempPeriod += startIndex;
                             //전달의 23일부터 불러오는 기간 일정 데이터가 만약 현재달에 걸치지않으면 예외임
-                            if (tempPeriod <= 0) {
-                                break;
-                            }
+                            if (tempPeriod <= 0) break;
                             startIndex = 0;
                         }
 
-                        for (int i = currentWeekRow * 7; i < currentWeekRow * 7 + 7; i++) {
-                            if (i == startIndex) {
+                        for (int idx = currentWeekRow * 7; idx < currentWeekRow * 7 + 7; idx++) {
+                            int nextIdxOfWeek = currentWeekRow * 7 + 7;
 
+                            if (idx == startIndex) {
                                 //만약 일정이 한 주에 이미 모두 꽉 채워지면 다음주로 넘겨야함
-                                if (startIndex + tempPeriod - 1 >= currentWeekRow * 7 + 7) {
+                                if (startIndex + tempPeriod - 1 >= nextIdxOfWeek) {
                                     event.setStartIndex(startIndex);
-                                    event.setPeriod(currentWeekRow * 7 + 7 - startIndex);
+                                    event.setPeriod(nextIdxOfWeek - startIndex);
                                     event.setWeekRow(currentWeekRow);
                                     addEventToFilteredEvents("PERIOD", event, filteredEventList);
 
-                                    tempPeriod -= (currentWeekRow * 7 + 7 - startIndex); // 뿌려줄 남은 기간
-                                    startIndex = currentWeekRow * 7 + 7;
+                                    tempPeriod -= (nextIdxOfWeek - startIndex); // 뿌려줄 남은 기간
+                                    startIndex = nextIdxOfWeek;
 
                                     currentWeekRow += 1;
                                     break;
                                 }
                                 //일주일안에 모두 그리기 가능해지면
                                 else {
-
                                     event.setStartIndex(startIndex);
                                     event.setPeriod(tempPeriod);
                                     event.setWeekRow(currentWeekRow);
                                     addEventToFilteredEvents("PERIOD", event, filteredEventList);
 
-                                    i += (tempPeriod - 1);
+                                    idx += (tempPeriod - 1);
                                     tempPeriod = 0;
                                 }
                             }
                         }
                     }
-                } else {
-                    addEventToFilteredEvents("DAY", event, filteredEventList);
                 }
-            } else {
-                if (frequency.equals("DAILY")) {
-                    int j = startIndex;
-                    while (j < end) {
-                        addEventToFilteredEvents("DAILY", event, filteredEventList);
-                        j += interval;
-                        event.setStartIndex(j);
-                    }
-                } else if (frequency.equals("WEEKLY")) {
-                    for (int d = 0; d < startDayList.size(); d++) {
-                        int diff = startDayList.get(d) - startDayNum;
-                        if (diff < 0) {
-                            diff += 7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
+            }
+            // 반복 일정
+            else {
+                // 매일 반복
+                switch (frequency) {
+                    case "DAILY":
+                        int idx = startIndex;
+                        while (idx < end) {
+                            addEventToFilteredEvents("DAILY", event, filteredEventList);
+                            idx += interval;
+                            event.setStartIndex(idx);
                         }
-                        event.setStartIndex(startIndex + diff);//첫 요일 이후 다른 요일들 시작일 계산
+                        break;
+                    // 주 반복
+                    case "WEEKLY":
+                        int startIdx = startIndex;
+                        for (Integer day : startDayList) {
+                            int diff = day - startDayNum;
+                            if (diff < 0) diff += 7; // (ex 수,일 반복인데 수요일부터 시작일 경우)
 
-                        for (int j = startIndex; j < end; ) {
-                            if (!(j + diff >= end)) {
-                                addEventToFilteredEvents("WEEKLY", event, filteredEventList);
-                            }
-                            j += interval * 7;
-                            event.setStartIndex(j + diff);
-                        }
-                    }
-                } else if (frequency.equals("MONTHLY")) {
-                    if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
-                        addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY");
-                    }
-                    // 마지막 날
-                    else if (byMonthDay != 0) {
-                        if (startMonth <= currentMonth-1 || startYear < currentYear) {
+                            event.setStartIndex(startIndex + diff);//첫 요일 이후 다른 요일들 시작일 계산
 
-                            int firstIndexForPre = getFirstDay(currentYear, currentMonth - 1);
-                            int targetIndexForPre = firstIndexForPre + daysOfMonth(currentYear, currentMonth-1) - 1;
-
-                            int lastIndexForPre = firstIndexForPre + daysOfMonth(currentYear, currentMonth - 1);
-                            if (targetIndexForPre >= lastIndexForPre - getFirstDay(currentYear, currentMonth) && targetIndexForPre < firstIndexForPre + daysOfMonth(currentYear, currentMonth-1)) {
-                                event.setStartIndex(getLastDay(currentYear,currentMonth-1));
-                                addEventToFilteredEvents("MONTHLY", event, filteredEventList);
-                            }
-
-                        }
-
-                        int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
-                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth) - 1);
-                        addEventToFilteredEvents("MONTHLY", event, filteredEventList);
-                    }
-                    // 마지막 무슨 요일
-                    else if (byDayList.size() > 0) {
-                        if (startMonth <= currentMonth-1 || startYear < currentYear) {
-
-                            int firstDayOfMonth = getFirstDay(currentYear, currentMonth-1);
-
-                            int day = byDayList.get(0).getDay().ordinal();
-                            DayOfWeek[] dayOfWeeks = DayOfWeek.values();
-                            DayOfWeek dayOfWeek = dayOfWeeks[day - 1];
-                            LocalDate date = LocalDate.of(currentYear, currentMonth-1, 1);
-                            int lastDateInMonth = date.with(TemporalAdjusters.lastInMonth(dayOfWeek)).getDayOfMonth();
-                            int calculatedIdx = firstDayOfMonth + lastDateInMonth - 1;
-
-                            int lastIndexForPre = firstDayOfMonth + daysOfMonth(currentYear, currentMonth - 1);
-                            if (calculatedIdx >= lastIndexForPre - getFirstDay(currentYear, currentMonth) && calculatedIdx < firstDayOfMonth + daysOfMonth(currentYear, currentMonth-1)) {
-                                event.setStartIndex(startDayNum == 8 ? 0 : startDayNum - 1);
-                                addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                            while (startIdx < end) {
+                                if (!(startIdx + diff >= end)) {
+                                    addEventToFilteredEvents("WEEKLY", event, filteredEventList);
+                                }
+                                startIdx += interval * 7;
+                                event.setStartIndex(startIdx + diff);
                             }
                         }
+                        break;
+                    // 월 반복
+                    case "MONTHLY":
+                        // 몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
+                        if (setPos != 0) {
+                            addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY");
+                        }
+                        // 마지막 날
+                        else if (byMonthDay != 0) {
+                            if (startMonth <= currentMonth - 1 || startYear < currentYear) {
 
-                        addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                                int firstIndexForPre = getFirstDay(currentYear, currentMonth - 1);
+                                int targetIndexForPre = firstIndexForPre + daysOfMonth - 1;
+                                int lastIndexForPre = firstIndexForPre + daysOfMonth;
 
-                    } else {
-                        int tempMonth = startMonth;
-                        int tempYear = startYear;
-                        int tempCount = 0;
-
-                        int j = startIndex;
-                        while (j < end) {
-                            if (tempCount == interval || tempCount == 0) {
-                                addEventToFilteredEvents("MONTHLY", event, filteredEventList);
-                                tempCount = 0;
+                                if (targetIndexForPre >= lastIndexForPre - getFirstDay(currentYear, currentMonth)
+                                        && targetIndexForPre < firstIndexForPre + daysOfMonth) {
+                                    event.setStartIndex(getLastDay(currentYear, currentMonth - 1));
+                                    addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                                }
                             }
 
-                            int daysForInterval = daysOfMonth(tempYear, tempMonth);
-                            j += daysForInterval;
-                            event.setStartIndex(j);
-                            tempMonth++;
-                            tempCount++;
+                            int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
+                            event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth) - 1);
+                            addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                        }
+                        // 마지막 무슨 요일
+                        else if (byDayList.size() > 0) {
+                            if (startMonth <= currentMonth - 1 || startYear < currentYear) {
 
-                            if (tempMonth > 12) {
-                                tempMonth = 1;
+                                int firstDayOfMonth = getFirstDay(currentYear, currentMonth - 1);
+
+                                int day = byDayList.get(0).getDay().ordinal();
+                                DayOfWeek[] dayOfWeeks = DayOfWeek.values();
+                                DayOfWeek dayOfWeek = dayOfWeeks[day - 1];
+                                LocalDate date = LocalDate.of(currentYear, currentMonth - 1, 1);
+                                int lastDateInMonth = date.with(TemporalAdjusters.lastInMonth(dayOfWeek)).getDayOfMonth();
+                                int calculatedIdx = firstDayOfMonth + lastDateInMonth - 1;
+
+                                int lastIndexForPre = firstDayOfMonth + daysOfMonth(currentYear, currentMonth - 1);
+                                if (calculatedIdx >= lastIndexForPre - getFirstDay(currentYear, currentMonth) && calculatedIdx < firstDayOfMonth + daysOfMonth(currentYear, currentMonth - 1)) {
+                                    event.setStartIndex(startDayNum == 8 ? 0 : startDayNum - 1);
+                                    addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                                }
+                            }
+
+                            addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList);
+
+                        } else {
+                            int tempMonth = startMonth;
+                            int tempYear = startYear;
+                            int tempCount = 0;
+
+                            int j = startIndex;
+                            while (j < end) {
+                                if (tempCount == interval || tempCount == 0) {
+                                    addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                                    tempCount = 0;
+                                }
+
+                                int daysForInterval = daysOfMonth(tempYear, tempMonth);
+                                j += daysForInterval;
+                                event.setStartIndex(j);
+                                tempMonth++;
+                                tempCount++;
+
+                                if (tempMonth > 12) {
+                                    tempMonth = 1;
+                                    tempYear++;
+                                }
+                            }
+                        }
+                        break;
+                    // 연 반복
+                    case "YEARLY":
+                        if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
+                            addDayRecurEventToFilteredEvents(event, filteredEventList, "YEARLY");
+                        }
+                        // 마지막 날
+                        else if (byMonthDay != 0 && startMonth == currentMonth) {
+                            int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
+                            event.setStartIndex(firstDayOfMonth + daysOfMonth - 1);
+                            addEventToFilteredEvents("YEARLY", event, filteredEventList);
+                        }
+                        // 마지막 무슨 요일 - setPos가 안들어감
+                        else if (byDayList.size() > 0 && startMonth == currentMonth) {
+                            addLastWeekRecurEventToFilteredEvents("YEARLY", event, filteredEventList);
+                        }
+                        // 일반 연 반복
+                        else {
+                            int tempYear = startYear;
+                            int j = startIndex;
+                            while (j < end) {
+                                int daysForInterval = daysOfYear(startMonth <= 2 ? tempYear : tempYear + 1);
+
+                                addEventToFilteredEvents("YEARLY", event, filteredEventList);
+
+                                j += daysForInterval;
+                                event.setStartIndex(j);
                                 tempYear++;
                             }
                         }
-                    }
-                } else if (frequency.equals("YEARLY")) {
-                    if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
-                        addDayRecurEventToFilteredEvents(event, filteredEventList, "YEARLY");
-                    } // 마지막 날
-                    else if (byMonthDay != 0 && startMonth == currentMonth) {
-                        int firstDayOfMonth = getFirstDay(currentYear, currentMonth);
-                        event.setStartIndex(firstDayOfMonth + daysOfMonth(currentYear, currentMonth) - 1);
-                        addEventToFilteredEvents("YEARLY", event, filteredEventList);
-                    }
-                    // 마지막 무슨 요일 - setPos가 안들어감
-                    else if (byDayList.size() > 0 && startMonth == currentMonth) {
-
-                        addLastWeekRecurEventToFilteredEvents("YEARLY", event, filteredEventList);
-
-                    } else { // 일반 연 반복
-                        int tempYear = startYear;
-                        int j = startIndex;
-                        while (j < end) {
-                            int daysForInterval = daysOfYear(startMonth <= 2 ? tempYear : tempYear + 1);
-
-                            addEventToFilteredEvents("YEARLY", event, filteredEventList);
-
-                            j += daysForInterval;
-                            event.setStartIndex(j);
-                            tempYear++;
-                        }
-                    }
+                        break;
                 }
             }
         }
-
-        filteredData.setTodoList(filteredTodoList);
-        filteredData.setEventList(filteredEventList);
-        return filteredData;
+        return filteredEventList;
     }
 
     //마지막째 주 요일 반복
@@ -460,7 +493,8 @@ public class ICalService {
                     }
 
                     int lastIndexForPre = firstIndexForPre + daysOfMonth(preYear, currentMonth - 1);
-                    if (targetIndexForPre >= lastIndexForPre - getFirstDay(currentYear, currentMonth) && targetIndexForPre < firstIndexForPre + daysOfMonth(preYear, startMonth)) {
+                    if (targetIndexForPre >= lastIndexForPre - getFirstDay(currentYear, currentMonth)
+                            && targetIndexForPre < firstIndexForPre + daysOfMonth(preYear, startMonth)) {
                         event.setStartIndex(startDayNum == 8 ? 0 : startDayNum - 1);
                         addEventToFilteredEvents(type, event, filteredEventList);
                     }
@@ -525,8 +559,6 @@ public class ICalService {
             }
         }
     }
-
-//    List<ICalFilteredEvent> periodList = new ArrayList<>();
 
     private void addEventToFilteredEvents(
             String type,
@@ -670,6 +702,7 @@ public class ICalService {
         int endYear = data.getEndYear();
         int endMonth = data.getEndMonth();
         int endDate = data.getEndDate();
+
         // 종일 이벤트가 아닌 시간 이벤트면 1 더해주기
         int offset = event.getStartDate().getTimeZone() != null ? 1 : 0;
         if (startYear == endYear) {
