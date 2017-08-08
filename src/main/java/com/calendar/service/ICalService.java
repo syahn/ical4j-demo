@@ -1,11 +1,6 @@
 package com.calendar.service;
 
 import com.calendar.data.*;
-import biweekly.component.VTodo;
-import com.calendar.data.ICalEvent;
-import com.calendar.data.ICalFilteredData;
-import com.calendar.data.ICalFilteredEvent;
-import com.calendar.data.ICalTodo;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
@@ -14,7 +9,6 @@ import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.RRule;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -36,14 +30,6 @@ import java.util.List;
 @Service
 public class ICalService {
 
-
-    private SettingService setting;
-
-    @Autowired
-    public ICalService(SettingService setting) {
-        this.setting = setting;
-    }
-
     public Calendar parseFile(String file) throws IOException, ParserException {
         FileInputStream fin = new FileInputStream(file);
         CalendarBuilder builder = new CalendarBuilder();
@@ -52,14 +38,16 @@ public class ICalService {
     }
 
     //일정리스트 만들기
-    public ICalFilteredData filterData(Calendar calendar, int month) throws ParseException {
+    public ICalFilteredData filterData(Calendar calendar, int month, int year) throws ParseException {
 
+        Setting setting = new Setting();
         setting.setCurrentMonth(month);
+        setting.setCurrentYear(year);
 
         List<VEvent> events = calendar.getComponents("VEVENT");
         List<VToDo> todos = calendar.getComponents("VTODO");
 
-        return filterValidData(events, todos);
+        return filterValidData(events, todos, setting);
     }
 
 
@@ -82,7 +70,8 @@ public class ICalService {
 
     private ICalFilteredData filterValidData(
             List<VEvent> events,
-            List<VToDo> todos
+            List<VToDo> todos,
+            Setting setting
     ) throws ParseException {
         int currentYear = setting.getCurrentYear();
         int currentMonth = setting.getCurrentMonth();
@@ -92,12 +81,12 @@ public class ICalService {
         Filter filter = new Filter(new PeriodRule(period));
 
         events = (List<VEvent>) filter.filter(events);
-        List<ICalEvent> resolvedEventList = resolveDataToICalEvent(events);
+        List<ICalEvent> resolvedEventList = resolveDataToICalEvent(events, setting);
 
-        return filterByIndex(resolvedEventList, todos);
+        return filterByIndex(resolvedEventList, todos, setting);
     }
 
-    private List<ICalEvent> resolveDataToICalEvent(List<VEvent> events) {
+    private List<ICalEvent> resolveDataToICalEvent(List<VEvent> events, Setting setting) {
         List<ICalEvent> eventList = new ArrayList<>();
 
         for (VEvent event : events) {
@@ -112,8 +101,8 @@ public class ICalService {
             data.setEndDate(extractDate(data.getEnd()));
             data.setEndMonth(extractMonth(data.getEnd()));
             data.setEndYear(extractYear(data.getEnd()));
-            data.setStartIndex(calculateIndexOfDate(data, "start"));//모든 이벤트 필수
-            data.setEndIndex(calculateIndexOfDate(data, "end"));//기간 일정만
+            data.setStartIndex(calculateIndexOfDate(data, "start", setting));//모든 이벤트 필수
+            data.setEndIndex(calculateIndexOfDate(data, "end", setting));//기간 일정만
             data.setWeekRow(calculateWeekRow(data.getStartIndex()));
             data.setPeriod(calculatePeriod(data, event));
 
@@ -154,7 +143,7 @@ public class ICalService {
                     data.setUntilDate(extractDate(data.getUntil()));
                     data.setUntilMonth(extractMonth(data.getUntil()));
                     data.setUntilYear(extractYear(data.getUntil()));
-                    data.setEndIndex(calculateIndexOfDate(data, "untilEnd")); //until 존재시 endIndex를 until date에 맞춰줌
+                    data.setEndIndex(calculateIndexOfDate(data, "untilEnd",setting)); //until 존재시 endIndex를 until date에 맞춰줌
                 }
 
                 /* 요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6) */
@@ -188,11 +177,11 @@ public class ICalService {
         return eventList;
     }
 
-    private ICalFilteredData filterByIndex(List<ICalEvent> eventList, List<VToDo> todoList) {
+    private ICalFilteredData filterByIndex(List<ICalEvent> eventList, List<VToDo> todoList,Setting setting) {
         ICalFilteredData filteredData = new ICalFilteredData();
 
-        List<ICalTodo> filteredTodoList = filterTodoListByIndex(todoList);
-        List<ICalFilteredEvent> filteredEventList = filterEventListByIndex(eventList);
+        List<ICalTodo> filteredTodoList = filterTodoListByIndex(todoList, setting);
+        List<ICalFilteredEvent> filteredEventList = filterEventListByIndex(eventList, setting);
 
         filteredData.setTodoList(filteredTodoList);
         filteredData.setEventList(filteredEventList);
@@ -200,7 +189,7 @@ public class ICalService {
         return filteredData;
     }
 
-    private List<ICalTodo> filterTodoListByIndex(List<VToDo> todoList) {
+    private List<ICalTodo> filterTodoListByIndex(List<VToDo> todoList, Setting setting) {
         int currentYear = setting.getCurrentYear();
         int currentMonth = setting.getCurrentMonth();
         List<ICalTodo> filteredTodoList = new ArrayList<>();
@@ -233,7 +222,7 @@ public class ICalService {
         return filteredTodoList;
     }
 
-    private List<ICalFilteredEvent> filterEventListByIndex(List<ICalEvent> eventList) {
+    private List<ICalFilteredEvent> filterEventListByIndex(List<ICalEvent> eventList, Setting setting) {
         int currentYear = setting.getCurrentYear();
         int currentMonth = setting.getCurrentMonth();
         List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
@@ -342,7 +331,7 @@ public class ICalService {
                     case "MONTHLY":
                         // 몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
                         if (setPos != 0) {
-                            addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY");
+                            addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY", setting);
                         }
                         // 마지막 날
                         else if (byMonthDay != 0) {
@@ -383,7 +372,7 @@ public class ICalService {
                                 }
                             }
 
-                            addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                            addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList, setting);
 
                         } else {
                             int tempMonth = startMonth;
@@ -413,7 +402,7 @@ public class ICalService {
                     // 연 반복
                     case "YEARLY":
                         if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
-                            addDayRecurEventToFilteredEvents(event, filteredEventList, "YEARLY");
+                            addDayRecurEventToFilteredEvents(event, filteredEventList, "YEARLY",setting);
                         }
                         // 마지막 날
                         else if (byMonthDay != 0 && startMonth == currentMonth) {
@@ -423,7 +412,7 @@ public class ICalService {
                         }
                         // 마지막 무슨 요일 - setPos가 안들어감
                         else if (byDayList.size() > 0 && startMonth == currentMonth) {
-                            addLastWeekRecurEventToFilteredEvents("YEARLY", event, filteredEventList);
+                            addLastWeekRecurEventToFilteredEvents("YEARLY", event, filteredEventList, setting);
                         }
                         // 일반 연 반복
                         else {
@@ -454,7 +443,8 @@ public class ICalService {
     private void addLastWeekRecurEventToFilteredEvents(
             String type,
             ICalEvent event,
-            List<ICalFilteredEvent> filteredEventList
+            List<ICalFilteredEvent> filteredEventList,
+            Setting setting
     ) {
         int currentYear = setting.getCurrentYear();
         int currentMonth = setting.getCurrentMonth();
@@ -474,7 +464,8 @@ public class ICalService {
     private void addDayRecurEventToFilteredEvents(
             ICalEvent event,
             List<ICalFilteredEvent> filteredEventList,
-            String type
+            String type,
+            Setting setting
     ) {
         int currentYear = setting.getCurrentYear();
         int currentMonth = setting.getCurrentMonth();
@@ -627,7 +618,7 @@ public class ICalService {
         }
     }
 
-    private int calculateIndexOfDate(ICalEvent event, String mode) {
+    private int calculateIndexOfDate(ICalEvent event, String mode, Setting setting) {
         int index;
         int currentYear = setting.getCurrentYear();
         int currentMonth = setting.getCurrentMonth();

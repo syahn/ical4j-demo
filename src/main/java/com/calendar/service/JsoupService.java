@@ -4,10 +4,7 @@ package com.calendar.service;
  * Created by NAVER on 2017-07-25.
  */
 
-import com.calendar.data.ICalComparator;
-import com.calendar.data.ICalFilteredData;
-import com.calendar.data.ICalFilteredEvent;
-import com.calendar.data.ICalTodo;
+import com.calendar.data.*;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import org.jsoup.Jsoup;
@@ -25,26 +22,28 @@ import java.util.List;
 public class JsoupService {
 
     private ICalService iCal;
-    private SettingService setting;
 
     @Autowired
-    public JsoupService(ICalService iCal, SettingService setting) {
+    public JsoupService(ICalService iCal) {
         this.iCal = iCal;
-        this.setting = setting;
     }
 
-    public void makeHTMLfiles() throws IOException, ParserException, ParseException {
-        int startMonth = setting.getStartMonth();
-        int endMonth = setting.getEndMonth();
-//
-        System.out.printf("%d%d\n", startMonth, endMonth);
+    public void makeHTMLfiles(int startMonth, int endMonth, int currentYear) throws IOException, ParserException, ParseException {
+
+        Setting settingPreview = new Setting();
+
+        settingPreview.setStartMonth(startMonth);
+        settingPreview.setEndMonth(endMonth);
+        settingPreview.setCurrentYear(currentYear);
+
+        int start = settingPreview.getStartMonth();
+        int end = settingPreview.getEndMonth();
 
         Calendar calendar = parseIcalFile();
 
-        for (int month = startMonth; month <= endMonth; month++) {
-            System.out.printf("month: %d \n", month);
+        for (int month = start; month <= end; month++) {
 
-            ICalFilteredData filteredData = iCal.filterData(calendar, month);
+            ICalFilteredData filteredData = iCal.filterData(calendar, month, currentYear);
             File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
             drawEventsOnHtml(doc, filteredData);

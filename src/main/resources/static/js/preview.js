@@ -5,8 +5,8 @@ var startOption = document.getElementById("start_month");
 var endOption = document.getElementById("end_month");
 var landscape = document.getElementById("rdo2_0");
 
-var initialStartMonth = startOption.options[startOption.selectedIndex].value;
-var startMonth, endMonth, orientation = 1;
+var initialStartMonth;
+var startMonth, endMonth, orientation;
 var printMode = {
     "portrait": "width: 180px; height:260px;",
     "landscape": "width: 343px; height:260px;"
@@ -15,7 +15,8 @@ var printMode = {
 $(document).ready(function () {
 
     //select option 메인 페이지 달로 초기화
-    listenToStopLoader();
+
+    // $("#monthPreview").attr("value",6);//임시
 
     $("._close").click(closeWindow);
     $("#button-print").click(requestPrint);
@@ -24,24 +25,22 @@ $(document).ready(function () {
     $("#end_month").on("change", changePeriod);
     $("._portrait, ._landscape").click(changeOrientation);
 
-    setTimeout(initiatePeriod(), 1000);
+    initiatePeriod();
+    makeFirstImage();
 });
 
+function makeFirstImage() {
+    changeOrientation();
+}
+
 function initiatePeriod() {
+
     $("#start_month").val($('#monthPreview').attr("value"));
     $("#end_month").val($('#monthPreview').attr("value"));
 
     initialStartMonth = startOption.options[startOption.selectedIndex].value;
-}
+    console.log(initialStartMonth);
 
-function listenToStopLoader() {
-    var img = new Image();
-    img.onload = function () {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('previewImage').style.display = 'inline';
-    };
-    img.src = document.getElementById('previewImage').src;
-    if (img.complete) img.onload();
 }
 
 function closeWindow() {
@@ -56,9 +55,10 @@ function requestPrint() {
 
     $.post("http://localhost:9000/convert",
         {
-            "startMonth": startMonth,
-            "endMonth": endMonth,
-            "orientation": orientation
+            startMonth: startMonth,
+            endMonth: endMonth,
+            currentYear: 2017, // 임시
+            orientation: orientation
         }).done(function () {
 
         printPage("/tempPdf/month_result.pdf");
@@ -86,21 +86,22 @@ function requestSave() {
     refreshOptions();
 
     var optionValue = {
-        'startMonth': startMonth,
-        'endMonth': endMonth,
-        'orientation': orientation
+        startMonth: startMonth,
+        endMonth: endMonth,
+        currentYear: 2017, // 임시
+        orientation: orientation
     };
 
     $.post("http://localhost:9000/convert", optionValue).done(function () {
         var dataURI = '/tempPdf/month_result.pdf';
         var fileName = 'Calendar.pdf';
 
-        save(dataURI,fileName);
+        save(dataURI, fileName);
 
         document.getElementById("save-loader").style.display = "none";
         document.getElementById("saveText").style.display = "block";
     });
-  
+
 }
 
 function save(fileURL, fileName) {
@@ -108,17 +109,17 @@ function save(fileURL, fileName) {
     var agent = navigator.userAgent.toLowerCase();
 
     //for IE
-    if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+    if ((navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1)) {
         //alert("인터넷 익스플로러 브라우저 입니다.");
         //for IE<=10
-        if(agent.indexOf("msie") != -1){
+        if (agent.indexOf("msie") != -1) {
             var _window = window.open(fileURL, '_blank');
             _window.document.close();
             _window.document.execCommand('SaveAs', true, fileName || fileURL);
             _window.close();
         }
         //for IE>10
-        else{
+        else {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', fileURL, true);
             xhr.responseType = 'blob';
@@ -146,6 +147,7 @@ function save(fileURL, fileName) {
 
 //총 페이지 수 표시 및 프리뷰 이미지 첫달로 변경
 function changePreviewImage() {
+
     changePeriod();
     if (initialStartMonth !== startMonth) {
         initialStartMonth = startMonth;
@@ -157,7 +159,6 @@ function changePeriod() {
     var pageNum = document.getElementById("pageNum");
 
     refreshOptions();
-    notifyPeriod();
 
     // 총 페이지 수 계산
     var numOfMonth = endMonth - startMonth + 1;
@@ -166,13 +167,6 @@ function changePeriod() {
         pageNum.innerHTML = " 총 페이지 개수: " + numOfMonth;
         pageNum.style.display = "inline";
     }
-}
-
-function notifyPeriod() {
-    $.post("/print-change-range", {
-        start: startMonth,
-        end: endMonth
-    });
 }
 
 //미리보기 세로방향, 가로방향 보여주기
@@ -195,17 +189,20 @@ function enableLoader() {
     document.getElementById('previewImage').style.display = 'none';
 }
 
-function takeScreenShot(month, mode) {
+function takeScreenShot(startMonth, mode) {
 
     $.post("/make-preview", {
-        month: month
+        startMonth: startMonth,
+        endMonth: startMonth,
+        currentYear: 2017
     }).done(function () {
+
         if (document.getElementById("hiddenFrame") !== null) {
             var elem = document.getElementById("hiddenFrame");
             elem.parentNode.removeChild(elem);
         }
 
-        makeDummyWindow(month);
+        makeDummyWindow(startMonth);
 
         html2canvas(document.getElementById("hiddenFrame"), {
             onrendered: function (canvas) {
@@ -261,7 +258,3 @@ function printPage(sURL) {
     oHiddFrame.src = sURL;
     document.body.appendChild(oHiddFrame);
 }
-
-
-//
-// })();

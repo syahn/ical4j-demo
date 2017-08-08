@@ -7,67 +7,32 @@
 
     previewButton.addEventListener("click", function (e) {
         var month = e.target.value;
-
-        $.post("/make-preview", {
-            month: month
+        var year = 2017;
+        //메인 페이지 인쇄 리퀘스트
+       $.post("/make-preview", {
+            startMonth: month,
+            endMonth : month,
+            currentYear: 2017//임시
         }).done(function () {
-            makeDummyWindow(month);
-            takeScreenShot(month);
+            //openPreviewTap(month);
+           openWindowWithPost(month,year);
+           document.getElementById('TheForm').submit();
         });
     });
 
-    function makeDummyWindow(month) {
+    function openPreviewTap(month) {
 
-        var hiddenFrame = document.createElement("iframe");
-        hiddenFrame.setAttribute("id", "hiddenFrame");
-        hiddenFrame.setAttribute("width", "100%");
-        hiddenFrame.setAttribute("height", "100%");
-        hiddenFrame.setAttribute("frameBorder", "0");
-        document.body.appendChild(hiddenFrame);
+        // currentmonth, currentyear parameter passing?
+       window.open('/preview', '인쇄 프리뷰', 'resizable=1,width=526,height=715');
 
-        $("#hiddenFrame").attr("src", generateNewUrl(month));
     }
 
-    function generateNewUrl(month) {
-        return "/html/month" + month + ".html";
+    function openWindowWithPost(month, year) {
+        var f = document.getElementById('TheForm');
+        f.month.value = month;
+        f.year.value = year;
+        window.open('', 'Preview', 'resizable=1,width=526,height=715');
+        f.submit();
     }
 
-    function takeScreenShot(month) {
-
-        html2canvas(document.getElementById("hiddenFrame"), {
-            onrendered: function (canvas) {
-                // 캔버스 URL 추출
-                var dataUrl = canvas.toDataURL();
-                openPreviewTap();
-                // 추출한 URL을 서버에 저장한 후, 프리뷰 창을 띄운다.
-                $.post("http://localhost:9000/save-url",
-                    {
-                        "previewUrl": dataUrl,
-                        "month": month
-                    }
-                );
-            }
-        });
-    }
-
-    // function takeScreenShot(month) {
-    //     html2canvas(document.getElementById("hiddenFrame"), {
-    //         onrendered: function (canvas) {
-    //             // 캔버스 URL 추출
-    //             var dataUrl = canvas.toDataURL();
-    //
-    //             // 추출한 URL을 서버에 저장한 후, 프리뷰 창을 띄운다.
-    //             $.post("http://localhost:9000/save-url",
-    //                 {
-    //                     "previewUrl": dataUrl,
-    //                     "month": month
-    //                 }
-    //             ).done(openPreviewTap);
-    //         }
-    //     });
-    // }
-
-    function openPreviewTap() {
-        window.open('/preview', '인쇄 프리뷰', 'resizable=1,width=526,height=715');
-    }
 })();

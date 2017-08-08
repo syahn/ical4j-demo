@@ -140,11 +140,10 @@
         </div>
         <div id="content" class="_content">
             <div class="print_type">
-                <div id="loader"></div>
-                <p class="_preview preview" id="monthPreview"
-                   th:value="${month}">
+                <div id="loader" style="display: none"></div>
+                <p class="_preview preview" id="monthPreview" th:value="${initialMonth}">
 
-                <img id="previewImage" th:src="${previewurl}"
+                <img id="previewImage" src=""
                      style="display: none; width: 343px; height: 252px;"
                      alt="월간 인쇄 미리보기"
                      title="월간 인쇄 미리보기" />

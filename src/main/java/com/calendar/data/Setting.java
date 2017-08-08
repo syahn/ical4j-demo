@@ -1,12 +1,10 @@
-package com.calendar.service;
-
-import org.springframework.stereotype.Service;
+package com.calendar.data;
 
 /**
  * Created by NAVER on 2017-08-07.
  */
-@Service
-public class SettingService {
+
+public class Setting {
 
     private int startMonth;
     private int endMonth;
