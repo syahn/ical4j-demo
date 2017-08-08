@@ -30,18 +30,9 @@ public class JsoupService {
 
     public void makeHTMLfiles(int startMonth, int endMonth, int currentYear) throws IOException, ParserException, ParseException {
 
-        Setting setting = new Setting();
-
-        setting.setStartMonth(startMonth);
-        setting.setEndMonth(endMonth);
-        setting.setCurrentYear(currentYear);
-
-        int start = setting.getStartMonth();
-        int end = setting.getEndMonth();
-
         Calendar calendar = parseIcalFile();
 
-        for (int month = start; month <= end; month++) {
+        for (int month = startMonth; month <= endMonth; month++) {
 
             ICalFilteredData filteredData = iCal.filterData(calendar, month, currentYear);
             File input = readTemplateByMonth(month);

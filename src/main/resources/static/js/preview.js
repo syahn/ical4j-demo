@@ -16,7 +16,8 @@ $(document).ready(function () {
 
     //select option 메인 페이지 달로 초기화
 
-    // $("#monthPreview").attr("value",6);//임시
+    initiatePeriod();
+    makeFirstImage();
 
     $("._close").click(closeWindow);
     $("#button-print").click(requestPrint);
@@ -24,13 +25,10 @@ $(document).ready(function () {
     $("#start_month").on("change", changePreviewImage);
     $("#end_month").on("change", changePeriod);
     $("._portrait, ._landscape").click(changeOrientation);
-
-    initiatePeriod();
-    makeFirstImage();
 });
 
 function makeFirstImage() {
-    changeOrientation();
+    changeOrientation(); // 분리 필요?
 }
 
 function initiatePeriod() {
@@ -39,7 +37,6 @@ function initiatePeriod() {
     $("#end_month").val($('#monthPreview').attr("value"));
 
     initialStartMonth = startOption.options[startOption.selectedIndex].value;
-    console.log(initialStartMonth);
 
 }
 
@@ -61,7 +58,7 @@ function requestPrint() {
             orientation: orientation
         }).done(function () {
 
-        printPage("/tempPdf/month_result.pdf");
+        printPDF("/tempPdf/month_result.pdf");
         document.getElementById("printText").style.display = "block";
         document.getElementById("print-loader").style.display = "none";
     });
@@ -106,11 +103,11 @@ function requestSave() {
 
 function save(fileURL, fileName) {
 
-    var agent = navigator.userAgent.toLowerCase();
+    var agent = navigator.userAgent.toLowerCase(); // ie아닌경우 agent 인식 위함
 
     //for IE
     if ((navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1)) {
-        //alert("인터넷 익스플로러 브라우저 입니다.");
+
         //for IE<=10
         if (agent.indexOf("msie") != -1) {
             var _window = window.open(fileURL, '_blank');
@@ -202,7 +199,7 @@ function takeScreenShot(startMonth, mode) {
             elem.parentNode.removeChild(elem);
         }
 
-        makeDummyWindow(startMonth);
+        makeDummyWindow(startMonth);//새로 생성된 html파일 불러와 iframe 만듬
 
         html2canvas(document.getElementById("hiddenFrame"), {
             onrendered: function (canvas) {
@@ -258,3 +255,32 @@ function printPage(sURL) {
     oHiddFrame.src = sURL;
     document.body.appendChild(oHiddFrame);
 }
+
+function printPDF(url) {
+
+    var agent = navigator.userAgent.toLowerCase(); // ie아닌경우 agent 인식 위함
+
+    if ((navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1)) {
+
+        console.log($("#pdfDocument"));
+
+        if (typeof document.getElementById("pdfDocument").print == 'undefined') {
+
+            console.log("redg");
+            setTimeout(function(){printPDF("pdfDocument");});
+
+        } else {
+
+            $("#pdfDocument").attr("src",url);
+            console.log("works");
+            var x = document.getElementById("pdfDocument");
+            console.log(x);
+            x.print();
+
+        }
+    }
+    else{
+        printPage(url);  // for chrome
+    }
+}
+
