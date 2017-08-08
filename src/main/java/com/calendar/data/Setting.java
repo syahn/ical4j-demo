@@ -8,7 +8,6 @@ public class Setting {
 
     private int startMonth;
     private int endMonth;
-    private String tempUrl;
     private int currentMonth;
     private int currentYear;
 
@@ -26,14 +25,6 @@ public class Setting {
 
     public void setCurrentMonth(int currentMonth) {
         this.currentMonth = currentMonth;
-    }
-
-    public String getTempUrl() {
-        return tempUrl;
-    }
-
-    public void setTempUrl(String tempUrl) {
-        this.tempUrl = tempUrl;
     }
 
     public int getStartMonth() {
