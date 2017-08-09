@@ -17,7 +17,7 @@ $(document).ready(function () {
     //select option 메인 페이지 달로 초기화
 
     initiatePeriod();
-    makeFirstImage();
+    changePreviewImage();
 
     $("._close").click(closeWindow);
     $("#button-print").click(requestPrint);
@@ -25,10 +25,11 @@ $(document).ready(function () {
     $("#start_month").on("change", changePreviewImage);
     $("#end_month").on("change", changePeriod);
     $("._portrait, ._landscape").click(changeOrientation);
+
 });
 
-function makeFirstImage() {
-    changeOrientation(); // 분리 필요?
+function closeWindow() {
+    window.close();
 }
 
 function initiatePeriod() {
@@ -40,33 +41,26 @@ function initiatePeriod() {
 
 }
 
-function closeWindow() {
-    window.close();
+function changePreviewImage() {
+    changePeriod();
+    changeOrientation();
 }
 
-function requestPrint() {
+function changePeriod() {
+    var pageNum = document.getElementById("pageNum");
 
     refreshOptions();
-    document.getElementById("printText").style.display = "none";
-    document.getElementById("print-loader").style.display = "block";
 
-    $.post("http://localhost:9000/convert",
-        {
-            startMonth: startMonth,
-            endMonth: endMonth,
-            currentYear: 2017, // 임시
-            orientation: orientation
-        }).done(function () {
+    // 총 페이지 수 계산
+    var numOfMonth = endMonth - startMonth + 1;
 
-        printPDF("/tempPdf/month_result.pdf");
-        document.getElementById("printText").style.display = "block";
-        document.getElementById("print-loader").style.display = "none";
-    });
-
+    if (startOption.selectedIndex != null) {
+        pageNum.innerHTML = " 총 페이지 개수: " + numOfMonth;
+        pageNum.style.display = "inline";
+    }
 }
 
 function refreshOptions() {
-
     //시작 월과 끝 월 파라미터 재설정
     startMonth = startOption.options[startOption.selectedIndex].value;
     endMonth = endOption.options[endOption.selectedIndex].value;
@@ -75,7 +69,75 @@ function refreshOptions() {
     orientation = landscape.checked ? 1 : 0;
 }
 
-//convert url request
+//미리보기 세로방향, 가로방향 보여주기
+function changeOrientation() {
+    enableLoader();
+    refreshOptions();
+
+    var vertical = document.getElementById("rdo2_1").checked;
+
+    if (vertical) {
+        takeScreenShot(startMonth, "portrait");
+    } else {
+        takeScreenShot(startMonth, "landscape");
+    }
+
+}
+
+function enableLoader() {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('previewImage').style.display = 'none';
+}
+
+function takeScreenShot(startMonth, mode) {
+
+    $.post("/make-preview", {
+        startMonth: startMonth,
+        endMonth: startMonth,
+        currentYear: 2017
+    }).done(function () {
+
+        if (document.getElementById("hiddenFrame") !== null) {
+            var elem = document.getElementById("hiddenFrame");
+            elem.parentNode.removeChild(elem);
+        }
+
+        makeDummyWindow(startMonth);//새로 생성된 html파일 불러와 iframe 만듬
+
+        html2canvas(document.getElementById("hiddenFrame"), {
+            onrendered: function (canvas) {
+                //이미지
+                var dataUrl = canvas.toDataURL();
+                $("#previewImage").attr({
+                    "src": dataUrl,
+                    "style": mode === "landscape" ? printMode.landscape : printMode.portrait
+                });
+                $("#loader").css("display", "none");
+            }
+        });
+        $("#hiddenFrame").css("visibility", "hidden");
+    });
+
+
+}
+
+function makeDummyWindow(month) {
+    var hiddenFrame = document.createElement("iframe");
+
+    hiddenFrame.setAttribute("id", "hiddenFrame");
+    hiddenFrame.setAttribute("width", "1000");
+    hiddenFrame.setAttribute("height", "1000");
+    hiddenFrame.setAttribute("frameBorder", "0");
+    hiddenFrame.style.marginTop = "100px";
+    document.body.appendChild(hiddenFrame);
+
+    $("#hiddenFrame").attr("src", generateNewUrl(month));
+}
+
+function generateNewUrl(month) {
+    return "/html/month" + month + ".html";
+}
+
 function requestSave() {
 
     document.getElementById("saveText").style.display = "none";
@@ -142,95 +204,25 @@ function save(fileURL, fileName) {
     }
 }
 
-//총 페이지 수 표시 및 프리뷰 이미지 첫달로 변경
-function changePreviewImage() {
-
-    changePeriod();
-    if (initialStartMonth !== startMonth) {
-        initialStartMonth = startMonth;
-        changeOrientation();
-    }
-}
-
-function changePeriod() {
-    var pageNum = document.getElementById("pageNum");
+function requestPrint() {
 
     refreshOptions();
+    document.getElementById("printText").style.display = "none";
+    document.getElementById("print-loader").style.display = "block";
 
-    // 총 페이지 수 계산
-    var numOfMonth = endMonth - startMonth + 1;
+    $.post("http://localhost:9000/convert",
+        {
+            startMonth: startMonth,
+            endMonth: endMonth,
+            currentYear: 2017, // 임시
+            orientation: orientation
+        }).done(function () {
 
-    if (startOption.selectedIndex != null) {
-        pageNum.innerHTML = " 총 페이지 개수: " + numOfMonth;
-        pageNum.style.display = "inline";
-    }
-}
-
-//미리보기 세로방향, 가로방향 보여주기
-function changeOrientation() {
-    enableLoader();
-    refreshOptions();
-
-    var vertical = document.getElementById("rdo2_1").checked;
-
-    if (vertical) {
-        takeScreenShot(startMonth, "portrait");
-    } else {
-        takeScreenShot(startMonth, "landscape");
-    }
-
-}
-
-function enableLoader() {
-    document.getElementById('loader').style.display = 'block';
-    document.getElementById('previewImage').style.display = 'none';
-}
-
-function takeScreenShot(startMonth, mode) {
-
-    $.post("/make-preview", {
-        startMonth: startMonth,
-        endMonth: startMonth,
-        currentYear: 2017
-    }).done(function () {
-
-        if (document.getElementById("hiddenFrame") !== null) {
-            var elem = document.getElementById("hiddenFrame");
-            elem.parentNode.removeChild(elem);
-        }
-
-        makeDummyWindow(startMonth);//새로 생성된 html파일 불러와 iframe 만듬
-
-        html2canvas(document.getElementById("hiddenFrame"), {
-            onrendered: function (canvas) {
-                //이미지
-                var dataUrl = canvas.toDataURL();
-                $("#previewImage").attr({
-                    "src": dataUrl,
-                    "style": mode === "landscape" ? printMode.landscape : printMode.portrait
-                });
-                $("#loader").css("display", "none");
-            }
-        });
+        printPDF("/tempPdf/month_result.pdf");
+        document.getElementById("printText").style.display = "block";
+        document.getElementById("print-loader").style.display = "none";
     });
 
-}
-
-function makeDummyWindow(month) {
-    var hiddenFrame = document.createElement("iframe");
-
-    hiddenFrame.setAttribute("id", "hiddenFrame");
-    hiddenFrame.setAttribute("width", "1000");
-    hiddenFrame.setAttribute("height", "1000");
-    hiddenFrame.setAttribute("frameBorder", "0");
-    hiddenFrame.style.marginTop = "100px";
-    document.body.appendChild(hiddenFrame);
-
-    $("#hiddenFrame").attr("src", generateNewUrl(month));
-}
-
-function generateNewUrl(month) {
-    return "/html/month" + month + ".html";
 }
 
 function closePrint() {
@@ -254,7 +246,9 @@ function printPage(sURL) {
     oHiddFrame.style.bottom = "0";
     oHiddFrame.src = sURL;
     document.body.appendChild(oHiddFrame);
+    console.log(oHiddFrame);
 }
+
 
 function printPDF(url) {
 
@@ -262,25 +256,27 @@ function printPDF(url) {
 
     if ((navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1)) {
 
-        console.log($("#pdfDocument"));
 
-        if (typeof document.getElementById("pdfDocument").print == 'undefined') {
-
-            console.log("redg");
-            setTimeout(function(){printPDF("pdfDocument");});
-
-        } else {
-
-            $("#pdfDocument").attr("src",url);
-            console.log("works");
-            var x = document.getElementById("pdfDocument");
-            console.log(x);
-            x.print();
-
+        if($("#obj").length!=0){
+            $("#pdfDocument").empty();
         }
+
+        var newElement = '<object id="obj" '+
+            'width="300" height="400" type="application/pdf"' +
+            'data="' + '/tempPdf/month_result.pdf' + '?#view=Fit&scrollbar=0&toolbar=0&navpanes=0">' +
+            '</object>';
+
+        $("#pdfDocument").append(newElement);
+
+        setTimeout(function () {
+            var el = document.getElementById("obj");
+            el.focus();
+            el.print();
+        }, 1000);
     }
     else{
-        printPage(url);  // for chrome
+        printPage(url);
     }
+
 }
 

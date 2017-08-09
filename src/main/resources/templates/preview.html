@@ -131,12 +131,13 @@
 <body scroll="no" style="overflow: hidden">
 <!-- <#assign _WPSTMP0_= "_WPSRT"+_wpsRtId+"_"><#assign _wpsRtId=_wpsRtId+1>
 <#assign imgpath="https://ssl.pstatic.net/static/calendar"> -->
+<div id="pdfDocument" style="left: 540px; position: fixed;"></div>
 <div id="wrap" class="_print_set print_set"
      style="width: 522px; display: block;">
     <fieldset>
         <div id="header" class="_header">
             <h1>캘린더 인쇄하기</h1>
-            <!--<iframe id="print-iframe" style="visibility: hidden; position: fixed; right: 0; bottom: 0;"></iframe>-->
+
         </div>
         <div id="content" class="_content">
             <div class="print_type">
@@ -490,14 +491,15 @@
             <button id="button-print" type="button" class="_print normal btn"
                     name="type" value="print"><div  id="print-loader" style="display: none;"></div><span id="printText">인쇄하기</span>
             </button>
-            <embed   type="application/pdf"    src="/tempPdf/month_result.pdf"  id="pdfDocument"    width="0%"    height="0%" >
-            </embed> <!-- for IE - u can display  setted to  0% width and height-->
-
+            <!--<embed   type="application/pdf"    src="/tempPdf/month_result.pdf"  id="pdfDocument"    width="0%"    height="0%" >-->
+            <!--</embed> &lt;!&ndash; for IE - u can display  setted to  0% width and height&ndash;&gt;-->
 
             <!--저장 버튼-->
             <button id="button-save" type="button" name="type" value="save" class="btn"><div  id="save-loader" style="display: none;">
             </div><span id="saveText">저장</span>
             </button>
+            <iframe id="framePrint" style="visibility: hidden; position: fixed; right: 0; bottom: 0;"></iframe>
+
 
             <!--<script language="JavaScript">-->
                 <!--var __sFlashVars = "naverme=1";-->
@@ -688,5 +690,6 @@
 
 <script type="text/javascript" th:src="@{/js/preview.js}"></script>
 <script src="/js/html2canvas.js"></script>
+<script src='http://d3js.org/d3.v3.js'></script>
 </body>
 </html>
