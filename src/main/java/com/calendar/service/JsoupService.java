@@ -4,7 +4,10 @@ package com.calendar.service;
  * Created by NAVER on 2017-07-25.
  */
 
-import com.calendar.data.*;
+import com.calendar.data.ICalComparator;
+import com.calendar.data.ICalFilteredData;
+import com.calendar.data.ICalFilteredEvent;
+import com.calendar.data.ICalTodo;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import org.jsoup.Jsoup;
@@ -28,7 +31,7 @@ public class JsoupService {
         this.iCal = iCal;
     }
 
-    public void makeHTMLfiles(int startMonth, int endMonth, int currentYear) throws IOException, ParserException, ParseException {
+    public void makeHTMLfiles(int startMonth, int endMonth, int currentYear, String fileID) throws IOException, ParserException, ParseException {
 
         Calendar calendar = parseIcalFile();
 
@@ -38,7 +41,7 @@ public class JsoupService {
             File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
             drawEventsOnHtml(doc, filteredData);
-            exportHtml(doc, month);
+            exportHtml(doc, month, fileID);
         }
     }
 
@@ -71,9 +74,10 @@ public class JsoupService {
         doc.select("script").remove();
     }
 
-    private void exportHtml(Document doc, int month) throws IOException {
+    private void exportHtml(Document doc, int month, String fileID) throws IOException {
+
         //로컬에 새로운 html 파일로 저장
-        String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month" + Integer.toString(month) + ".html";
+        String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month" + Integer.toString(month)+fileID + ".html";
         BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
         htmlWriter.write(doc.toString());
         htmlWriter.flush();

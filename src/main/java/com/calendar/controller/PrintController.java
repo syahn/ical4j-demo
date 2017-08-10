@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.UUID;
 
 /**
  * Created by NAVER on 2017-07-25.
@@ -38,10 +39,11 @@ public class PrintController {
     public void makePreview(
             @RequestParam("startMonth") int startMonth,
             @RequestParam("endMonth") int endMonth,
+            @RequestParam("fileID") String fileID,
             @RequestParam("currentYear") int currentYear
     ) throws ParseException, ParserException, IOException {
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear);
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,fileID);
 
     }
 
@@ -52,13 +54,11 @@ public class PrintController {
             @RequestParam("year") int year
     ) throws ParseException, ParserException, IOException {
 
-        long millis = System.currentTimeMillis();
-        String sig = Long.toHexString(millis);
-        System.out.println(sig);
+        String fileID = UUID.randomUUID().toString();
 
         model.addAttribute("initialMonth",month);
         model.addAttribute("initialYear",year);
-        model.addAttribute("fileID",sig);
+        model.addAttribute("fileID",fileID);
 
         return "preview";
     }
@@ -69,13 +69,16 @@ public class PrintController {
             @RequestParam("startMonth") int startMonth,
             @RequestParam("endMonth") int endMonth,
             @RequestParam("currentYear") int currentYear,
-            @RequestParam("orientation") int orientation
+            @RequestParam("orientation") int orientation,
+            @RequestParam("fileID") String fileID,
+            @RequestParam("type") String type
     ) throws ParseException, ParserException, IOException, InterruptedException {
         //converting html to pdf - by url
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear);
-        converter.makeAPdf(startMonth, endMonth, orientation);
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,fileID);
+        converter.makeAPdf(startMonth, endMonth, orientation, fileID, type);
 
         return "preview";
     }
+
 }

@@ -138,7 +138,7 @@
             <h1>캘린더 인쇄하기</h1>
 
         </div>
-        <div id="content" class="_content">
+        <div id="content" class="_content" th:value="${fileID}">
             <div class="print_type">
                 <div id="loader" style="display: none"></div>
                 <p class="_preview preview" id="monthPreview" th:value="${initialMonth}">
