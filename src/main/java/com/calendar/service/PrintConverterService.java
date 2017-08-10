@@ -22,7 +22,7 @@ public class PrintConverterService {
             selectFiles.append(fileUrl).append(Integer.toString(month)).append(".html ");
         }
 
-        String extendedUrl = "wkhtmltopdf" +
+        String extendedUrl = "wkhtmltopdf " +
                 (orientation == 1 ? " -O landscape " : " ") +
                 "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/month_result.pdf";
 

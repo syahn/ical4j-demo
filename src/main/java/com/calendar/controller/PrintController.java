@@ -44,8 +44,13 @@ public class PrintController {
     @PostMapping("/preview")
     public String viewPreviewWindow(Model model, @RequestParam("month") int month, @RequestParam("year") int year) throws ParseException, ParserException, IOException {
 
+        long millis = System.currentTimeMillis();
+        String sig = Long.toHexString(millis);
+        System.out.println(sig);
+
         model.addAttribute("initialMonth",month);
         model.addAttribute("initialYear",year);
+        model.addAttribute("fileID",sig);
 
         return "preview";
     }
