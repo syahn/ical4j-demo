@@ -7,6 +7,7 @@
         $.get("http://localhost:9000/load-iCalData",
             generateMonthObject()
         ).done(function (dataList) {
+            console.log(dataList);
             renderingAllEvents(dataList);
         });
     });
@@ -188,26 +189,28 @@
     }
 
     function addNewRow(weekRow) {
-        $(".table_container div:nth-child(" + (weekRow + 1) + ")>" +
-            ".schedule_list>tbody")
+        $(".table_container div:nth-child(" + (weekRow + 1) + ")>.schedule_list>tbody")
             .append("<tr></tr>");
     }
 
     function periodEvent(event, color) {
+        var uid = event.uid;
         var index = event.index;
         var period = event.period;
         var summary = event.summary;
 
         return "<td dayindex='" + index + "' colspan = '" + period + "'>" +
-            "<div style='background: " + color + ";'>" +
+            "<div class='event_period' key='" + uid + "' style='background: " + color + ";'>" +
             "<span style='color: white;'>" + summary + "</span>" +
             "</div>" +
             "</td>";
     }
 
     function ondDayEvent(event, color) {
+        var uid = event.uid;
         var summary = event.summary;
-        return "<div colspan='1' style='background: " + color + ";'>" +
+        return "<div class='event_oneday' key='" + uid + "' colspan='1' " +
+            "style='padding: 1px; background: " + color + ";'>" +
             "<span style='color: white;'>" + summary + "</span>" +
             "</div>";
     }
@@ -219,17 +222,17 @@
     function selectColorByType(type) {
         switch (type) {
             case "TODO":
-                return "red";
+                return "#f35055";
             case "DAY":
                 return "blue";
             case "YEARLY":
-                return "black";
+                return "#ff9c71";
             case "MONTHLY":
                 return "green";
             case "WEEKLY":
                 return "red";
             case "PERIOD":
-                return "grey";
+                return "#4984d9";
             case "DAILY":
                 return "MediumPurple";
         }

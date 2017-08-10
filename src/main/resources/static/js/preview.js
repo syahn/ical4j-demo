@@ -1,6 +1,5 @@
 //option variables
 (function () {
-
     var startOption = document.getElementById("start_month");
     var endOption = document.getElementById("end_month");
     var landscape = document.getElementById("rdo2_0");

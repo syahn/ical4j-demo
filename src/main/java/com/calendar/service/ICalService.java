@@ -38,7 +38,6 @@ public class ICalService {
 
     //일정리스트 만들기
     public ICalFilteredData filterData(Calendar calendar, int month, int year) throws ParseException {
-
         Setting setting = new Setting();
         setting.setCurrentMonth(month);
         setting.setCurrentYear(year);
@@ -46,28 +45,10 @@ public class ICalService {
         List<VEvent> events = calendar.getComponents("VEVENT");
         List<VToDo> todos = calendar.getComponents("VTODO");
 
-        return filterValidData(events, todos, setting);
+        return filterByValidPeriod(events, todos, setting);
     }
 
-    private Period makeValidPeriod(int year, int month) throws ParseException {
-        YearMonth currentYearMonth = YearMonth.of(year, month);
-        int preYear = currentYearMonth.minusMonths(1).getYear();
-        int nextYear = currentYearMonth.plusMonths(1).getYear();
-        int preMonth = currentYearMonth.minusMonths(1).getMonth().getValue();
-        int nextMonth = currentYearMonth.plusMonths(1).getMonth().getValue();
-
-        LocalDate tempStart = YearMonth.of(preYear, preMonth).atDay(23);
-        LocalDate tempEnd = YearMonth.of(nextYear, nextMonth).atDay(6);
-        DateTime startDate = new DateTime(tempStart
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//전달 23일
-        DateTime endDate = new DateTime(tempEnd
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//다음달 6일
-
-        //기간 만들기 - RRule 밑에 EXPIR있는 경우 인식 못함
-        return new Period(startDate, endDate);
-    }
-
-    private ICalFilteredData filterValidData(
+    private ICalFilteredData filterByValidPeriod(
             List<VEvent> events,
             List<VToDo> todos,
             Setting setting
@@ -83,6 +64,24 @@ public class ICalService {
         List<ICalEvent> resolvedEventList = resolveDataToICalEvent(events, setting);
 
         return filterByIndex(resolvedEventList, todos, setting);
+    }
+
+    private Period makeValidPeriod(int year, int month) throws ParseException {
+        YearMonth currentYearMonth = YearMonth.of(year, month);
+        int preYear = currentYearMonth.minusMonths(1).getYear();
+        int nextYear = currentYearMonth.plusMonths(1).getYear();
+        int preMonth = currentYearMonth.minusMonths(1).getMonth().getValue();
+        int nextMonth = currentYearMonth.plusMonths(1).getMonth().getValue();
+
+        LocalDate lastWeekOfPrevMonth = YearMonth.of(preYear, preMonth).atDay(23);
+        LocalDate firstWeekOfNextMonth = YearMonth.of(nextYear, nextMonth).atDay(6);
+        DateTime startDate = new DateTime(lastWeekOfPrevMonth
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//전달 23일
+        DateTime endDate = new DateTime(firstWeekOfNextMonth
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//다음달 6일
+
+        //기간 만들기 - RRule 밑에 EXPIR있는 경우 인식 못함
+        return new Period(startDate, endDate);
     }
 
     private List<ICalEvent> resolveDataToICalEvent(List<VEvent> events, Setting setting) {
@@ -441,6 +440,35 @@ public class ICalService {
         return filteredEventList;
     }
 
+    private void addEventToFilteredEvents(
+            String type,
+            ICalEvent event,
+            List<ICalFilteredEvent> filteredEventList
+    ) {
+        int startIndex = event.getStartIndex();
+        int endIndex = event.getEndIndex();
+        int period = event.getPeriod();
+        int startHour = event.getStartHour();
+        int startMinute = event.getStartMinute();
+
+        if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
+            ICalFilteredEvent data = new ICalFilteredEvent();
+            data.setSummary(event.getSummary());
+            data.setIndex(startIndex);
+            data.setPeriod(period);
+            data.setUid(event.getUid());
+            data.setType(type);
+            data.setEndIndex(endIndex);
+            data.setWeekRow(calculateWeekRow(startIndex));
+            data.setStartHour(startHour);
+            data.setStartMinute(startMinute);
+            data.setIsAnniversary(event.getIsAnniversary());
+            data.setTimeLabel(event.getTimeLabel());
+
+            filteredEventList.add(data);
+        }
+    }
+
     //마지막째 주 요일 반복
     private void addLastWeekRecurEventToFilteredEvents(
             String type,
@@ -573,34 +601,6 @@ public class ICalService {
         }
     }
 
-    private void addEventToFilteredEvents(
-            String type,
-            ICalEvent event,
-            List<ICalFilteredEvent> filteredEventList
-    ) {
-        int startIndex = event.getStartIndex();
-        int endIndex = event.getEndIndex();
-        int period = event.getPeriod();
-        int startHour = event.getStartHour();
-        int startMinute = event.getStartMinute();
-
-        if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
-            ICalFilteredEvent data = new ICalFilteredEvent();
-            data.setSummary(event.getSummary());
-            data.setIndex(startIndex);
-            data.setPeriod(period);
-            data.setUid(event.getUid());
-            data.setType(type);
-            data.setEndIndex(endIndex);
-            data.setWeekRow(calculateWeekRow(startIndex));
-            data.setStartHour(startHour);
-            data.setStartMinute(startMinute);
-            data.setIsAnniversary(event.getIsAnniversary());
-            data.setTimeLabel(event.getTimeLabel());
-
-            filteredEventList.add(data);
-        }
-    }
 
     private int calculateIndexOfDate(ICalEvent event, String mode, Setting setting) {
         int index;

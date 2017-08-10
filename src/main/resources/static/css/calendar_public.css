@@ -3066,3 +3066,12 @@ body, html {
 .en_US .layer_view_schedule .schedule_list .cont {
     padding-left: 45px
 }
+
+.event_period {
+    margin: 0 2px 1px 2px;
+    border: 1px solid #2769d4!important;
+}
+
+.event_oneday {
+    margin: 0 2px 1px 2px;
+}
