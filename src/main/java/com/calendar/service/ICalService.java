@@ -6,6 +6,7 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.*;
+import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.RRule;
@@ -15,9 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -119,12 +118,15 @@ public class ICalService {
                 data.setStartMinute(Integer.parseInt(mdf.format(event.getStartDate().getDate())));
                 data.setEndHour(Integer.parseInt(hdf.format(event.getEndDate().getDate())));
                 data.setEndMinute(Integer.parseInt(mdf.format(event.getEndDate().getDate())));
+
                 String timeLabel;
-                if (data.getStartHour() > 11) {
-                    int hour = data.getStartHour() == 12 ? 12 : data.getStartHour() - 12;
+                int startHour = data.getStartHour();
+
+                if (startHour > 11) {
+                    int hour = startHour == 12 ? 12 : startHour - 12;
                     timeLabel = "(오후 " + hour + ":" + data.getStartMinute() + ") ";
                 } else {
-                    int hour = data.getStartHour() == 0 ? 12 : data.getStartHour();
+                    int hour = startHour == 0 ? 12 : startHour;
                     timeLabel = "(오전 " + hour + ":" + data.getStartMinute() + ") ";
                 }
                 data.setTimeLabel(timeLabel);
@@ -155,7 +157,6 @@ public class ICalService {
                     }
                     data.setStartDayList(tempDayList);
 
-
                     //시작 날짜의 요일 dayofWeek 포함( 나중에 시작일 구분 시 필요) - 시작일이 요일이면
                     LocalDate date = LocalDate.of(data.getStartYear(), data.getStartMonth(), data.getStartDate());
                     DayOfWeek dayOfWeek = date.getDayOfWeek();
@@ -177,7 +178,11 @@ public class ICalService {
         return eventList;
     }
 
-    private ICalFilteredData filterByIndex(List<ICalEvent> eventList, List<VToDo> todoList,Setting setting) {
+    private ICalFilteredData filterByIndex(
+            List<ICalEvent> eventList,
+            List<VToDo> todoList,
+            Setting setting
+    ) {
         ICalFilteredData filteredData = new ICalFilteredData();
 
         List<ICalTodo> filteredTodoList = filterTodoListByIndex(todoList, setting);
@@ -355,9 +360,7 @@ public class ICalService {
                         // 마지막 무슨 요일
                         else if (byDayList.size() > 0) {
                             if (startMonth <= currentMonth - 1 || startYear < currentYear) {
-
                                 int firstDayOfMonth = getFirstDay(currentYear, currentMonth - 1);
-
                                 int day = byDayList.get(0).getDay().ordinal();
                                 DayOfWeek[] dayOfWeeks = DayOfWeek.values();
                                 DayOfWeek dayOfWeek = dayOfWeeks[day - 1];
@@ -378,8 +381,8 @@ public class ICalService {
                             int tempMonth = startMonth;
                             int tempYear = startYear;
                             int tempCount = 0;
-
                             int j = startIndex;
+
                             while (j < end) {
                                 if (tempCount == interval || tempCount == 0) {
                                     addEventToFilteredEvents("MONTHLY", event, filteredEventList);
@@ -432,7 +435,6 @@ public class ICalService {
                 }
             }
         }
-
 
         Collections.sort(filteredEventList,new ICalComparator());
 
@@ -600,24 +602,6 @@ public class ICalService {
         }
     }
 
-    private int calculateWeekRow(int startIndex) {
-        if (startIndex < 7) {
-            return 0;
-        } else if (startIndex < 14) {
-            return 1;
-        } else if (startIndex < 21) {
-            return 2;
-        } else if (startIndex < 28) {
-            return 3;
-        } else if (startIndex < 35) {
-            return 4;
-        } else if (startIndex < 42) {
-            return 5;
-        } else {
-            return -1;
-        }
-    }
-
     private int calculateIndexOfDate(ICalEvent event, String mode, Setting setting) {
         int index;
         int currentYear = setting.getCurrentYear();
@@ -664,6 +648,23 @@ public class ICalService {
         return index;
     }
 
+    private int calculateWeekRow(int startIndex) {
+        if (startIndex < 7) {
+            return 0;
+        } else if (startIndex < 14) {
+            return 1;
+        } else if (startIndex < 21) {
+            return 2;
+        } else if (startIndex < 28) {
+            return 3;
+        } else if (startIndex < 35) {
+            return 4;
+        } else if (startIndex < 42) {
+            return 5;
+        } else {
+            return -1;
+        }
+    }
 
     private int extractYear(String time) {
         return Integer.parseInt(time.substring(0, 4));
@@ -677,35 +678,37 @@ public class ICalService {
         return Integer.parseInt(time.substring(6, 8));
     }
 
-    private boolean isLeapYear(int year) {
-        return year % 400 == 0 || (year % 100 != 0 && year % 4 == 0);
-    }
-
     private int daysOfMonth(int year, int month) {
-        YearMonth ym = YearMonth.of(year, month);
-        return ym.getMonth().length(isLeapYear(year));
+        return YearMonth.of(year, month).lengthOfMonth();
     }
 
     private int daysOfYear(int year) {
-        return isLeapYear(year) ? 366 : 365;
+        return Year.of(year).length();
     }
 
     private int getFirstDay(int year, int month) {
-        YearMonth ym = YearMonth.of(year, month);
-        return ym.atDay(1).getDayOfWeek().getValue();
+        return YearMonth.of(year, month).atDay(1).getDayOfWeek().getValue();
     }
 
     private int getLastDay(int year, int month) {
-        YearMonth ym = YearMonth.of(year, month);
-        return ym.atDay(daysOfMonth(year, month)).getDayOfWeek().getValue();
+        int lastDay = daysOfMonth(year, month);
+        return YearMonth.of(year, month).atDay(lastDay).getDayOfWeek().getValue();
     }
 
     private int getYearOfPreMonth(int year, int month) {
-        return month == 1 ? year - 1 : year;
+        return YearMonth.of(year, month).minusMonths(1).getYear();
     }
 
     private int getYearOfNextMonth(int year, int month) {
-        return month == 12 ? year + 1 : year;
+        return YearMonth.of(year, month).plusMonths(1).getYear();
+    }
+
+    private int getPreMonth(int month) {
+        return Month.of(month).minus(1).getValue();
+    }
+
+    private int getNextMonth(int month) {
+        return  Month.of(month).plus(1).getValue();
     }
 
     private int calculatePeriod(ICalEvent data, VEvent event) {
@@ -728,13 +731,5 @@ public class ICalService {
             // TODO: 연 계산하기
         }
         return -1;
-    }
-
-    private int getPreMonth(int month) {
-        return month == 1 ? 12 : month - 1;
-    }
-
-    private int getNextMonth(int month) {
-        return month == 12 ? 1 : month + 1;
     }
 }
