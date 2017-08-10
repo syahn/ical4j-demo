@@ -12341,3 +12341,13 @@ _::-webkit-full-page-media .attendee_header, _::-webkit-full-page-media .attende
 _::-webkit-full-page-media .osx .attendee_header, _::-webkit-full-page-media .attendee_body, _:future .osx .attendee_header, _:future .attendee_body, :root .osx .attendee_header, :root .attendee_body {
     padding-right: 0
 }
+
+
+.event_period {
+    margin: 0 2px 1px 2px;
+    border: 1px solid #2769d4!important;
+}
+
+.event_oneday {
+    margin: 0 2px 1px 2px;
+}

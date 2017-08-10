@@ -21,6 +21,11 @@ public class ICalController {
         return "index";
     }
 
+    @GetMapping("/login")
+    public String login() throws IOException, ParserException {
+        return "login";
+    }
+
     @RequestMapping(value="/month/{id}")
     public String renderMonthView(@PathVariable int id){
         return "month_" + Integer.toString(id);

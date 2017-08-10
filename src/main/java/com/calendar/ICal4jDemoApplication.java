@@ -18,13 +18,11 @@ public class ICal4jDemoApplication {
 		TimerTask hourlyTask = new TimerTask () {
 			@Override
 			public void run () {
-
 				DeleteTask task = new DeleteTask();
 				task.DeleteFiles();
 			}
 		};
 
 		timer.schedule (hourlyTask, 0l, 15000);
-
 	}
 }
