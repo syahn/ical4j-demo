@@ -103,6 +103,8 @@
             currentYear: 2017
         }).done(function () {
 
+            console.log(document.cookie);
+
             if (document.getElementById("hiddenFrame") !== null) {
                 var elem = document.getElementById("hiddenFrame");
                 elem.parentNode.removeChild(elem);

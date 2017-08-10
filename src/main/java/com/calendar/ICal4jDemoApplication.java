@@ -12,7 +12,9 @@ public class ICal4jDemoApplication {
 
 	public static void main(String[] args) {
 
+
 		SpringApplication.run(ICal4jDemoApplication.class, args);
+
 
 		Timer timer = new Timer ();
 		TimerTask hourlyTask = new TimerTask () {
@@ -27,4 +29,7 @@ public class ICal4jDemoApplication {
 		timer.schedule (hourlyTask, 0l, 15000);
 
 	}
+
 }
+
+
