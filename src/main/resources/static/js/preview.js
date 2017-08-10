@@ -115,7 +115,7 @@ function takeScreenShot(startMonth, mode) {
                 $("#loader").css("display", "none");
             }
         });
-        // $("#hiddenFrame").css("visibility", "hidden");
+        $("#hiddenFrame").css("visibility", "hidden");
     });
 
 
@@ -218,83 +218,9 @@ function requestPrint() {
             orientation: orientation
         }).done(function () {
 
-        printPDF("/tempPdf/month_result.pdf");
+        $("#hiddenFrame").attr("src", "/tempPdf/month_result.pdf");
         document.getElementById("printText").style.display = "block";
         document.getElementById("print-loader").style.display = "none";
     });
 
 }
-
-function closePrint() {
-    document.body.removeChild(this.__container__);
-}
-
-function setPrint() {
-    this.contentWindow.__container__ = this;
-    this.contentWindow.onbeforeunload = closePrint;
-    this.contentWindow.onafterprint = closePrint;
-    this.contentWindow.focus(); // Required for IE
-    this.contentWindow.print();
-}
-
-function printPage(sURL) {
-    var oHiddFrame = document.createElement("iframe");
-    oHiddFrame.onload = setPrint;
-    oHiddFrame.style.visibility = "hidden";
-    oHiddFrame.style.position = "fixed";
-    oHiddFrame.style.right = "0";
-    oHiddFrame.style.bottom = "0";
-    oHiddFrame.src = sURL;
-    document.body.appendChild(oHiddFrame);
-    console.log(oHiddFrame);
-}
-
-
-function printPDF(url) {
-
-    var agent = navigator.userAgent.toLowerCase(); // ie아닌경우 agent 인식 위함
-
-    if ((navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1)) {
-
-        //방법 1 - 새창에 pdf파일을 표시하여 print 실행 - 로드는 되지만 실행 안됨 / 크롬은 정상동작
-        // setTimeout(function () {
-        //     var W = window.open(url);
-        //     W.print();
-        // },3000);
-
-        //방법 2 - iframe에 pdf파일을 로드시킨후 print 실행 - 로드 되고 프린트 실행시
-        //$("#hiddenFrame").attr("src","/tempPdf/printable.pdf");
-        // setTimeout(function () {
-        //     $("#hiddenFrame").get(0).focus();
-        //     // $("#hiddenFrame").get(0).contentWindow.document.execCommand('print', false, null);
-        // },3000);
-
-        //방법 3 - object에 pdf파일 임베딩
-        // if($("#obj").length!=0){
-        //     $("#pdfDocument").empty();
-        // }
-
-        // var newElement = '<object id="obj" '+
-        //     'width="300" height="400" type="application/pdf"' +
-        //     'data="' + '/tempPdf/printable.pdf' + '?#view=Fit&scrollbar=0&toolbar=0&navpanes=0">' +
-        //     '</object>';
-
-        // setTimeout(function () {
-        //     var el = document.getElementById("obj");
-        //     el.focus();
-        //     el.print();
-        // }, 1000);
-
-
-        //방법 4 - pdf파일에 auto printable js 삽입
-        var oHiddFrame = document.createElement("iframe");
-        oHiddFrame.src="http://localhost:9000/tempPdf/printable.pdf"
-        $("#pdfDocument").append(oHiddFrame);
-
-    }
-    else{
-        printPage(url);
-    }
-
-}
-

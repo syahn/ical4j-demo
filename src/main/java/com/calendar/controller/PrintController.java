@@ -35,14 +35,22 @@ public class PrintController {
 
     @ResponseBody
     @PostMapping("/make-preview")
-    public void makePreview(@RequestParam("startMonth") int startMonth, @RequestParam("endMonth") int endMonth, @RequestParam("currentYear") int currentYear) throws ParseException, ParserException, IOException {
+    public void makePreview(
+            @RequestParam("startMonth") int startMonth,
+            @RequestParam("endMonth") int endMonth,
+            @RequestParam("currentYear") int currentYear
+    ) throws ParseException, ParserException, IOException {
 
         jSoup.makeHTMLfiles(startMonth,endMonth,currentYear);
 
     }
 
     @PostMapping("/preview")
-    public String viewPreviewWindow(Model model, @RequestParam("month") int month, @RequestParam("year") int year) throws ParseException, ParserException, IOException {
+    public String viewPreviewWindow(
+            Model model,
+            @RequestParam("month") int month,
+            @RequestParam("year") int year
+    ) throws ParseException, ParserException, IOException {
 
         long millis = System.currentTimeMillis();
         String sig = Long.toHexString(millis);
