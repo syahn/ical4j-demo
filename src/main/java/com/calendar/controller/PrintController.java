@@ -3,6 +3,9 @@ package com.calendar.controller;
 import com.calendar.service.JsoupService;
 import com.calendar.service.PrintConverterService;
 import net.fortuna.ical4j.data.ParserException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionJavaScript;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionNamed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -35,14 +39,22 @@ public class PrintController {
 
     @ResponseBody
     @PostMapping("/make-preview")
-    public void makePreview(@RequestParam("startMonth") int startMonth, @RequestParam("endMonth") int endMonth, @RequestParam("currentYear") int currentYear) throws ParseException, ParserException, IOException {
+    public void makePreview(
+            @RequestParam("startMonth") int startMonth,
+            @RequestParam("endMonth") int endMonth,
+            @RequestParam("currentYear") int currentYear
+    ) throws ParseException, ParserException, IOException {
 
         jSoup.makeHTMLfiles(startMonth,endMonth,currentYear);
 
     }
 
     @PostMapping("/preview")
-    public String viewPreviewWindow(Model model, @RequestParam("month") int month, @RequestParam("year") int year) throws ParseException, ParserException, IOException {
+    public String viewPreviewWindow(
+            Model model,
+            @RequestParam("month") int month,
+            @RequestParam("year") int year
+    ) throws ParseException, ParserException, IOException {
 
         model.addAttribute("initialMonth",month);
         model.addAttribute("initialYear",year);

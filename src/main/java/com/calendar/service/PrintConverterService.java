@@ -4,8 +4,11 @@ package com.calendar.service;
  * Created by NAVER on 2017-07-07.
  */
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionNamed;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 
 @Service
@@ -29,6 +32,24 @@ public class PrintConverterService {
         String command = String.format(extendedUrl, selectFiles.toString());
         Process wkhtml = Runtime.getRuntime().exec(command); // Start process
         wkhtml.waitFor(); // Allow process to run
+
+        File file = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/month_result.pdf");
+
+        PDDocument document = PDDocument.load(file);
+
+        //Creating PDActionJavaScript object
+        PDActionNamed action = new PDActionNamed();
+        action.setN("Print");
+
+        //Embedding java script
+        document.getDocumentCatalog().setOpenAction(action);
+
+        //Saving the document
+        document.save( new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/month_result.pdf") );
+        System.out.println("Data added to the given PDF");
+
+        //Closing the document
+        document.close();
     }
 }
 

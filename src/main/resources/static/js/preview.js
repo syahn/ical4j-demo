@@ -254,29 +254,32 @@ function printPDF(url) {
 
     var agent = navigator.userAgent.toLowerCase(); // ie아닌경우 agent 인식 위함
 
-    if ((navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1)) {
+    if ((navigator.appName === 'Netscape' && navigator.userAgent.search('Trident') !== -1) || (agent.indexOf("msie") !== -1)) {
 
+        var oHiddFrame = document.createElement("iframe");
+        oHiddFrame.src ='/tempPdf/month_result.pdf' ;
 
-        if($("#obj").length!=0){
-            $("#pdfDocument").empty();
-        }
+        $("#pdfDocument").append(oHiddFrame);
 
-        var newElement = '<object id="obj" '+
-            'width="300" height="400" type="application/pdf"' +
-            'data="' + '/tempPdf/month_result.pdf' + '?#view=Fit&scrollbar=0&toolbar=0&navpanes=0">' +
-            '</object>';
-
-        $("#pdfDocument").append(newElement);
-
-        setTimeout(function () {
-            var el = document.getElementById("obj");
-            el.focus();
-            el.print();
-        }, 1000);
+        // setTimeout(function () {
+        //     var el = document.getElementById("obj");
+        //     el.focus();
+        //     el.print();
+        // }, 1000);
     }
-    else{
+    else {
         printPage(url);
     }
-
 }
 
+function myPrint() {
+    var myPrintContent = document.getElementById('printdiv');
+    var myPrintWindow = window.open(windowUrl, windowName, 'left=300,top=100,width=400,height=400');
+    myPrintWindow.document.write(myPrintContent.innerHTML);
+    myPrintWindow.document.getElementById('hidden_div').style.display = 'block';
+    myPrintWindow.document.close();
+    myPrintWindow.focus();
+    myPrintWindow.print();
+    myPrintWindow.close();
+    return false;
+}

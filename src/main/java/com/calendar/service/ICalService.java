@@ -50,12 +50,12 @@ public class ICalService {
         return filterValidData(events, todos, setting);
     }
 
-
     private Period makeValidPeriod(int year, int month) throws ParseException {
-        int preYear = getYearOfPreMonth(year, month);
-        int nextYear = getYearOfNextMonth(year, month);
-        int preMonth = getPreMonth(month);
-        int nextMonth = getNextMonth(month);
+        YearMonth currentYearMonth = YearMonth.of(year, month);
+        int preYear = currentYearMonth.minusMonths(1).getYear();
+        int nextYear = currentYearMonth.plusMonths(1).getYear();
+        int preMonth = currentYearMonth.minusMonths(1).getMonth().getValue();
+        int nextMonth = currentYearMonth.plusMonths(1).getMonth().getValue();
 
         LocalDate tempStart = YearMonth.of(preYear, preMonth).atDay(23);
         LocalDate tempEnd = YearMonth.of(nextYear, nextMonth).atDay(6);
