@@ -12,14 +12,17 @@ var printMode = {
     "landscape": "width: 343px; height:260px;"
 };
 
+var fileID;
+
 $(document).ready(function () {
 
     //select option 메인 페이지 달로 초기화
 
+    fileID = $("#content").attr("value");
+
     initiatePeriod();
     changePreviewImage();
 
-    $("._close").click(closeWindow);
     $("#button-print").click(requestPrint);
     $("#button-save").click(requestSave);
     $("#start_month").on("change", changePreviewImage);
@@ -27,10 +30,6 @@ $(document).ready(function () {
     $("._portrait, ._landscape").click(changeOrientation);
 
 });
-
-function closeWindow() {
-    window.close();
-}
 
 function initiatePeriod() {
 
@@ -65,6 +64,11 @@ function refreshOptions() {
     startMonth = startOption.options[startOption.selectedIndex].value;
     endMonth = endOption.options[endOption.selectedIndex].value;
 
+    if(startMonth>endMonth){
+        $("#end_month").val(startMonth);
+        endMonth=startMonth;
+    }
+
     //용지방향 재설정
     orientation = landscape.checked ? 1 : 0;
 }
@@ -94,6 +98,7 @@ function takeScreenShot(startMonth, mode) {
     $.post("/make-preview", {
         startMonth: startMonth,
         endMonth: startMonth,
+        fileID: fileID,
         currentYear: 2017
     }).done(function () {
 
@@ -102,7 +107,7 @@ function takeScreenShot(startMonth, mode) {
             elem.parentNode.removeChild(elem);
         }
 
-        makeDummyWindow(startMonth);//새로 생성된 html파일 불러와 iframe 만듬
+        makeDummyWindow(startMonth.toString()+fileID);//새로 생성된 html파일 불러와 iframe 만듬
 
         html2canvas(document.getElementById("hiddenFrame"), {
             onrendered: function (canvas) {
@@ -121,7 +126,7 @@ function takeScreenShot(startMonth, mode) {
 
 }
 
-function makeDummyWindow(month) {
+function makeDummyWindow(path) {
     var hiddenFrame = document.createElement("iframe");
 
     hiddenFrame.setAttribute("id", "hiddenFrame");
@@ -131,11 +136,11 @@ function makeDummyWindow(month) {
     hiddenFrame.style.marginTop = "100px";
     document.body.appendChild(hiddenFrame);
 
-    $("#hiddenFrame").attr("src", generateNewUrl(month));
+    $("#hiddenFrame").attr("src", generateNewUrl(path));
 }
 
-function generateNewUrl(month) {
-    return "/html/month" + month + ".html";
+function generateNewUrl(path) {
+    return "/html/month" + path + ".html";
 }
 
 function requestSave() {
@@ -148,11 +153,13 @@ function requestSave() {
         startMonth: startMonth,
         endMonth: endMonth,
         currentYear: 2017, // 임시
-        orientation: orientation
+        orientation: orientation,
+        fileID: fileID,
+        type: "save"
     };
 
     $.post("http://localhost:9000/convert", optionValue).done(function () {
-        var dataURI = '/tempPdf/month_result.pdf';
+        var dataURI = '/tempPdf/month_result'+fileID+'.pdf';
         var fileName = 'Calendar.pdf';
 
         save(dataURI, fileName);
@@ -215,10 +222,12 @@ function requestPrint() {
             startMonth: startMonth,
             endMonth: endMonth,
             currentYear: 2017, // 임시
-            orientation: orientation
+            orientation: orientation,
+            fileID: fileID,
+            type: "print"
         }).done(function () {
 
-        $("#hiddenFrame").attr("src", "/tempPdf/month_result.pdf");
+        $("#hiddenFrame").attr("src", "/tempPdf/month_result"+fileID+".pdf");
         document.getElementById("printText").style.display = "block";
         document.getElementById("print-loader").style.display = "none";
     });
