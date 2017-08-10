@@ -160,7 +160,6 @@ function requestSave() {
         document.getElementById("save-loader").style.display = "none";
         document.getElementById("saveText").style.display = "block";
     });
-
 }
 
 function save(fileURL, fileName) {
