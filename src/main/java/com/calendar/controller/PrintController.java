@@ -5,11 +5,10 @@ import com.calendar.service.PrintConverterService;
 import net.fortuna.ical4j.data.ParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -36,6 +35,7 @@ public class PrintController {
 
     @ResponseBody
     @PostMapping("/make-preview")
+    @PostAuthorize("returnObject.type == authentication.name")
     public void makePreview(
             @RequestParam("startMonth") int startMonth,
             @RequestParam("endMonth") int endMonth,
@@ -45,6 +45,20 @@ public class PrintController {
 
         jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,fileID);
 
+    }
+
+    @RequestMapping("/tempPdf/{id}")
+    public String findMyPath(Model model, @PathVariable String id){
+
+        System.out.println(id);
+        model.addAttribute("path", "/tempPDf/"+id+"/month_result.pdf");
+        return "/pdf";
+
+    }
+
+    @RequestMapping("/tempPdf/{id}/"+"month_result.pdf")
+    public String makeError(Model model, @PathVariable String id) {
+        return "";
     }
 
     @PostMapping("/preview")

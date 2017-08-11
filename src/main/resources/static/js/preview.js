@@ -1,6 +1,5 @@
 //option variables
 (function () {
-
     var startOption = document.getElementById("start_month");
     var endOption = document.getElementById("end_month");
     var landscape = document.getElementById("rdo2_0");
@@ -111,7 +110,6 @@
 
             }
 
-
             makeDummyWindow(startMonth.toString() + fileID);//새로 생성된 html파일 불러와 iframe 만듬
 
             html2canvas(document.getElementById("hiddenFrame"), {
@@ -125,7 +123,7 @@
                     $("#loader").css("display", "none");
                 }
             });
-            $("#hiddenFrame").css("visibility", "hidden");
+            // $("#hiddenFrame").css("visibility", "hidden");
         });
     }
 
@@ -236,7 +234,7 @@
                 type: "print"
             }).done(function () {
 
-            $("#hiddenFrame").attr("src", "/tempPdf/month_result" + fileID + ".pdf");
+            $("#hiddenFrame").attr("src", "http://localhost:9000/tempPdf/" + fileID);
 
             setTimeout(disablePrintLoader, 1000);
         });

@@ -89,15 +89,12 @@ public class JsoupService {
         for(int i=0;i<list.size();i++){
 
             if(list.get(i) instanceof ICalTodo){
-//                System.out.println("list of ICalTODO"+((ICalTodo) list.get(i)).getSummary());
                 appendTodoEvent(doc, (ICalTodo) list.get(i));
             }
             else if(list.get(i) instanceof ICalFilteredEvent){
                 if(((ICalFilteredEvent) list.get(i)).getType().equals("PERIOD")){
-//                    System.out.println("list of period"+((ICalFilteredEvent) list.get(i)).getSummary());
                     appendPeriodEvent(doc, (ICalFilteredEvent) list.get(i));
                 }else{
-//                    System.out.println("list of oneDay"+((ICalFilteredEvent) list.get(i)).getSummary());
                     appenOneDayEvent(doc, (ICalFilteredEvent) list.get(i));
                 }
             }
@@ -337,17 +334,17 @@ public class JsoupService {
     private String selectColorByType(String type) {
         switch (type) {
             case "TODO":
-                return "red";
+                return "#f35055";
             case "DAY":
                 return "blue";
             case "YEARLY":
-                return "black";
+                return "#ff9c71";
             case "MONTHLY":
                 return "green";
             case "WEEKLY":
                 return "red";
             case "PERIOD":
-                return "grey";
+                return "#4984d9";
             case "DAILY":
                 return "MediumPurple";
         }

@@ -17,7 +17,21 @@ public class PrintConverterService {
     //pdf저장 메소드
     final static String fileUrl = "C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month";//기본 url뒤에 월을 붙임
 
-    public void makeAPdf(int startMonth, int endMonth, int orientation, String fileID, String type) throws InterruptedException, IOException {
+    public void makeAPdf(
+            int startMonth,
+            int endMonth,
+            int orientation,
+            String fileID,
+            String type
+    ) throws InterruptedException, IOException {
+        File dirById = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID);
+        if (!dirById.exists()) {
+            if (dirById.mkdir()) {
+                System.out.println("Directory is created!");
+            } else {
+                System.out.println("Failed to create directory!");
+            }
+        }
 
         // 각 월에 대한 임시 경로 생성
         StringBuilder selectFiles = new StringBuilder();
@@ -27,14 +41,14 @@ public class PrintConverterService {
 
         String extendedUrl = "wkhtmltopdf " +
                 (orientation == 1 ? " -O landscape " : " ") +
-                "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/month_result" + fileID + ".pdf";
+                "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID + "/month_result.pdf";
 
         String command = String.format(extendedUrl, selectFiles.toString());
         Process wkhtml = Runtime.getRuntime().exec(command); // Start process
         wkhtml.waitFor(); // Allow process to run
 
         if(type.equals("print")){
-            File file = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/month_result" + fileID + ".pdf");
+            File file = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID + "/month_result.pdf");
 
             PDDocument document = PDDocument.load(file);
 
@@ -46,11 +60,10 @@ public class PrintConverterService {
             document.getDocumentCatalog().setOpenAction(action);
 
             //Saving the document
-            document.save(new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/month_result" + fileID + ".pdf"));
+            document.save(new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID + "/month_result.pdf"));
 
             //Closing the document
             document.close();
         }
     }
 }
-
