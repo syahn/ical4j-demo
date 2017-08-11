@@ -17,7 +17,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         System.out.println("app");
-        registry.addInterceptor(requestInterceptor).addPathPatterns("/tempPdf/{id}/*");
+        registry.addInterceptor(requestInterceptor).addPathPatterns("/tempPdf/*");
     }
 
 }

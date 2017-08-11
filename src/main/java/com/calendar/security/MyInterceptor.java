@@ -19,12 +19,15 @@ public class MyInterceptor extends HandlerInterceptorAdapter {
         System.out.println("fda");
         String uri = httpServletRequest.getRequestURI();
         System.out.println(uri);
+        System.out.println(uri.substring(9,uri.length()));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentPrincipalName = authentication.getName();
+
         if(currentPrincipalName.equals("user1")){
             System.out.println("current user is user1");
             return false;
         }
+
         return true;
 
     }

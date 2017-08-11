@@ -6,6 +6,7 @@ import net.fortuna.ical4j.data.ParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,14 +24,17 @@ public class PrintController {
 
     private JsoupService jSoup;
     private PrintConverterService converter;
+    private final InMemoryUserDetailsManager inMemoryUserDetailsManager;
 
     @Autowired
     public PrintController(
             JsoupService jSoup,
-            PrintConverterService converter
+            PrintConverterService converter,
+            InMemoryUserDetailsManager inMemoryUserDetailsManager
     ) {
         this.jSoup = jSoup;
         this.converter = converter;
+        this.inMemoryUserDetailsManager = inMemoryUserDetailsManager;
     }
 
     @ResponseBody
@@ -58,7 +62,9 @@ public class PrintController {
 
     @RequestMapping("/tempPdf/{id}/"+"month_result.pdf")
     public String makeError(Model model, @PathVariable String id) {
-        return "";
+        model.addAttribute("path", "/tempPDf /"+id+"/month_result.pdf");
+        return "/pdf";
+
     }
 
     @PostMapping("/preview")
@@ -69,6 +75,14 @@ public class PrintController {
     ) throws ParseException, ParserException, IOException {
 
         String fileID = UUID.randomUUID().toString();
+
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String currentPrincipalName = authentication.getName();
+//        User user = (User) inMemoryUserDetailsManager.loadUserByUsername(currentPrincipalName);
+//        user.setId(fileID);
+//        inMemoryUserDetailsManager.updateUser(user);
+//        System.out.println(((User) inMemoryUserDetailsManager.loadUserByUsername(currentPrincipalName)).getId());
+        //user에 id 삽입
 
         model.addAttribute("initialMonth",month);
         model.addAttribute("initialYear",year);
