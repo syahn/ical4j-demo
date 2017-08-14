@@ -48,14 +48,14 @@ public class PrintConverterService {
         System.out.printf("%s, %s", currentPrincipalName, fileID);
         String extendedUrl = "wkhtmltopdf " +
                 (orientation == 1 ? " -O landscape " : " ") +
-                "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" + fileID + "-month_result.pdf";
+                "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" + fileID + ".pdf";
 
         String command = String.format(extendedUrl, selectFiles.toString());
         Process wkhtml = Runtime.getRuntime().exec(command); // Start process
         wkhtml.waitFor(); // Allow process to run
 
         if(type.equals("print")){
-            File file = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" +  fileID + "-month_result.pdf");
+            File file = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" +  fileID + ".pdf");
 
             PDDocument document = PDDocument.load(file);
 
@@ -67,7 +67,7 @@ public class PrintConverterService {
             document.getDocumentCatalog().setOpenAction(action);
 
             //Saving the document
-            document.save(new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" +  fileID + "-month_result.pdf"));
+            document.save(new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" +  fileID + ".pdf"));
 
             //Closing the document
             document.close();

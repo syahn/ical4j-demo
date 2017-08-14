@@ -24,6 +24,7 @@ public class MyInterceptor extends HandlerInterceptorAdapter {
         String uri = httpServletRequest.getRequestURI();
         String userID = uri.split("/")[2];
 
+        System.out.printf("userID: %s", userID);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentPrincipalName = authentication.getName();
 

@@ -57,7 +57,7 @@ public class PrintController {
         jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID);
     }
 
-    @GetMapping("/html/{userID}/month{startMonth}_{fileID}.html")
+    @GetMapping("/html/{userID}/{startMonth}/{fileID}/html-request")
     @ResponseBody
     public String responseHtml(
             @PathVariable String userID,
@@ -70,18 +70,15 @@ public class PrintController {
         return new String(contents);
     }
 
-    @GetMapping("/tempPdf/{userID}/{fileID}-month_result.pdf")
-    public ResponseEntity<byte[]> login2( @PathVariable String userID, @PathVariable String fileID) throws IOException, ParserException {
-        Path pdfPath = Paths.get("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/"+userID+ "/" + fileID+"-month_result.pdf");
-        byte[] contents = Files.readAllBytes(pdfPath);
+    @GetMapping("/tempPdf/{userID}/{fileID}/pdf-request")
+    public String responseDir(
+            @PathVariable String userID,
+            @PathVariable String fileID,
+            Model model
+    ) throws IOException, ParserException {
+        model.addAttribute("path", "/tempPdf/" + userID + "/" + fileID + ".pdf");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("application/pdf"));
-        String filename = "output.pdf";
-        headers.setContentDispositionFormData(filename, filename);
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(contents, headers, HttpStatus.OK);
-        return response;
+        return "/pdf";
     }
 
     @PostMapping("/preview")

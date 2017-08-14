@@ -104,8 +104,8 @@
             }
             makeDummyWindow(userID, fileID, startMonth.toString());//새로 생성된 html파일 불러와 iframe 만듬
 
-            $.get("/html/"+ userID +"/month" + startMonth +"_"+ fileID + ".html")
-                .done(function(e) {
+            $.get("/html/" + userID + "/" + startMonth + "/" + fileID + "/html-request")
+                .done(function (e) {
                     // var file = window.URL.createObjectURL(e);
                     var frame = document.getElementById('hiddenFrame'),
                         framedoc = frame.contentDocument || frame.contentWindow.document;
@@ -122,7 +122,6 @@
             onrendered: function (canvas) {
                 //이미지
                 var dataUrl = canvas.toDataURL();
-                console.log("url", dataUrl);
                 $("#previewImage").attr({
                     "src": dataUrl,
                     "style": mode === "landscape" ? printMode.landscape : printMode.portrait
@@ -130,7 +129,7 @@
                 $("#loader").css("display", "none");
             }
         });
-        $("#hiddenFrame").css("visibility", "hidden");
+        // $("#hiddenFrame").css("visibility", "hidden");
     }
 
 
@@ -231,24 +230,9 @@
                 fileID: fileID,
                 type: "print"
             }).done(function () {
-
-            var xhr = new XMLHttpRequest();
-            // load `document` from `cache`
-            xhr.open("GET", "/tempPdf/" + userID + "/" + fileID + "-month_result.pdf", true);
-            xhr.responseType = "blob";
-
-            xhr.onload = function (e) {
-                if (this.status === 200) {
-                    // `blob` response
-                    console.log(this.response);
-                    var file = window.URL.createObjectURL(this.response);
-                    $("#hiddenFrame").attr("src",file);
-                }
-            };
-            xhr.send();
-
-            setTimeout(disablePrintLoader, 1000);
-        });
+                $("#hiddenFrame").attr("src", "/tempPdf/" + userID + "/" + fileID + "/pdf-request");
+                setTimeout(disablePrintLoader, 1000);
+            });
     }
 
     function enablePrintLoader() {
