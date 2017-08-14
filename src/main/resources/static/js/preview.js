@@ -27,7 +27,6 @@
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
         $("._portrait, ._landscape").click(changeOrientation);
-
     });
 
     function initiatePeriod() {
@@ -60,7 +59,6 @@
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
-
 
         if (startMonth > endMonth) {
             $("#end_month").val(startMonth);
@@ -101,13 +99,11 @@
             currentYear: 2017
         }).done(function () {
 
-            console.log(document.cookie);
-
             if (document.getElementById("hiddenFrame") !== null) {
                 var elem = document.getElementById("hiddenFrame");
                 elem.parentNode.removeChild(elem);
             }
-            makeDummyWindow(startMonth.toString() + fileID);//새로 생성된 html파일 불러와 iframe 만듬
+            makeDummyWindow(userID, fileID, startMonth.toString());//새로 생성된 html파일 불러와 iframe 만듬
 
             html2canvas(document.getElementById("hiddenFrame"), {
                 onrendered: function (canvas) {
@@ -125,34 +121,27 @@
     }
 
 
-    function makeDummyWindow(path) {
+    function makeDummyWindow(userID, fileID, startMonth) {
         var hiddenFrame = document.createElement("iframe");
         hiddenFrame.id = "hiddenFrame";
         hiddenFrame.width = "1000";
         hiddenFrame.height = "1000";
         hiddenFrame.frameBorder = "0";
-        hiddenFrame.src = generateNewUrl(path);
+        hiddenFrame.src = "/html/"+ userID +"/month" + startMonth + fileID + ".html";
         document.body.appendChild(hiddenFrame);
     }
 
-
-    function generateNewUrl(path) {
-        return "/html/month" + path + ".html";
-    }
-
-
     function requestSave() {
-
 
         refreshOptions();
         enableSaveLoader();
-
 
         var optionValue = {
             startMonth: startMonth,
             endMonth: endMonth,
             currentYear: 2017, // 임시
             orientation: orientation,
+            userID: userID,
             fileID: fileID,
             type: "save"
         };
@@ -197,10 +186,8 @@
                 xhr.responseType = 'blob';
                 xhr.onload = function (e) {
                     if (this.status == 200) {
-
                         var blobObject = new Blob([this.response], {type: 'application/pdf'});
                         window.navigator.msSaveOrOpenBlob(blobObject, fileName);
-
                     }
                 };
                 xhr.send();

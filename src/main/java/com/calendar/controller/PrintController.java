@@ -47,26 +47,24 @@ public class PrintController {
         this.converter = converter;
     }
 
-
     @ResponseBody
     @PostMapping("/make-preview")
     @PostAuthorize("returnObject.type == authentication.name")
     public void makePreview(
             @RequestParam("startMonth") int startMonth,
             @RequestParam("endMonth") int endMonth,
+            @RequestParam("userID") String userID,
             @RequestParam("fileID") String fileID,
             @RequestParam("currentYear") int currentYear
     ) throws ParseException, ParserException, IOException {
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,fileID);
-
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID);
     }
-
 
     @GetMapping("/tempPdf/{userID}/{fileID}-month_result.pdf")
     public ResponseEntity<byte[]> login2( @PathVariable String userID, @PathVariable String fileID) throws IOException, ParserException {
-        InputStream inputStream = new FileInputStream("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static//tempPdf/"+userID+ "/" + fileID+"-month_result.pdf");
-        byte[] contents = readFully(inputStream);
+        Path pdfPath = Paths.get("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/"+userID+ "/" + fileID+"-month_result.pdf");
+        byte[] contents = Files.readAllBytes(pdfPath);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
@@ -75,19 +73,6 @@ public class PrintController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(contents, headers, HttpStatus.OK);
         return response;
-    }
-
-    public static byte[] readFully(InputStream stream) throws IOException
-    {
-        byte[] buffer = new byte[8192];
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        int bytesRead;
-        while ((bytesRead = stream.read(buffer)) != -1)
-        {
-            baos.write(buffer, 0, bytesRead);
-        }
-        return baos.toByteArray();
     }
 
     @PostMapping("/preview")
@@ -116,13 +101,14 @@ public class PrintController {
             @RequestParam("endMonth") int endMonth,
             @RequestParam("currentYear") int currentYear,
             @RequestParam("orientation") int orientation,
+            @RequestParam("userID") String userID,
             @RequestParam("fileID") String fileID,
             @RequestParam("type") String type
     ) throws ParseException, ParserException, IOException, InterruptedException {
         //converting html to pdf - by url
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,fileID);
-        converter.makeAPdf(startMonth, endMonth, orientation, fileID, type);
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear, userID, fileID);
+        converter.makeAPdf(startMonth, endMonth, orientation, userID, fileID, type);
 
         return "preview";
     }

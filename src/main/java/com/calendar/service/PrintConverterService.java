@@ -17,12 +17,12 @@ import java.io.IOException;
 public class PrintConverterService {
 
     //pdf저장 메소드
-    final static String fileUrl = "C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month";//기본 url뒤에 월을 붙임
 
     public void makeAPdf(
             int startMonth,
             int endMonth,
             int orientation,
+            String userID,
             String fileID,
             String type
     ) throws InterruptedException, IOException {
@@ -37,6 +37,8 @@ public class PrintConverterService {
                 System.out.println("Failed to create directory!");
             }
         }
+
+        final String fileUrl = "C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/" + userID + "/month";//기본 url뒤에 월을 붙임
 
         // 각 월에 대한 임시 경로 생성
         StringBuilder selectFiles = new StringBuilder();
