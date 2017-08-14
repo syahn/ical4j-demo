@@ -12,15 +12,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.util.UUID;
 
@@ -59,6 +55,19 @@ public class PrintController {
     ) throws ParseException, ParserException, IOException {
 
         jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID);
+    }
+
+    @GetMapping("/html/{userID}/month{startMonth}_{fileID}.html")
+    @ResponseBody
+    public String responseHtml(
+            @PathVariable String userID,
+            @PathVariable String startMonth,
+            @PathVariable String fileID
+    ) throws IOException, ParserException {
+        Path htmlPath = Paths.get("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/"+userID+ "/month" + startMonth+"_" + fileID + ".html");
+        byte[] contents = Files.readAllBytes(htmlPath);
+
+        return new String(contents);
     }
 
     @GetMapping("/tempPdf/{userID}/{fileID}-month_result.pdf")

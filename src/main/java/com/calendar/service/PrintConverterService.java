@@ -43,9 +43,9 @@ public class PrintConverterService {
         // 각 월에 대한 임시 경로 생성
         StringBuilder selectFiles = new StringBuilder();
         for (int month = startMonth; month <= endMonth; month++) {
-            selectFiles.append(fileUrl).append(Integer.toString(month) + fileID).append(".html ");
+            selectFiles.append(fileUrl).append(Integer.toString(month) + "_" + fileID).append(".html ");
         }
-
+        System.out.printf("%s, %s", currentPrincipalName, fileID);
         String extendedUrl = "wkhtmltopdf " +
                 (orientation == 1 ? " -O landscape " : " ") +
                 "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" + fileID + "-month_result.pdf";

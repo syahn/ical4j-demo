@@ -93,7 +93,9 @@ public class JsoupService {
         String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/"+
                 userID +
                 "/month" +
-                Integer.toString(month) + fileID +
+                Integer.toString(month) +
+                "_" +
+                fileID +
                 ".html";
 
         BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));

@@ -15,7 +15,6 @@
     $(document).ready(function () {
 
         //select option 메인 페이지 달로 초기화
-
         fileID = $("#content").attr("value");
         userID = $("#header").attr("value");
 
@@ -105,31 +104,45 @@
             }
             makeDummyWindow(userID, fileID, startMonth.toString());//새로 생성된 html파일 불러와 iframe 만듬
 
-            html2canvas(document.getElementById("hiddenFrame"), {
-                onrendered: function (canvas) {
-                    //이미지
-                    var dataUrl = canvas.toDataURL();
-                    $("#previewImage").attr({
-                        "src": dataUrl,
-                        "style": mode === "landscape" ? printMode.landscape : printMode.portrait
-                    });
-                    $("#loader").css("display", "none");
-                }
-            });
-            // $("#hiddenFrame").css("visibility", "hidden");
+            $.get("/html/"+ userID +"/month" + startMonth +"_"+ fileID + ".html")
+                .done(function(e) {
+                    // var file = window.URL.createObjectURL(e);
+                    var frame = document.getElementById('hiddenFrame'),
+                        framedoc = frame.contentDocument || frame.contentWindow.document;
+
+                    framedoc.body.innerHTML = e;
+
+                    convertHtmlToCanvas(framedoc, mode);
+                });
         });
     }
 
+    function convertHtmlToCanvas(framedoc, mode) {
+        html2canvas(framedoc.body, {
+            onrendered: function (canvas) {
+                //이미지
+                var dataUrl = canvas.toDataURL();
+                console.log("url", dataUrl);
+                $("#previewImage").attr({
+                    "src": dataUrl,
+                    "style": mode === "landscape" ? printMode.landscape : printMode.portrait
+                });
+                $("#loader").css("display", "none");
+            }
+        });
+        $("#hiddenFrame").css("visibility", "hidden");
+    }
 
-    function makeDummyWindow(userID, fileID, startMonth) {
+
+    function makeDummyWindow() {
         var hiddenFrame = document.createElement("iframe");
         hiddenFrame.id = "hiddenFrame";
         hiddenFrame.width = "1000";
         hiddenFrame.height = "1000";
         hiddenFrame.frameBorder = "0";
-        hiddenFrame.src = "/html/"+ userID +"/month" + startMonth + fileID + ".html";
         document.body.appendChild(hiddenFrame);
     }
+
 
     function requestSave() {
 
