@@ -3,6 +3,7 @@ package com.calendar.security;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -20,11 +21,15 @@ public class MyInterceptor extends HandlerInterceptorAdapter {
         String uri = httpServletRequest.getRequestURI();
         System.out.println(uri);
         System.out.println(uri.substring(9,uri.length()));
+
+        String fileID = uri.substring(9,uri.length());
+        String currentSessionID = RequestContextHolder.currentRequestAttributes().getSessionId();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         String currentPrincipalName = authentication.getName();
 
-        if(currentPrincipalName.equals("user1")){
-            System.out.println("current user is user1");
+        if(!fileID.equals(currentSessionID)){
+            System.out.println("session doesn't match");
             return false;
         }
 

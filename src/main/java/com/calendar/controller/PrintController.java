@@ -5,13 +5,24 @@ import com.calendar.service.PrintConverterService;
 import net.fortuna.ical4j.data.ParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.UUID;
 
@@ -24,17 +35,14 @@ public class PrintController {
 
     private JsoupService jSoup;
     private PrintConverterService converter;
-    private final InMemoryUserDetailsManager inMemoryUserDetailsManager;
 
     @Autowired
     public PrintController(
             JsoupService jSoup,
-            PrintConverterService converter,
-            InMemoryUserDetailsManager inMemoryUserDetailsManager
+            PrintConverterService converter
     ) {
         this.jSoup = jSoup;
         this.converter = converter;
-        this.inMemoryUserDetailsManager = inMemoryUserDetailsManager;
     }
 
     @ResponseBody
@@ -52,18 +60,20 @@ public class PrintController {
     }
 
     @RequestMapping("/tempPdf/{id}")
-    public String findMyPath(Model model, @PathVariable String id){
+    public ResponseEntity findMyPath(Model model, @PathVariable String id) throws IOException {
 
-        System.out.println(id);
-        model.addAttribute("path", "/tempPDf/"+id+"/month_result.pdf");
-        return "/pdf";
+        String filePath = "C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + id + "/month_result.pdf";
+        InputStream inputStream = new FileInputStream(new File(filePath));
+        InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-disposition", "inline;filename=" + "dkdkd.pdf");
+        headers.setContentLength(Files.size(Paths.get(filePath)));
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        return new ResponseEntity(inputStreamResource, headers, HttpStatus.OK);
 
-    }
-
-    @RequestMapping("/tempPdf/{id}/"+"month_result.pdf")
-    public String makeError(Model model, @PathVariable String id) {
-        model.addAttribute("path", "/tempPDf /"+id+"/month_result.pdf");
-        return "/pdf";
+//        System.out.println(id);
+//        model.addAttribute("path", "/tempPdf/"+id+"/month_result.pdf");
+//        return "/pdf";
 
     }
 
@@ -73,16 +83,18 @@ public class PrintController {
             @RequestParam("month") int month,
             @RequestParam("year") int year
     ) throws ParseException, ParserException, IOException {
-
         String fileID = UUID.randomUUID().toString();
 
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String currentPrincipalName = authentication.getName();
-//        User user = (User) inMemoryUserDetailsManager.loadUserByUsername(currentPrincipalName);
-//        user.setId(fileID);
-//        inMemoryUserDetailsManager.updateUser(user);
-//        System.out.println(((User) inMemoryUserDetailsManager.loadUserByUsername(currentPrincipalName)).getId());
-        //user에 id 삽입
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
+
+        fileID = sessionId;
+
+        System.out.println(sessionId);
+
+        String currentPrincipalName = authentication.getName();
+        System.out.println(currentPrincipalName);
 
         model.addAttribute("initialMonth",month);
         model.addAttribute("initialYear",year);

@@ -234,7 +234,21 @@
                 type: "print"
             }).done(function () {
 
-            $("#hiddenFrame").attr("src", "http://localhost:9000/tempPdf/" + fileID);
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://localhost:9000/tempPdf/" + fileID, true);
+            xhr.responseType = 'blob';
+            xhr.onload = function (e) {
+                if (this.status == 200) {
+
+                    var blobObject = new Blob([this.response], {type: 'application/pdf'});
+                    var blob_url = URL.createObjectURL(blobObject);
+                    document.querySelector('#hiddenFrame').src = blob_url;
+
+                }
+            };
+            xhr.send();
+
+            //$("#hiddenFrame").attr("src", "http://localhost:9000/tempPdf/" + fileID);
 
             setTimeout(disablePrintLoader, 1000);
         });
