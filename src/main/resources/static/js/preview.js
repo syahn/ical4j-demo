@@ -3,8 +3,6 @@
     var startOption = document.getElementById("start_month");
     var endOption = document.getElementById("end_month");
     var landscape = document.getElementById("rdo2_0");
-
-
     var initialStartMonth;
     var startMonth, endMonth, orientation;
     var printMode = {
@@ -12,13 +10,14 @@
         "landscape": "width: 343px; height:260px;"
     };
 
-    var fileID;
+    var fileID, userID;
 
     $(document).ready(function () {
 
         //select option 메인 페이지 달로 초기화
 
         fileID = $("#content").attr("value");
+        userID = $("#header").attr("value");
 
         initiatePeriod();
         changePreviewImage();
@@ -94,10 +93,10 @@
 
     function takeScreenShot(startMonth, mode) {
 
-
         $.post("/make-preview", {
             startMonth: startMonth,
             endMonth: startMonth,
+            userID: userID,
             fileID: fileID,
             currentYear: 2017
         }).done(function () {
@@ -107,9 +106,7 @@
             if (document.getElementById("hiddenFrame") !== null) {
                 var elem = document.getElementById("hiddenFrame");
                 elem.parentNode.removeChild(elem);
-
             }
-
             makeDummyWindow(startMonth.toString() + fileID);//새로 생성된 html파일 불러와 iframe 만듬
 
             html2canvas(document.getElementById("hiddenFrame"), {
@@ -128,13 +125,13 @@
     }
 
 
-    function makeDummyWindow(month) {
+    function makeDummyWindow(path) {
         var hiddenFrame = document.createElement("iframe");
         hiddenFrame.id = "hiddenFrame";
         hiddenFrame.width = "1000";
         hiddenFrame.height = "1000";
         hiddenFrame.frameBorder = "0";
-        hiddenFrame.src = generateNewUrl(month);
+        hiddenFrame.src = generateNewUrl(path);
         document.body.appendChild(hiddenFrame);
     }
 
@@ -157,11 +154,12 @@
             currentYear: 2017, // 임시
             orientation: orientation,
             fileID: fileID,
+            userID: userID,
             type: "save"
         };
 
         $.post("http://localhost:9000/convert", optionValue).done(function () {
-            var dataURI = '/tempPdf/month_result' + fileID + '.pdf';
+            var dataURI = '/tempPdf/'+ userID + '/'+ fileID + '-month_result.pdf';
             var fileName = 'Calendar.pdf';
             save(dataURI, fileName);
             setTimeout(disableSaveLoader, 500);
@@ -230,28 +228,55 @@
                 endMonth: endMonth,
                 currentYear: 2017, // 임시
                 orientation: orientation,
+                userID: userID,
                 fileID: fileID,
                 type: "print"
             }).done(function () {
 
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', "http://localhost:9000/tempPdf/" + fileID, true);
-            xhr.responseType = 'blob';
+            xhr.open("GET", "/tempPdf/" + userID + "/" + fileID + "-month_result.pdf", true);
+            xhr.responseType = "blob";
             xhr.onload = function (e) {
-                if (this.status == 200) {
+                if (this.status === 200) {
+                    // `blob` response
+                    console.log(this.response);
+                    // var url;
+                    // blobToDataURL(this.response, function(dataurl){
+                    //     console.log(dataurl);
+                    //     url = dataurl;
+                    //
+                    // });
+                    var url = window.URL || window.webkitURL;
+                    var file = url.createObjectURL(this.response);
+                    //window.navigator.msSaveOrOpenBlob(this.response);
+                    //window.open(file);
+                    // console.log(file);
+                     $("#hiddenFrame").attr("src",file);
 
-                    var blobObject = new Blob([this.response], {type: 'application/pdf'});
-                    var blob_url = URL.createObjectURL(blobObject);
-                    document.querySelector('#hiddenFrame').src = blob_url;
+                    // var canvas = document.createElement("canvas")
+                    // var context = canvas.getContext("2d")
+                    // context.drawImage(img, 0, 0) // i assume that img.src is your blob url
+                    // var dataurl = canvas.toDataURL("your prefer type", your prefer quality)
+
+                    //a link method
+                    // var a = document.createElement("a");
+                    // a.href = file;
+                    // document.body.appendChild(a);
+                    // a.click();
 
                 }
             };
             xhr.send();
 
-            //$("#hiddenFrame").attr("src", "http://localhost:9000/tempPdf/" + fileID);
-
             setTimeout(disablePrintLoader, 1000);
         });
+    }
+
+    //**blob to dataURL**
+    function blobToDataURL(blob, callback) {
+        var a = new FileReader();
+        a.onload = function(e) {callback(e.target.result);}
+        a.readAsDataURL(blob);
     }
 
     function enablePrintLoader() {
@@ -263,4 +288,8 @@
         document.getElementById("print-loader").style.display = "none";
         document.getElementById("printText").style.display = "block";
     }
+
 })();
+
+
+
