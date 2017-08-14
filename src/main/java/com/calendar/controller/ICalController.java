@@ -28,6 +28,6 @@ public class ICalController {
 
     @RequestMapping(value="/month/{id}")
     public String renderMonthView(@PathVariable int id){
-        return "month_" + Integer.toString(id);
+        return "/month_view/month_" + Integer.toString(id);
     }
 }

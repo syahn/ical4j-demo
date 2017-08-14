@@ -31,7 +31,13 @@ public class JsoupService {
         this.iCal = iCal;
     }
 
-    public void makeHTMLfiles(int startMonth, int endMonth, int currentYear, String fileID) throws IOException, ParserException, ParseException {
+    public void makeHTMLfiles(
+            int startMonth,
+            int endMonth,
+            int currentYear,
+            String userID,
+            String fileID
+    ) throws IOException, ParserException, ParseException {
 
         Calendar calendar = parseIcalFile();
 
@@ -41,7 +47,7 @@ public class JsoupService {
             File input = readTemplateByMonth(month);
             Document doc = parseHtml(input);
             drawEventsOnHtml(doc, filteredData);
-            exportHtml(doc, month, fileID);
+            exportHtml(doc, month, userID, fileID);
         }
     }
 
@@ -50,7 +56,7 @@ public class JsoupService {
     }
 
     private File readTemplateByMonth(int month) {
-        return new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/templates/month_" + month + ".html");
+        return new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/templates/month_view/month_" + month + ".html");
     }
 
     private Document parseHtml(File input) throws IOException {
@@ -74,10 +80,24 @@ public class JsoupService {
         doc.select("script").remove();
     }
 
-    private void exportHtml(Document doc, int month, String fileID) throws IOException {
-
+    private void exportHtml(Document doc, int month, String userID, String fileID) throws IOException {
+        File dirById = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/" + userID);
+        if (!dirById.exists()) {
+            if (dirById.mkdir()) {
+                System.out.println("Directory is created!");
+            } else {
+                System.out.println("Failed to create directory!");
+            }
+        }
         //로컬에 새로운 html 파일로 저장
-        String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/month" + Integer.toString(month)+fileID + ".html";
+        String output = "/Users/NAVER/Desktop/ical4j-demo/target/classes/static/html/"+
+                userID +
+                "/month" +
+                Integer.toString(month) +
+                "_" +
+                fileID +
+                ".html";
+
         BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
         htmlWriter.write(doc.toString());
         htmlWriter.flush();

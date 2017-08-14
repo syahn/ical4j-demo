@@ -15,7 +15,6 @@
     $(document).ready(function () {
 
         //select option 메인 페이지 달로 초기화
-
         fileID = $("#content").attr("value");
         userID = $("#header").attr("value");
 
@@ -27,7 +26,6 @@
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
         $("._portrait, ._landscape").click(changeOrientation);
-
     });
 
     function initiatePeriod() {
@@ -60,7 +58,6 @@
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
-
 
         if (startMonth > endMonth) {
             $("#end_month").val(startMonth);
@@ -101,65 +98,69 @@
             currentYear: 2017
         }).done(function () {
 
-            console.log(document.cookie);
-
             if (document.getElementById("hiddenFrame") !== null) {
                 var elem = document.getElementById("hiddenFrame");
                 elem.parentNode.removeChild(elem);
             }
-            makeDummyWindow(startMonth.toString() + fileID);//새로 생성된 html파일 불러와 iframe 만듬
+            makeDummyWindow(userID, fileID, startMonth.toString());//새로 생성된 html파일 불러와 iframe 만듬
 
-            html2canvas(document.getElementById("hiddenFrame"), {
-                onrendered: function (canvas) {
-                    //이미지
-                    var dataUrl = canvas.toDataURL();
-                    $("#previewImage").attr({
-                        "src": dataUrl,
-                        "style": mode === "landscape" ? printMode.landscape : printMode.portrait
-                    });
-                    $("#loader").css("display", "none");
-                }
-            });
-            // $("#hiddenFrame").css("visibility", "hidden");
+            $.get("/html/"+ userID +"/month" + startMonth +"_"+ fileID + ".html")
+                .done(function(e) {
+                    // var file = window.URL.createObjectURL(e);
+                    var frame = document.getElementById('hiddenFrame'),
+                        framedoc = frame.contentDocument || frame.contentWindow.document;
+
+                    framedoc.body.innerHTML = e;
+
+                    convertHtmlToCanvas(framedoc, mode);
+                });
         });
     }
 
+    function convertHtmlToCanvas(framedoc, mode) {
+        html2canvas(framedoc.body, {
+            onrendered: function (canvas) {
+                //이미지
+                var dataUrl = canvas.toDataURL();
+                console.log("url", dataUrl);
+                $("#previewImage").attr({
+                    "src": dataUrl,
+                    "style": mode === "landscape" ? printMode.landscape : printMode.portrait
+                });
+                $("#loader").css("display", "none");
+            }
+        });
+        $("#hiddenFrame").css("visibility", "hidden");
+    }
 
-    function makeDummyWindow(path) {
+
+    function makeDummyWindow() {
         var hiddenFrame = document.createElement("iframe");
         hiddenFrame.id = "hiddenFrame";
         hiddenFrame.width = "1000";
         hiddenFrame.height = "1000";
         hiddenFrame.frameBorder = "0";
-        hiddenFrame.src = generateNewUrl(path);
         document.body.appendChild(hiddenFrame);
-    }
-
-
-    function generateNewUrl(path) {
-        return "/html/month" + path + ".html";
     }
 
 
     function requestSave() {
 
-
         refreshOptions();
         enableSaveLoader();
-
 
         var optionValue = {
             startMonth: startMonth,
             endMonth: endMonth,
             currentYear: 2017, // 임시
             orientation: orientation,
-            fileID: fileID,
             userID: userID,
+            fileID: fileID,
             type: "save"
         };
 
         $.post("http://localhost:9000/convert", optionValue).done(function () {
-            var dataURI = '/tempPdf/'+ userID + '/'+ fileID + '-month_result.pdf';
+            var dataURI = '/tempPdf/'+ userID + '/'+ fileID + '.pdf';
             var fileName = 'Calendar.pdf';
             save(dataURI, fileName);
             setTimeout(disableSaveLoader, 500);
@@ -198,10 +199,8 @@
                 xhr.responseType = 'blob';
                 xhr.onload = function (e) {
                     if (this.status == 200) {
-
                         var blobObject = new Blob([this.response], {type: 'application/pdf'});
                         window.navigator.msSaveOrOpenBlob(blobObject, fileName);
-
                     }
                 };
                 xhr.send();
@@ -233,51 +232,29 @@
                 type: "print"
             }).done(function () {
 
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/tempPdf/" + userID + "/" + fileID + "-month_result.pdf", true);
-            xhr.responseType = "blob";
-            xhr.onload = function (e) {
-                if (this.status === 200) {
-                    // `blob` response
-                    console.log(this.response);
-                    // var url;
-                    // blobToDataURL(this.response, function(dataurl){
-                    //     console.log(dataurl);
-                    //     url = dataurl;
-                    //
-                    // });
-                    var url = window.URL || window.webkitURL;
-                    var file = url.createObjectURL(this.response);
-                    //window.navigator.msSaveOrOpenBlob(this.response);
-                    //window.open(file);
-                    // console.log(file);
-                     $("#hiddenFrame").attr("src",file);
+            // var xhr = new XMLHttpRequest();
+            // xhr.open("GET", "/tempPdf/" + userID + "/" + fileID + "-month_result.pdf", true);
+            // xhr.responseType = "blob";
+            // xhr.onload = function (e) {
+            //     if (this.status === 200) {
+            //
+            //         console.log(this.response);
+            //
+            //         var url = window.URL || window.webkitURL;
+            //         var file = url.createObjectURL(this.response);
+            //         $("#hiddenFrame").attr("src",file);
+            //
+            //     }
+            // };
+            // xhr.send();
 
-                    // var canvas = document.createElement("canvas")
-                    // var context = canvas.getContext("2d")
-                    // context.drawImage(img, 0, 0) // i assume that img.src is your blob url
-                    // var dataurl = canvas.toDataURL("your prefer type", your prefer quality)
-
-                    //a link method
-                    // var a = document.createElement("a");
-                    // a.href = file;
-                    // document.body.appendChild(a);
-                    // a.click();
-
-                }
-            };
-            xhr.send();
+            $("#hiddenFrame").attr("src", '/tempPdf/'+ userID +"/"+fileID+"/print-request");
 
             setTimeout(disablePrintLoader, 1000);
         });
     }
 
-    //**blob to dataURL**
-    function blobToDataURL(blob, callback) {
-        var a = new FileReader();
-        a.onload = function(e) {callback(e.target.result);}
-        a.readAsDataURL(blob);
-    }
+
 
     function enablePrintLoader() {
         document.getElementById("printText").style.display = "none";

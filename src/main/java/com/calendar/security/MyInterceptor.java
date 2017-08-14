@@ -3,7 +3,6 @@ package com.calendar.security;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -23,15 +22,13 @@ public class MyInterceptor extends HandlerInterceptorAdapter {
     ) throws Exception {
 
         String uri = httpServletRequest.getRequestURI();
-        System.out.println("잡았다!");
-        String fileId = uri.split("/")[2];
+        String userID = uri.split("/")[2];
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String currentPrincipalName = authentication.getName();
-
-        if(!currentPrincipalName.equals(fileId)){
-            System.out.println("current user is not: " + fileId);
+        if(!currentPrincipalName.equals(userID)){
+            System.out.println("current user is not: " + userID);
             return false;
         }
 
