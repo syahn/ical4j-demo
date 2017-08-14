@@ -15,18 +15,28 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 public class MyInterceptor extends HandlerInterceptorAdapter {
     @Override
-    public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
-        System.out.println("fda");
+    public boolean preHandle(
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse,
+            Object o
+    ) throws Exception {
+
         String uri = httpServletRequest.getRequestURI();
-        System.out.println(uri);
+//        System.out.println(uri);
+        System.out.println("잡았다!");
+        String fileId = uri.split("/")[2];
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentPrincipalName = authentication.getName();
-        if(currentPrincipalName.equals("user1")){
-            System.out.println("current user is user1");
+
+//        System.out.println("id: " + currentPrincipalName + "requestId/" + fileId);
+
+        if(!currentPrincipalName.equals(fileId)){
+            System.out.println("current user is not: " + fileId);
             return false;
         }
-        return true;
 
+        return true;
     }
 
     @Override

@@ -3,8 +3,6 @@
     var startOption = document.getElementById("start_month");
     var endOption = document.getElementById("end_month");
     var landscape = document.getElementById("rdo2_0");
-
-
     var initialStartMonth;
     var startMonth, endMonth, orientation;
     var printMode = {
@@ -12,13 +10,14 @@
         "landscape": "width: 343px; height:260px;"
     };
 
-    var fileID;
+    var fileID, userID;
 
     $(document).ready(function () {
 
         //select option 메인 페이지 달로 초기화
 
         fileID = $("#content").attr("value");
+        userID = $("#header").attr("value");
 
         initiatePeriod();
         changePreviewImage();
@@ -94,10 +93,10 @@
 
     function takeScreenShot(startMonth, mode) {
 
-
         $.post("/make-preview", {
             startMonth: startMonth,
             endMonth: startMonth,
+            userID: userID,
             fileID: fileID,
             currentYear: 2017
         }).done(function () {
@@ -107,9 +106,7 @@
             if (document.getElementById("hiddenFrame") !== null) {
                 var elem = document.getElementById("hiddenFrame");
                 elem.parentNode.removeChild(elem);
-
             }
-
             makeDummyWindow(startMonth.toString() + fileID);//새로 생성된 html파일 불러와 iframe 만듬
 
             html2canvas(document.getElementById("hiddenFrame"), {
@@ -128,13 +125,13 @@
     }
 
 
-    function makeDummyWindow(month) {
+    function makeDummyWindow(path) {
         var hiddenFrame = document.createElement("iframe");
         hiddenFrame.id = "hiddenFrame";
         hiddenFrame.width = "1000";
         hiddenFrame.height = "1000";
         hiddenFrame.frameBorder = "0";
-        hiddenFrame.src = generateNewUrl(month);
+        hiddenFrame.src = generateNewUrl(path);
         document.body.appendChild(hiddenFrame);
     }
 
@@ -230,11 +227,25 @@
                 endMonth: endMonth,
                 currentYear: 2017, // 임시
                 orientation: orientation,
+                userID: userID,
                 fileID: fileID,
                 type: "print"
             }).done(function () {
 
-            $("#hiddenFrame").attr("src", "http://localhost:9000/tempPdf/" + fileID);
+            var xhr = new XMLHttpRequest();
+            // load `document` from `cache`
+            xhr.open("GET", "/tempPdf/" + userID + "/" + fileID + "-month_result.pdf", true);
+            xhr.responseType = "blob";
+
+            xhr.onload = function (e) {
+                if (this.status === 200) {
+                    // `blob` response
+                    console.log(this.response);
+                    var file = window.URL.createObjectURL(this.response);
+                    $("#hiddenFrame").attr("src",file);
+                }
+            };
+            xhr.send();
 
             setTimeout(disablePrintLoader, 1000);
         });

@@ -6,6 +6,8 @@ package com.calendar.service;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionNamed;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -24,7 +26,10 @@ public class PrintConverterService {
             String fileID,
             String type
     ) throws InterruptedException, IOException {
-        File dirById = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+
+        File dirById = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName);
         if (!dirById.exists()) {
             if (dirById.mkdir()) {
                 System.out.println("Directory is created!");
@@ -41,14 +46,14 @@ public class PrintConverterService {
 
         String extendedUrl = "wkhtmltopdf " +
                 (orientation == 1 ? " -O landscape " : " ") +
-                "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID + "/month_result.pdf";
+                "%s C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" + fileID + "-month_result.pdf";
 
         String command = String.format(extendedUrl, selectFiles.toString());
         Process wkhtml = Runtime.getRuntime().exec(command); // Start process
         wkhtml.waitFor(); // Allow process to run
 
         if(type.equals("print")){
-            File file = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID + "/month_result.pdf");
+            File file = new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" +  fileID + "-month_result.pdf");
 
             PDDocument document = PDDocument.load(file);
 
@@ -60,7 +65,7 @@ public class PrintConverterService {
             document.getDocumentCatalog().setOpenAction(action);
 
             //Saving the document
-            document.save(new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + fileID + "/month_result.pdf"));
+            document.save(new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/" + currentPrincipalName + "/" +  fileID + "-month_result.pdf"));
 
             //Closing the document
             document.close();
