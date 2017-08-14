@@ -48,6 +48,21 @@ public class PrintController {
     }
 
 
+    @ResponseBody
+    @PostMapping("/make-preview")
+    @PostAuthorize("returnObject.type == authentication.name")
+    public void makePreview(
+            @RequestParam("startMonth") int startMonth,
+            @RequestParam("endMonth") int endMonth,
+            @RequestParam("fileID") String fileID,
+            @RequestParam("currentYear") int currentYear
+    ) throws ParseException, ParserException, IOException {
+
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,fileID);
+
+    }
+
+
     @GetMapping("/tempPdf/{userID}/{fileID}-month_result.pdf")
     public ResponseEntity<byte[]> login2( @PathVariable String userID, @PathVariable String fileID) throws IOException, ParserException {
         InputStream inputStream = new FileInputStream("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static//tempPdf/"+userID+ "/" + fileID+"-month_result.pdf");
