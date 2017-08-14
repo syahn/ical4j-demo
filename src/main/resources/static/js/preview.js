@@ -104,8 +104,8 @@
             }
             makeDummyWindow(userID, fileID, startMonth.toString());//새로 생성된 html파일 불러와 iframe 만듬
 
-            $.get("/html/"+ userID +"/month" + startMonth +"_"+ fileID + ".html")
-                .done(function(e) {
+            $.get("/html/" + userID + "/" + startMonth + "/" + fileID + "/html-request")
+                .done(function (e) {
                     // var file = window.URL.createObjectURL(e);
                     var frame = document.getElementById('hiddenFrame'),
                         framedoc = frame.contentDocument || frame.contentWindow.document;
@@ -122,7 +122,6 @@
             onrendered: function (canvas) {
                 //이미지
                 var dataUrl = canvas.toDataURL();
-                console.log("url", dataUrl);
                 $("#previewImage").attr({
                     "src": dataUrl,
                     "style": mode === "landscape" ? printMode.landscape : printMode.portrait
@@ -160,7 +159,7 @@
         };
 
         $.post("http://localhost:9000/convert", optionValue).done(function () {
-            var dataURI = '/tempPdf/'+ userID + '/'+ fileID + '.pdf';
+            var dataURI = '/tempPdf/' + userID + '/' + fileID + '.pdf';
             var fileName = 'Calendar.pdf';
             save(dataURI, fileName);
             setTimeout(disableSaveLoader, 500);
@@ -232,6 +231,7 @@
                 type: "print"
             }).done(function () {
 
+
             // var xhr = new XMLHttpRequest();
             // xhr.open("GET", "/tempPdf/" + userID + "/" + fileID + "-month_result.pdf", true);
             // xhr.responseType = "blob";
@@ -248,12 +248,11 @@
             // };
             // xhr.send();
 
-            $("#hiddenFrame").attr("src", '/tempPdf/'+ userID +"/"+fileID+"/print-request");
-
+            $("#hiddenFrame").attr("src", "/tempPdf/" + userID + "/" + fileID + "/pdf-request");
             setTimeout(disablePrintLoader, 1000);
         });
-    }
 
+    }
 
 
     function enablePrintLoader() {

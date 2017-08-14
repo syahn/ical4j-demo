@@ -52,8 +52,7 @@ public class PrintController {
         jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID);
     }
 
-
-    @GetMapping("/html/{userID}/month{startMonth}_{fileID}.html")
+    @GetMapping("/html/{userID}/{startMonth}/{fileID}/html-request")
     @ResponseBody
     public String responseHtml(
             @PathVariable String userID,
@@ -66,12 +65,16 @@ public class PrintController {
         return new String(contents);
     }
 
-    @RequestMapping("/tempPdf/{userID}/{fileID}/print-request")
-    public String findMyPath(Model model, @PathVariable String userID, @PathVariable String fileID){
 
-        model.addAttribute("path", "/tempPdf/"+userID+"/"+fileID+".pdf");
+    @GetMapping("/tempPdf/{userID}/{fileID}/pdf-request")
+    public String responseDir(
+            @PathVariable String userID,
+            @PathVariable String fileID,
+            Model model
+    ) throws IOException, ParserException {
+        model.addAttribute("path", "/tempPdf/" + userID + "/" + fileID + ".pdf");
+
         return "/pdf";
-
     }
 
 //    @GetMapping("/tempPdf/{userID}/{fileID}-month_result.pdf")
