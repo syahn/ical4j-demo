@@ -1,17 +1,25 @@
 package com.calendar.data;
 
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
+
 /**
  * Created by NAVER on 2017-08-11.
  */
-public class User {
+public class User extends org.springframework.security.core.userdetails.User{
 
-    private int id;
+    private String id;
 
-    public int getId() {
+    public User(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        super(username, password, authorities);
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

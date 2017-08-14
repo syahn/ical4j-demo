@@ -20,4 +20,5 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         registry.addInterceptor(requestInterceptor)
                 .addPathPatterns("/tempPdf/**");
     }
+
 }
