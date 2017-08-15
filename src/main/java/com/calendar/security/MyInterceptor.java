@@ -26,8 +26,8 @@ public class MyInterceptor extends HandlerInterceptorAdapter {
 
         System.out.printf("userID: %s", userID);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentPrincipalName = authentication.getName();
 
+        String currentPrincipalName = authentication.getName();
         if(!currentPrincipalName.equals(userID)){
             System.out.println("current user is not: " + userID);
             return false;
