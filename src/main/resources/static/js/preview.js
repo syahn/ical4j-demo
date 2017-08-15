@@ -5,7 +5,7 @@
     var landscape = document.getElementById("rdo2_0");
     var fontSizeOpt = document.getElementById("font_size_select");
     var vertical = document.getElementById("rdo2_1").checked ? "portrait" : "landscape";
-    var templateType = "all";
+    var templateType = $(":input:radio[name=print_item]:checked").val();;
     var initialStartMonth;
     var startMonth, endMonth, orientation;
     var fontSize = fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
@@ -65,6 +65,7 @@
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
         vertical = document.getElementById("rdo2_1").checked ? "portrait" : "landscape";
+        templateType = $(":input:radio[name=print_item]:checked").val();
         fontSize =fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
 
         if (startMonth > endMonth) {

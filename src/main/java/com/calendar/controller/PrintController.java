@@ -50,7 +50,9 @@ public class PrintController {
             @RequestParam("fileID") String fileID,
             @RequestParam("currentYear") int currentYear
     ) throws ParseException, ParserException, IOException {
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear, templateType, fontSize, userID,fileID);
+
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID, fontSize, templateType);
+
     }
 
     @GetMapping("/html/{userID}/{startMonth}/{fileID}/html-request")
@@ -127,10 +129,12 @@ public class PrintController {
     ) throws ParseException, ParserException, IOException, InterruptedException {
         //converting html to pdf - by url
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,templateType, fontSize, userID, fileID);
+
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear, userID, fileID, fontSize, templateType);
         converter.makeAPdf(startMonth, endMonth, orientation, userID, fileID, type);
 
         return "preview";
     }
+
 
 }

@@ -25,6 +25,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 .headers().addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 .and()
                 .authorizeRequests()
+                .antMatchers("/", "/preview", "/html","/tempPdf").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -44,15 +45,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         auth.inMemoryAuthentication().withUser("user1").password("password").roles("USER");
         auth.inMemoryAuthentication().withUser("user2").password("password").roles("USER");
 
-        auth.userDetailsService(inMemoryUserDetailsManager());
-
-    }
-
-    @Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-        final Properties users = new Properties();
-        users.put("user","pass,ROLE_USER,enabled"); //add whatever other user you need
-        return new InMemoryUserDetailsManager(users);
     }
 
 }

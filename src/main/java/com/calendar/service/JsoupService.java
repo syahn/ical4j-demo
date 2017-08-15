@@ -35,10 +35,10 @@ public class JsoupService {
             int startMonth,
             int endMonth,
             int currentYear,
-            String templateType,
-            int fontSize,
             String userID,
-            String fileID
+            String fileID,
+            int fontSize,
+            String templateType
     ) throws IOException, ParserException, ParseException {
 
         Calendar calendar = parseIcalFile();
@@ -46,9 +46,11 @@ public class JsoupService {
         for (int month = startMonth; month <= endMonth; month++) {
 
             ICalFilteredData filteredData = iCal.filterData(calendar, month, currentYear);
-            File input = readTemplateByMonth(month);
+            File input = readTemplateByMonth(month, templateType);
             Document doc = parseHtml(input);
-            drawEventsOnHtml(doc, templateType, fontSize, filteredData);
+
+            drawEventsOnHtml(doc, filteredData, fontSize, templateType);
+
             exportHtml(doc, month, userID, fileID);
         }
     }
@@ -57,7 +59,12 @@ public class JsoupService {
         return iCal.parseFile("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/period.ics");
     }
 
-    private File readTemplateByMonth(int month) {
+    private File readTemplateByMonth(int month, String templateType) {
+
+        if(templateType.equals("schedule")){
+            return new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/templates/month_view/month" + month + "_Naver.html");
+        }
+
         return new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/templates/month_view/month_" + month + ".html");
     }
 
@@ -69,19 +76,20 @@ public class JsoupService {
         );
     }
 
-    private void drawEventsOnHtml(Document doc, String templateType, int fontSize, ICalFilteredData filteredData) {
+
+    private void drawEventsOnHtml(Document doc, ICalFilteredData filteredData, int fontSize ,String templateType) {
+
         List<ICalTodo> todoList = filteredData.getTodoList();
         List<ICalFilteredEvent> eventList = filteredData.getEventList();
 
         Collections.sort(eventList,new ICalComparator());
 
-        renderingAllEvents(doc, todoList);
-        renderingAllEvents(doc, eventList);
+        renderingAllEvents(doc, todoList, templateType);
+        renderingAllEvents(doc, eventList, templateType);
 
         //스크립트 태그 제거 - 마크업 중복 방지
         doc.select("script").remove();
         doc.head().append("<link rel='stylesheet' href='../../css/font_by_size/" + Integer.toString(fontSize * 2 - 2) + ".css'>");
-
     }
 
     private void exportHtml(Document doc, int month, String userID, String fileID) throws IOException {
@@ -108,7 +116,7 @@ public class JsoupService {
         htmlWriter.close();
     }
 
-    private void renderingAllEvents(Document doc, List list){
+    private void renderingAllEvents(Document doc, List list, String templateType){
 
         for(int i=0;i<list.size();i++){
 
@@ -117,13 +125,15 @@ public class JsoupService {
             }
             else if(list.get(i) instanceof ICalFilteredEvent){
                 if(((ICalFilteredEvent) list.get(i)).getType().equals("PERIOD")){
+                    if(templateType.equals("schedule")){
+                        continue;
+                    }
                     appendPeriodEvent(doc, (ICalFilteredEvent) list.get(i));
                 }else{
                     appenOneDayEvent(doc, (ICalFilteredEvent) list.get(i));
                 }
             }
         }
-
     }
 
     private void appendTodoEvent(Document doc, ICalTodo todo) {

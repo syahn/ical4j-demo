@@ -118,12 +118,13 @@ body, html {
     left: 0;
     right: 0;
     height: 62px;
-    background: black;
+    background: #f1f1f1;
     text-align: center
 }
 
 .calendar_header .title {
     position: relative;
+    display: inline-block;
     margin: 15px 0 0;
     text-align: center;
     font-size: 27px;
@@ -135,9 +136,8 @@ body, html {
     position: relative;
     display: inline-block;
     padding: 0 35px;
-    font-size: 42px;
-    bottom: 6px;
-    color: #fff
+    font-size: 27px;
+    color: #6a20c5
 }
 
 .calendar_header .title .btn_prev, .calendar_header .title .btn_next {
@@ -244,7 +244,7 @@ body, html {
     table-layout: fixed;
     width: 100%;
     border-collapse: collapse;
-    background: #f1f1f1;
+    background: white;
     height: 22px;
     text-align: center
 }
@@ -3074,4 +3074,21 @@ body, html {
 
 .event_oneday {
     margin: 0 2px 1px 2px;
+}
+
+
+.wrap {
+    width: 100%;
+    overflow:auto;
+}
+
+.fleft {
+    float:left;
+    width: 85%;
+
+}
+
+.fright {
+    float: right;
+    width: 15%;
 }

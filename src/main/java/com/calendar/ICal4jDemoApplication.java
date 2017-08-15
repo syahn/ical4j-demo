@@ -11,7 +11,6 @@ public class ICal4jDemoApplication {
 
 		SpringApplication.run(ICal4jDemoApplication.class, args);
 
-
 //		Timer timer = new Timer ();
 //		TimerTask hourlyTask = new TimerTask () {
 //			@Override
@@ -23,20 +22,6 @@ public class ICal4jDemoApplication {
 //
 //		timer.schedule (hourlyTask, 0l, 15000);
 	}
-
-//	@Bean
-//	public WebMvcConfigurerAdapter webMvcConfigurerAdapter() {
-//		return new WebMvcConfigurerAdapter() {
-//			@Override
-//			public void addInterceptors(InterceptorRegistry registry) {
-//				System.out.println("boot");
-//
-//				registry.addInterceptor(new MyInterceptor()).addPathPatterns("/tempPdf");
-//			}
-//		};
-//	}
-
-
 
 }
 
