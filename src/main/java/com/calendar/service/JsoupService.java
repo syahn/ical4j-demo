@@ -37,6 +37,7 @@ public class JsoupService {
             int currentYear,
             String userID,
             String fileID,
+            int fontSize,
             String print_item
     ) throws IOException, ParserException, ParseException {
 
@@ -47,7 +48,9 @@ public class JsoupService {
             ICalFilteredData filteredData = iCal.filterData(calendar, month, currentYear);
             File input = readTemplateByMonth(month, print_item);
             Document doc = parseHtml(input);
-            drawEventsOnHtml(doc, filteredData, print_item);
+
+            drawEventsOnHtml(doc, filteredData, fontSize, print_item);
+
             exportHtml(doc, month, userID, fileID);
         }
     }
@@ -73,7 +76,9 @@ public class JsoupService {
         );
     }
 
-    private void drawEventsOnHtml(Document doc, ICalFilteredData filteredData, String print_item) {
+
+    private void drawEventsOnHtml(Document doc, ICalFilteredData filteredData, int fontSize ,String print_item) {
+
         List<ICalTodo> todoList = filteredData.getTodoList();
         List<ICalFilteredEvent> eventList = filteredData.getEventList();
 
@@ -84,6 +89,7 @@ public class JsoupService {
 
         //스크립트 태그 제거 - 마크업 중복 방지
         doc.select("script").remove();
+        doc.head().append("<link rel='stylesheet' href='../../css/font_by_size/" + Integer.toString(fontSize * 2 - 2) + ".css'>");
     }
 
     private void exportHtml(Document doc, int month, String userID, String fileID) throws IOException {

@@ -44,13 +44,16 @@ public class PrintController {
     public void makePreview(
             @RequestParam("startMonth") int startMonth,
             @RequestParam("endMonth") int endMonth,
+            @RequestParam("fontSize") int fontSize,
             @RequestParam("userID") String userID,
             @RequestParam("fileID") String fileID,
             @RequestParam("print_item") String print_item,
             @RequestParam("currentYear") int currentYear
     ) throws ParseException, ParserException, IOException {
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID,print_item);
+
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID, fontSize, print_item);
+
     }
 
     @GetMapping("/html/{userID}/{startMonth}/{fileID}/html-request")
@@ -105,6 +108,7 @@ public class PrintController {
             @RequestParam("endMonth") int endMonth,
             @RequestParam("currentYear") int currentYear,
             @RequestParam("orientation") int orientation,
+            @RequestParam("fontSize") int fontSize,
             @RequestParam("userID") String userID,
             @RequestParam("fileID") String fileID,
             @RequestParam("print_item") String print_item,
@@ -112,7 +116,8 @@ public class PrintController {
     ) throws ParseException, ParserException, IOException, InterruptedException {
         //converting html to pdf - by url
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear, userID, fileID, print_item);
+
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear, userID, fileID, fontSize, print_item);
         converter.makeAPdf(startMonth, endMonth, orientation, userID, fileID, type);
 
         return "preview";

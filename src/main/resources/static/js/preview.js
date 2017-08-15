@@ -3,13 +3,15 @@
     var startOption = document.getElementById("start_month");
     var endOption = document.getElementById("end_month");
     var landscape = document.getElementById("rdo2_0");
+    var fontSizeOpt = document.getElementById("font_size_select");
+    var vertical = document.getElementById("rdo2_1").checked;
     var initialStartMonth;
     var startMonth, endMonth, orientation;
+    var fontSize = fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
     var printMode = {
         "portrait": "width: 180px; height:260px;",
         "landscape": "width: 343px; height:260px;"
     };
-
     var fileID, userID;
     var print_item;
 
@@ -29,6 +31,7 @@
         $("#button-save").click(requestSave);
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
+        $("._font_size_select").on("change", changeFontSize);
         $("._portrait, ._landscape").click(changeOrientation);
         $('input[type=radio][name=print_item]').change(function() {
             changePreviewImage();
@@ -61,11 +64,24 @@
         }
     }
 
+    function changeFontSize() {
+        enablePreviewLoader();
+        refreshOptions();
+
+        if (vertical) {
+            takeScreenShot(startMonth, fontSize, "portrait");
+        } else {
+            takeScreenShot(startMonth, fontSize, "landscape");
+        }
+    }
+
     function refreshOptions() {
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
         print_item = $(":input:radio[name=print_item]:checked").val();
+        vertical = document.getElementById("rdo2_1").checked;
+        fontSize =fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
 
         if (startMonth > endMonth) {
             $("#end_month").val(startMonth);
@@ -76,13 +92,10 @@
         orientation = landscape.checked ? 1 : 0;
     }
 
-
     //미리보기 세로방향, 가로방향 보여주기
     function changeOrientation() {
         enablePreviewLoader();
         refreshOptions();
-
-        var vertical = document.getElementById("rdo2_1").checked;
 
         if (vertical) {
             takeScreenShot(startMonth, "portrait",print_item);
@@ -98,9 +111,11 @@
 
     function takeScreenShot(startMonth, mode, print_item) {
 
+
         $.post("/make-preview", {
             startMonth: startMonth,
             endMonth: startMonth,
+            fontSize: fontSize,
             userID: userID,
             fileID: fileID,
             print_item: print_item,
@@ -141,7 +156,6 @@
         $("#hiddenFrame").css("visibility", "hidden");
     }
 
-
     function makeDummyWindow() {
         var hiddenFrame = document.createElement("iframe");
         hiddenFrame.id = "hiddenFrame";
@@ -151,31 +165,28 @@
         document.body.appendChild(hiddenFrame);
     }
 
-
     function requestSave() {
 
         refreshOptions();
         enableSaveLoader();
 
-        var optionValue = {
+        $.post("http://localhost:9000/convert", {
             startMonth: startMonth,
             endMonth: endMonth,
             currentYear: 2017, // 임시
             orientation: orientation,
+            fontSize: fontSize,
             userID: userID,
             fileID: fileID,
             print_item:print_item,
             type: "save"
-        };
-
-        $.post("http://localhost:9000/convert", optionValue).done(function () {
-            var dataURI = '/tempPdf/' + userID + '/' + fileID + '.pdf';
+        }).done(function () {
+            var dataURI = "/tempPdf/" + userID + "/" + fileID + "/pdf-request";
             var fileName = 'Calendar.pdf';
             save(dataURI, fileName);
             setTimeout(disableSaveLoader, 500);
         });
     }
-
 
     function enableSaveLoader() {
         document.getElementById("saveText").style.display = "none";
@@ -236,6 +247,7 @@
                 endMonth: endMonth,
                 currentYear: 2017, // 임시
                 orientation: orientation,
+                fontSize: fontSize,
                 userID: userID,
                 fileID: fileID,
                 print_item:print_item,
@@ -265,7 +277,6 @@
 
     }
 
-
     function enablePrintLoader() {
         document.getElementById("printText").style.display = "none";
         document.getElementById("print-loader").style.display = "block";
@@ -275,8 +286,4 @@
         document.getElementById("print-loader").style.display = "none";
         document.getElementById("printText").style.display = "block";
     }
-
 })();
-
-
-
