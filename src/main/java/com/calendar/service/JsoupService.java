@@ -36,7 +36,8 @@ public class JsoupService {
             int endMonth,
             int currentYear,
             String userID,
-            String fileID
+            String fileID,
+            String print_item
     ) throws IOException, ParserException, ParseException {
 
         Calendar calendar = parseIcalFile();
@@ -44,9 +45,9 @@ public class JsoupService {
         for (int month = startMonth; month <= endMonth; month++) {
 
             ICalFilteredData filteredData = iCal.filterData(calendar, month, currentYear);
-            File input = readTemplateByMonth(month);
+            File input = readTemplateByMonth(month, print_item);
             Document doc = parseHtml(input);
-            drawEventsOnHtml(doc, filteredData);
+            drawEventsOnHtml(doc, filteredData, print_item);
             exportHtml(doc, month, userID, fileID);
         }
     }
@@ -55,7 +56,12 @@ public class JsoupService {
         return iCal.parseFile("/Users/Naver/Desktop/ical4j-demo/target/classes/static/iCalData/period.ics");
     }
 
-    private File readTemplateByMonth(int month) {
+    private File readTemplateByMonth(int month, String print_item) {
+
+        if(print_item.equals("schedule")){
+            return new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/templates/month_view/month" + month + "_Naver.html");
+        }
+
         return new File("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/templates/month_view/month_" + month + ".html");
     }
 
@@ -67,14 +73,14 @@ public class JsoupService {
         );
     }
 
-    private void drawEventsOnHtml(Document doc, ICalFilteredData filteredData) {
+    private void drawEventsOnHtml(Document doc, ICalFilteredData filteredData, String print_item) {
         List<ICalTodo> todoList = filteredData.getTodoList();
         List<ICalFilteredEvent> eventList = filteredData.getEventList();
 
         Collections.sort(eventList,new ICalComparator());
 
-        renderingAllEvents(doc, todoList);
-        renderingAllEvents(doc, eventList);
+        renderingAllEvents(doc, todoList, print_item);
+        renderingAllEvents(doc, eventList, print_item);
 
         //스크립트 태그 제거 - 마크업 중복 방지
         doc.select("script").remove();
@@ -104,7 +110,7 @@ public class JsoupService {
         htmlWriter.close();
     }
 
-    private void renderingAllEvents(Document doc, List list){
+    private void renderingAllEvents(Document doc, List list, String print_item){
 
         for(int i=0;i<list.size();i++){
 
@@ -113,6 +119,9 @@ public class JsoupService {
             }
             else if(list.get(i) instanceof ICalFilteredEvent){
                 if(((ICalFilteredEvent) list.get(i)).getType().equals("PERIOD")){
+                    if(print_item.equals("schedule")){
+                        continue;
+                    }
                     appendPeriodEvent(doc, (ICalFilteredEvent) list.get(i));
                 }else{
                     appenOneDayEvent(doc, (ICalFilteredEvent) list.get(i));

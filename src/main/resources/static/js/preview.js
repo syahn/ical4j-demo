@@ -11,8 +11,12 @@
     };
 
     var fileID, userID;
+    var print_item;
 
     $(document).ready(function () {
+
+        print_item = $(":input:radio[name=print_item]:checked").val();
+
 
         //select option 메인 페이지 달로 초기화
         fileID = $("#content").attr("value");
@@ -26,6 +30,9 @@
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
         $("._portrait, ._landscape").click(changeOrientation);
+        $('input[type=radio][name=print_item]').change(function() {
+            changePreviewImage();
+        });
     });
 
     function initiatePeriod() {
@@ -58,6 +65,7 @@
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
+        print_item = $(":input:radio[name=print_item]:checked").val();
 
         if (startMonth > endMonth) {
             $("#end_month").val(startMonth);
@@ -77,9 +85,9 @@
         var vertical = document.getElementById("rdo2_1").checked;
 
         if (vertical) {
-            takeScreenShot(startMonth, "portrait");
+            takeScreenShot(startMonth, "portrait",print_item);
         } else {
-            takeScreenShot(startMonth, "landscape");
+            takeScreenShot(startMonth, "landscape",print_item);
         }
     }
 
@@ -88,13 +96,14 @@
         document.getElementById('previewImage').style.display = 'none';
     }
 
-    function takeScreenShot(startMonth, mode) {
+    function takeScreenShot(startMonth, mode, print_item) {
 
         $.post("/make-preview", {
             startMonth: startMonth,
             endMonth: startMonth,
             userID: userID,
             fileID: fileID,
+            print_item: print_item,
             currentYear: 2017
         }).done(function () {
 
@@ -155,6 +164,7 @@
             orientation: orientation,
             userID: userID,
             fileID: fileID,
+            print_item:print_item,
             type: "save"
         };
 
@@ -228,6 +238,7 @@
                 orientation: orientation,
                 userID: userID,
                 fileID: fileID,
+                print_item:print_item,
                 type: "print"
             }).done(function () {
 
@@ -248,7 +259,7 @@
             // };
             // xhr.send();
 
-            $("#hiddenFrame").attr("src", "/tempPdf/" + userID + "/" + fileID + "/pdf-request");
+            $("#hiddenFrame").attr("src", "http://localhost:9000/tempPdf/" + userID + "/" + fileID + ".pdf");
             setTimeout(disablePrintLoader, 1000);
         });
 
