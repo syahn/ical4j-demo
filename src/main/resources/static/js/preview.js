@@ -153,7 +153,7 @@
             fileID: fileID,
             type: "save"
         }).done(function () {
-            var dataURI = "/tempPdf/" + userID + "/" + fileID + "/pdf-request";
+            var dataURI = "/tempPdf/" + userID + "/" + fileID + ".pdf";
             var fileName = 'Calendar.pdf';
             save(dataURI, fileName);
             setTimeout(disableSaveLoader, 500);

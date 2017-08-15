@@ -136,5 +136,10 @@ public class PrintController {
         return "preview";
     }
 
+    @RequestMapping("/test")
+    public String test(){
+        return "/testMonth";
+    }
+
 
 }
