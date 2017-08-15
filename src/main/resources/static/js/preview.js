@@ -4,7 +4,8 @@
     var endOption = document.getElementById("end_month");
     var landscape = document.getElementById("rdo2_0");
     var fontSizeOpt = document.getElementById("font_size_select");
-    var vertical = document.getElementById("rdo2_1").checked;
+    var vertical = document.getElementById("rdo2_1").checked ? "portrait" : "landscape";
+    var templateType = $(":input:radio[name=print_item]:checked").val();;
     var initialStartMonth;
     var startMonth, endMonth, orientation;
     var fontSize = fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
@@ -13,11 +14,8 @@
         "landscape": "width: 343px; height:260px;"
     };
     var fileID, userID;
-    var print_item;
 
     $(document).ready(function () {
-
-        print_item = $(":input:radio[name=print_item]:checked").val();
 
         //select option 메인 페이지 달로 초기화
         fileID = $("#content").attr("value");
@@ -29,12 +27,11 @@
         $("#button-print").click(requestPrint);
         $("#button-save").click(requestSave);
         $("#start_month").on("change", changePreviewImage);
-        $("#end_month").on("change", changePreviewImage);
-        $("._font_size_select").on("change", ch);
-        $("._portrait, ._landscape").click(changeOrientation);
-        $('input[type=radio][name=print_item]').change(function() {
-            changePreviewImage();
-        });
+        $("#end_month").on("change", changePeriod);
+        $("._print_item").on("change", changePreviewImage);
+        $("._font_size_select").on("change", changePreviewImage);
+        $("._portrait, ._landscape").click(changePreviewImage);
+
     });
 
     function initiatePeriod() {
@@ -45,14 +42,15 @@
     }
 
     function changePreviewImage() {
-        changePeriod();
-        changeOrientation();
+        enablePreviewLoader();
+        refreshOptions();
+        takeScreenShot();
     }
 
     function changePeriod() {
         var pageNum = document.getElementById("pageNum");
-
-        refreshOptions();
+        startMonth = startOption.options[startOption.selectedIndex].value;
+        endMonth = endOption.options[endOption.selectedIndex].value;
 
         // 총 페이지 수 계산
         var numOfMonth = endMonth - startMonth + 1;
@@ -67,8 +65,8 @@
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
-        print_item = $(":input:radio[name=print_item]:checked").val();
-        vertical = document.getElementById("rdo2_1").checked;
+        vertical = document.getElementById("rdo2_1").checked ? "portrait" : "landscape";
+        templateType = $(":input:radio[name=print_item]:checked").val();
         fontSize =fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
 
         if (startMonth > endMonth) {
@@ -80,33 +78,19 @@
         orientation = landscape.checked ? 1 : 0;
     }
 
-    //미리보기 세로방향, 가로방향 보여주기
-    function changeOrientation() {
-        enablePreviewLoader();
-        refreshOptions();
-
-        if (vertical) {
-            takeScreenShot(startMonth, "portrait",print_item);
-        } else {
-            takeScreenShot(startMonth, "landscape",print_item);
-        }
-    }
-
     function enablePreviewLoader() {
         document.getElementById('loader').style.display = 'block';
         document.getElementById('previewImage').style.display = 'none';
     }
 
-    function takeScreenShot(startMonth, mode, print_item) {
-
-
+    function takeScreenShot() {
         $.post("/make-preview", {
             startMonth: startMonth,
             endMonth: startMonth,
+            templateType: templateType,
             fontSize: fontSize,
             userID: userID,
             fileID: fileID,
-            print_item: print_item,
             currentYear: 2017
         }).done(function () {
 
@@ -124,19 +108,19 @@
 
                     framedoc.body.innerHTML = e;
 
-                    convertHtmlToCanvas(framedoc, mode);
+                    convertHtmlToCanvas(framedoc);
                 });
         });
     }
 
-    function convertHtmlToCanvas(framedoc, mode) {
+    function convertHtmlToCanvas(framedoc) {
         html2canvas(framedoc.body, {
             onrendered: function (canvas) {
                 //이미지
                 var dataUrl = canvas.toDataURL();
                 $("#previewImage").attr({
                     "src": dataUrl,
-                    "style": mode === "landscape" ? printMode.landscape : printMode.portrait
+                    "style": vertical === "landscape" ? printMode.landscape : printMode.portrait
                 });
                 $("#loader").css("display", "none");
             }
@@ -163,10 +147,10 @@
             endMonth: endMonth,
             currentYear: 2017, // 임시
             orientation: orientation,
+            templateType: templateType,
             fontSize: fontSize,
             userID: userID,
             fileID: fileID,
-            print_item:print_item,
             type: "save"
         }).done(function () {
             var dataURI = "/tempPdf/" + userID + "/" + fileID + "/pdf-request";
@@ -235,34 +219,15 @@
                 endMonth: endMonth,
                 currentYear: 2017, // 임시
                 orientation: orientation,
+                templateType: templateType,
                 fontSize: fontSize,
                 userID: userID,
                 fileID: fileID,
-                print_item:print_item,
                 type: "print"
             }).done(function () {
-
-
-            // var xhr = new XMLHttpRequest();
-            // xhr.open("GET", "/tempPdf/" + userID + "/" + fileID + "-month_result.pdf", true);
-            // xhr.responseType = "blob";
-            // xhr.onload = function (e) {
-            //     if (this.status === 200) {
-            //
-            //         console.log(this.response);
-            //
-            //         var url = window.URL || window.webkitURL;
-            //         var file = url.createObjectURL(this.response);
-            //         $("#hiddenFrame").attr("src",file);
-            //
-            //     }
-            // };
-            // xhr.send();
-
-            $("#hiddenFrame").attr("src", "http://localhost:9000/tempPdf/" + userID + "/" + fileID + ".pdf");
-            setTimeout(disablePrintLoader, 1000);
-        });
-
+                $("#hiddenFrame").attr("src", "/tempPdf/" + userID + "/" + fileID + "/pdf-request");
+                setTimeout(disablePrintLoader, 1000);
+            });
     }
 
     function enablePrintLoader() {

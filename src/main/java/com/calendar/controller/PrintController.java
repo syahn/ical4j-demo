@@ -44,15 +44,14 @@ public class PrintController {
     public void makePreview(
             @RequestParam("startMonth") int startMonth,
             @RequestParam("endMonth") int endMonth,
+            @RequestParam("templateType") String templateType,
             @RequestParam("fontSize") int fontSize,
             @RequestParam("userID") String userID,
             @RequestParam("fileID") String fileID,
-            @RequestParam("print_item") String print_item,
             @RequestParam("currentYear") int currentYear
     ) throws ParseException, ParserException, IOException {
 
-
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID, fontSize, print_item);
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear,userID,fileID, fontSize, templateType);
 
     }
 
@@ -70,15 +69,29 @@ public class PrintController {
     }
 
 
-//    @GetMapping("/tempPdf/{userID}/{fileID}/pdf-request")
-//    public String responseDir(
-//            @PathVariable String userID,
-//            @PathVariable String fileID,
-//            Model model
-//    ) throws IOException, ParserException {
-//        model.addAttribute("path", "/tempPdf/" + userID + "/" + fileID + ".pdf");
+    @GetMapping("/tempPdf/{userID}/{fileID}/pdf-request")
+    public String responseDir(
+            @PathVariable String userID,
+            @PathVariable String fileID,
+            Model model
+    ) throws IOException, ParserException {
+        model.addAttribute("path", "/tempPdf/" + userID + "/" + fileID + ".pdf");
+
+        return "/pdf";
+    }
+
+//    @GetMapping("/tempPdf/{userID}/{fileID}-month_result.pdf")
+//    public ResponseEntity<byte[]> login2(@PathVariable String userID, @PathVariable String fileID) throws IOException, ParserException {
+//        Path pdfPath = Paths.get("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/"+userID+ "/" + fileID+"-month_result.pdf");
+//        byte[] contents = Files.readAllBytes(pdfPath);
 //
-//        return "/pdf";
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.parseMediaType("application/pdf"));
+//        String filename = "output.pdf";
+//        headers.setContentDispositionFormData("inline", filename);
+//        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//        ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(contents, headers, HttpStatus.OK);
+//        return response;
 //    }
 
     @PostMapping("/preview")
@@ -108,39 +121,20 @@ public class PrintController {
             @RequestParam("endMonth") int endMonth,
             @RequestParam("currentYear") int currentYear,
             @RequestParam("orientation") int orientation,
+            @RequestParam("templateType") String templateType,
             @RequestParam("fontSize") int fontSize,
             @RequestParam("userID") String userID,
             @RequestParam("fileID") String fileID,
-            @RequestParam("print_item") String print_item,
             @RequestParam("type") String type
     ) throws ParseException, ParserException, IOException, InterruptedException {
         //converting html to pdf - by url
 
 
-        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear, userID, fileID, fontSize, print_item);
+        jSoup.makeHTMLfiles(startMonth,endMonth,currentYear, userID, fileID, fontSize, templateType);
         converter.makeAPdf(startMonth, endMonth, orientation, userID, fileID, type);
 
         return "preview";
     }
 
-
-    //    @GetMapping("/tempPdf/{userID}/{fileID}-month_result.pdf")
-//    public ResponseEntity<byte[]> login2(@PathVariable String userID, @PathVariable String fileID) throws IOException, ParserException {
-//        Path pdfPath = Paths.get("C:/Users/NAVER/Desktop/ical4j-demo/target/classes/static/tempPdf/"+userID+ "/" + fileID+"-month_result.pdf");
-//        byte[] contents = Files.readAllBytes(pdfPath);
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.parseMediaType("application/pdf"));
-//        String filename = "output.pdf";
-//        headers.setContentDispositionFormData("inline", filename);
-//        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-//        ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(contents, headers, HttpStatus.OK);
-//        return response;
-//    }
-
-    @RequestMapping("/test")
-    public String test(){
-        return "/testMonth";
-    }
 
 }
