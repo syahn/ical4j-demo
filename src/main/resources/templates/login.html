@@ -1,20 +1,65 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml"
+>
 <head>
     <title>Spring Security Example </title>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
+          integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
+          crossorigin="anonymous">
+    <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css' rel='stylesheet' type='text/css'>
+    <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
+    <style>
+        * { font-family: 'Spoqa Han Sans', 'Spoqa Han Sans JP', 'Sans-serif'; }
+        .main {
+            margin-top: 200px;
+        }
+
+        .login-form {
+            margin: auto;
+            display: block;
+            height: 500px;
+            width: 600px;
+        }
+        .title {
+            margin: 66px 0;
+            font-weight: 600;
+            font-size: 52px;
+        }
+        .submit-btn {
+            text-align: right !important;
+            background-color: #0AC37C;
+            border-color: #0AC37C;
+        }
+    </style>
 </head>
 <body>
-<div th:if="${param.error}">
-    Invalid username and password.
+<div class="container main">
+
+    <div class="container login-form">
+        <h1 class="title">캘린더 인쇄 프로토타입 앱</h1>
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="exampleInputId">User Name</label>
+                <input type="text"  name="username" class="form-control" id="exampleInputId" placeholder="Enter ID">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword">Password</label>
+                <input type="password" name="password" class="form-control" id="exampleInputPassword" placeholder="Password">
+            </div>
+
+            <button type="submit" class="btn btn-primary submit-btn">Submit</button>
+        </form>
+
+    </div>
+    <div th:if="${param.error}">
+        Invalid username and password.
+    </div>
+    <div th:if="${param.logout}">
+        You have been logged out.
+    </div>
+
 </div>
-<div th:if="${param.logout}">
-    You have been logged out.
-</div>
-<form th:action="@{/login}" method="post">
-    <div><label> User Name : <input type="text" name="username"/> </label></div>
-    <div><label> Password: <input type="password" name="password"/> </label></div>
-    <div><input type="submit" value="Sign In"/></div>
-</form>
+
 </body>
 </html>
