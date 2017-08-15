@@ -4,7 +4,8 @@
     var endOption = document.getElementById("end_month");
     var landscape = document.getElementById("rdo2_0");
     var fontSizeOpt = document.getElementById("font_size_select");
-    var vertical = document.getElementById("rdo2_1").checked;
+    var vertical = document.getElementById("rdo2_1").checked ? "portrait" : "landscape";
+    var templateType = "all";
     var initialStartMonth;
     var startMonth, endMonth, orientation;
     var fontSize = fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
@@ -27,8 +28,9 @@
         $("#button-save").click(requestSave);
         $("#start_month").on("change", changePreviewImage);
         $("#end_month").on("change", changePeriod);
-        $("._font_size_select").on("change", changeFontSize);
-        $("._portrait, ._landscape").click(changeOrientation);
+        $("._print_item").on("change", changePreviewImage);
+        $("._font_size_select").on("change", changePreviewImage);
+        $("._portrait, ._landscape").click(changePreviewImage);
     });
 
     function initiatePeriod() {
@@ -39,14 +41,15 @@
     }
 
     function changePreviewImage() {
-        changePeriod();
-        changeOrientation();
+        enablePreviewLoader();
+        refreshOptions();
+        takeScreenShot();
     }
 
     function changePeriod() {
         var pageNum = document.getElementById("pageNum");
-
-        refreshOptions();
+        startMonth = startOption.options[startOption.selectedIndex].value;
+        endMonth = endOption.options[endOption.selectedIndex].value;
 
         // 총 페이지 수 계산
         var numOfMonth = endMonth - startMonth + 1;
@@ -57,22 +60,11 @@
         }
     }
 
-    function changeFontSize() {
-        enablePreviewLoader();
-        refreshOptions();
-
-        if (vertical) {
-            takeScreenShot(startMonth, fontSize, "portrait");
-        } else {
-            takeScreenShot(startMonth, fontSize, "landscape");
-        }
-    }
-
     function refreshOptions() {
         //시작 월과 끝 월 파라미터 재설정
         startMonth = startOption.options[startOption.selectedIndex].value;
         endMonth = endOption.options[endOption.selectedIndex].value;
-        vertical = document.getElementById("rdo2_1").checked;
+        vertical = document.getElementById("rdo2_1").checked ? "portrait" : "landscape";
         fontSize =fontSizeOpt.options[fontSizeOpt.selectedIndex].value;
 
         if (startMonth > endMonth) {
@@ -84,27 +76,16 @@
         orientation = landscape.checked ? 1 : 0;
     }
 
-    //미리보기 세로방향, 가로방향 보여주기
-    function changeOrientation() {
-        enablePreviewLoader();
-        refreshOptions();
-
-        if (vertical) {
-            takeScreenShot(startMonth, fontSize, "portrait");
-        } else {
-            takeScreenShot(startMonth, fontSize, "landscape");
-        }
-    }
-
     function enablePreviewLoader() {
         document.getElementById('loader').style.display = 'block';
         document.getElementById('previewImage').style.display = 'none';
     }
 
-    function takeScreenShot(startMonth, fontSize, mode) {
+    function takeScreenShot() {
         $.post("/make-preview", {
             startMonth: startMonth,
             endMonth: startMonth,
+            templateType: templateType,
             fontSize: fontSize,
             userID: userID,
             fileID: fileID,
@@ -125,19 +106,19 @@
 
                     framedoc.body.innerHTML = e;
 
-                    convertHtmlToCanvas(framedoc, mode);
+                    convertHtmlToCanvas(framedoc);
                 });
         });
     }
 
-    function convertHtmlToCanvas(framedoc, mode) {
+    function convertHtmlToCanvas(framedoc) {
         html2canvas(framedoc.body, {
             onrendered: function (canvas) {
                 //이미지
                 var dataUrl = canvas.toDataURL();
                 $("#previewImage").attr({
                     "src": dataUrl,
-                    "style": mode === "landscape" ? printMode.landscape : printMode.portrait
+                    "style": vertical === "landscape" ? printMode.landscape : printMode.portrait
                 });
                 $("#loader").css("display", "none");
             }
@@ -164,6 +145,7 @@
             endMonth: endMonth,
             currentYear: 2017, // 임시
             orientation: orientation,
+            templateType: templateType,
             fontSize: fontSize,
             userID: userID,
             fileID: fileID,
@@ -235,6 +217,7 @@
                 endMonth: endMonth,
                 currentYear: 2017, // 임시
                 orientation: orientation,
+                templateType: templateType,
                 fontSize: fontSize,
                 userID: userID,
                 fileID: fileID,
