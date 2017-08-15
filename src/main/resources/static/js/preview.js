@@ -19,7 +19,6 @@
 
         print_item = $(":input:radio[name=print_item]:checked").val();
 
-
         //select option 메인 페이지 달로 초기화
         fileID = $("#content").attr("value");
         userID = $("#header").attr("value");
@@ -30,8 +29,8 @@
         $("#button-print").click(requestPrint);
         $("#button-save").click(requestSave);
         $("#start_month").on("change", changePreviewImage);
-        $("#end_month").on("change", changePeriod);
-        $("._font_size_select").on("change", changeFontSize);
+        $("#end_month").on("change", changePreviewImage);
+        $("._font_size_select").on("change", ch);
         $("._portrait, ._landscape").click(changeOrientation);
         $('input[type=radio][name=print_item]').change(function() {
             changePreviewImage();
@@ -61,17 +60,6 @@
         if (startOption.selectedIndex !== null) {
             pageNum.innerHTML = " 총 페이지 개수: " + numOfMonth;
             pageNum.style.display = "inline";
-        }
-    }
-
-    function changeFontSize() {
-        enablePreviewLoader();
-        refreshOptions();
-
-        if (vertical) {
-            takeScreenShot(startMonth, fontSize, "portrait");
-        } else {
-            takeScreenShot(startMonth, fontSize, "landscape");
         }
     }
 
