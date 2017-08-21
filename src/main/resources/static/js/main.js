@@ -21,5 +21,4 @@
         window.open('', 'Preview', 'resizable=1,width=526,height=715');
         f.submit();
     }
-
 })();

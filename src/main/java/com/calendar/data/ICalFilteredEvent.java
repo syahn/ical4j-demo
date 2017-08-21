@@ -104,17 +104,4 @@ public class ICalFilteredEvent{
     public void setTimeLabel(String timeLabel) {
         this.timeLabel = timeLabel;
     }
-
-//    @Override
-//    public int compareTo(ICalFilteredEvent o) {
-//        if(isAnniversary > o.isAnniversary) return -1;
-//        else if(isAnniversary < o.isAnniversary) return 1;
-//        else if(index < o.index) return -1;
-//        else if(index > o.index) return 1;
-//        else if(period < o.period) return 1;
-//        else if(period > o.period) return -1;
-//        else if(startHour < o.startHour) return -1;
-//        else if(startHour > o.startHour) return 1;
-//        return 0;
-//    }
 }

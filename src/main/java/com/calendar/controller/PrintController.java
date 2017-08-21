@@ -140,6 +140,4 @@ public class PrintController {
     public String test(){
         return "/testMonth";
     }
-
-
 }

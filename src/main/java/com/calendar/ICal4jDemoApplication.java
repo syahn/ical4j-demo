@@ -15,7 +15,7 @@ public class ICal4jDemoApplication {
 
 		SpringApplication.run(ICal4jDemoApplication.class, args);
 
-		Timer timer = new Timer ();
+/*		Timer timer = new Timer ();
 		TimerTask hourlyTask = new TimerTask () {
 			@Override
 			public void run () {
@@ -24,9 +24,8 @@ public class ICal4jDemoApplication {
 			}
 		};
 
-		timer.schedule (hourlyTask, 0l, 10000);
+		timer.schedule (hourlyTask, 0l, 10000);*/
 	}
-
 }
 
 

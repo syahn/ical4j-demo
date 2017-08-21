@@ -24,5 +24,4 @@ public class Setting {
     public void setCurrentMonth(int currentMonth) {
         this.currentMonth = currentMonth;
     }
-
 }

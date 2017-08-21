@@ -303,8 +303,8 @@ public class ICalService {
             }
             // 반복 일정
             else {
-                // 매일 반복
                 switch (frequency) {
+                    // 매일 반복
                     case "DAILY":
                         int idx = startIndex;
                         while (idx < end) {
@@ -403,7 +403,8 @@ public class ICalService {
                         break;
                     // 연 반복
                     case "YEARLY":
-                        if (setPos != 0) {//몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
+                        //몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
+                        if (setPos != 0) {
                             addDayRecurEventToFilteredEvents(event, filteredEventList, "YEARLY",setting);
                         }
                         // 마지막 날

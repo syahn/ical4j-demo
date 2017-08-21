@@ -20,3 +20,4 @@ public class ICalComparator implements Comparator<ICalFilteredEvent> {
         return 0;
     }
 }
+
