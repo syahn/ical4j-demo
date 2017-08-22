@@ -1,6 +1,11 @@
 package com.calendar.util;
 
+import com.calendar.data.ICalEvent;
+import com.calendar.data.ICalFilteredEvent;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by NAVER on 2017-08-22.
@@ -56,6 +61,20 @@ public class FilterUtilTest {
 
     @Test
     public void filterDaily() throws Exception {
+
+        //daily 일정만 있는 ics 파싱해서 ICalevent로 만들기
+        ICalEvent event = new ICalEvent("uid","dateString");
+
+        //list
+        List<ICalFilteredEvent> filteredEventList = new ArrayList<>();
+
+        //
+        FilterUtil.FilterDaily(event,filteredEventList);
+
+        //확인
+        assert(filteredEventList, expected);
+
+
     }
 
     @Test

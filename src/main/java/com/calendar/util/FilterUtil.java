@@ -421,8 +421,6 @@ public class FilterUtil {
 
     public static void FilterDaily(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
 
-        List<ICalFilteredEvent> list = new ArrayList<>();
-
         int endIndex = event.getEndIndex();
         int interval = event.getInterval();
         int untilDate = event.getUntilDate();
