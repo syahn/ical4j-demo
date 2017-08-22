@@ -8,7 +8,6 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
 import net.fortuna.ical4j.filter.PeriodRule;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
@@ -17,9 +16,6 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,10 +43,13 @@ public class ICalService {
         List<VToDo> todos = calendar.getComponents("VTODO");
 
         // 필터링
+        System.out.println("1");
         events = filterByValidPeriod(events, todos, setting);
+        System.out.println("2");
         List<ICalEvent> resolvedEventList = resolveDataToICalEvent(events, setting);
+        System.out.println("3");
         ICalFilteredData filteredData = filterByIndex(resolvedEventList, todos, setting);
-
+        System.out.println("4" + filteredData.toString());
         return filteredData;
     }
 
@@ -107,18 +106,16 @@ public class ICalService {
     }
 
     private List<ICalTodo> filterTodoListByIndex(List<VToDo> todoList, Setting setting) {
-        int currentYear = setting.getCurrentYear();
-        int currentMonth = setting.getCurrentMonth();
+
         List<ICalTodo> filteredTodoList = new ArrayList<>();
 
         for (VToDo todo : todoList) {
 
-            ICalTodo data = FilterUtil.VTodoToICalTodo(todo,setting);
+            ICalTodo data = FilterUtil.VTodoToICalTodo(todo, setting);
             filteredTodoList.add(data);
-
         }
 
-        System.out.println(filteredTodoList);
+        //System.out.println("filtered todo" + filteredTodoList.toString());
         return filteredTodoList;
     }
 
@@ -131,8 +128,8 @@ public class ICalService {
             // 반복 없는 일정
             if (event.getRecur() == false) {
 
-                FilterUtil.FilterNoneRecurEvent(event, filteredEventList);
-
+                filteredEventList = FilterUtil.FilterNoneRecurEvent(event, filteredEventList);
+                System.out.println("list" + filteredEventList.toString());
             }
             // 반복 일정
             else {
@@ -142,7 +139,7 @@ public class ICalService {
             }
         }
 
-        Collections.sort(filteredEventList,new ICalComparator());
+        Collections.sort(filteredEventList, new ICalComparator());
 
         System.out.println(filteredEventList);
 

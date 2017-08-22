@@ -79,33 +79,32 @@ public class FilterUtil {
         }
     }
 
-    public static int calIndexOfDate(ICalEvent event, String mode, Setting setting) {
-
     public static ICalTodo VTodoToICalTodo(VToDo todo, Setting setting){
+
         String uid = todo.getUid().getValue();
         String due = todo.getDue().getValue();
         String summary = todo.getSummary().getValue();
 
+        int currentYear = setting.getCurrentYear();
+        int currentMonth = setting.getCurrentMonth();
         int dueYear = DateUtil.extractYear(due);
         int dueMonth = DateUtil.extractMonth(due);
         int dueDate = DateUtil.extractDate(due);
-        int index = DateUtil.getFirstDay(setting.getCurrentYear(), setting.getCurrentMonth()) + dueDate - 1;
+        int index = DateUtil.getFirstDay(currentYear, currentMonth) + dueDate - 1;
         int weekRow = DateUtil.calculateWeekRow(index);
 
         ICalTodo todoData = new ICalTodo();
         todoData.setUid(uid);
         todoData.setSummary(summary);
 
-        if (dueYear == setting.getCurrentYear() && dueMonth == setting.getCurrentMonth()) {
+        if (dueYear == currentYear && dueMonth == currentMonth) {
             todoData.setDueYear(dueYear);
             todoData.setDueMonth(dueMonth);
             todoData.setDueDate(dueDate);
             todoData.setIndex(index);
             todoData.setWeekRow(weekRow);
             todoData.setType("TODO");
-
         }
-
         return todoData;
     }
 
@@ -190,7 +189,6 @@ public class FilterUtil {
                 data.setBySetPos(rule.getRecur().getSetPosList().get(0));
             }
         }
-
 
         return data;
     }
@@ -319,7 +317,7 @@ public class FilterUtil {
 
     }
 
-    public static void FilterNoneRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
+    public static List<ICalFilteredEvent> FilterNoneRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
 
         int startIndex = event.getStartIndex();
         int period = event.getPeriod();
@@ -375,6 +373,7 @@ public class FilterUtil {
                 }
             }
         }
+        return filteredEventList;
     }
 
     public static void FilterDaily(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {

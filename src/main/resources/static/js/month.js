@@ -8,6 +8,7 @@
             generateMonthObject()
         ).done(function (dataList) {
             console.log(dataList);
+            console.log("hty");
             renderingAllEvents(dataList);
         });
     });
