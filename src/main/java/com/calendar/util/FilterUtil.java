@@ -33,7 +33,10 @@ import java.util.List;
  * Created by NAVER on 2017-08-22.
  */
 public class FilterUtil {
-    public static Period makeValidPeriod(int year, int month) throws ParseException {
+    public static Period makeValidPeriod(Setting setting) throws ParseException {
+        int year = setting.getCurrentYear();
+        int month = setting.getCurrentMonth();
+
         int preYear = DateUtil.getYearOfPreMonth(year, month);
         int nextYear = DateUtil.getYearOfNextMonth(year, month);
         int preMonth = DateUtil.getPreMonth(month);
@@ -294,33 +297,30 @@ public class FilterUtil {
     }
 
 
-    public static void FilterRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList, Setting setting) {
-
+    public static void filterRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList, Setting setting) {
         String frequency = event.getFrequency();
 
         switch (frequency) {
-
             case "DAILY":
-                FilterDaily(event, filteredEventList);
+                filterDaily(event, filteredEventList);
                 break;
 
             case "WEEKLY":
-                FilterWeekly(event, filteredEventList);
+                filterWeekly(event, filteredEventList);
                 break;
 
             case "MONTHLY":
-                FilterMonthly(event, filteredEventList, setting);
+                filterMonthly(event, filteredEventList, setting);
                 break;
             // 연 반복
             case "YEARLY":
-                FilterYearly(event, filteredEventList, setting);
+                filterYearly(event, filteredEventList, setting);
                 break;
         }
 
     }
 
     public static List<ICalFilteredEvent> FilterNoneRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
-
         int startIndex = event.getStartIndex();
         int period = event.getPeriod();
         int weekRow = event.getWeekRow();
@@ -331,13 +331,10 @@ public class FilterUtil {
             addEventToFilteredEvents("DAY", event, filteredEventList);
         }
 
-
         // 여러날 일정
         else if (period > 1) {
-
             int tempPeriod = period;
             int currentWeekRow = weekRow;
-            System.out.println("여기냐1"+ Integer.toString(period)+ Integer.toString(startIndex));
 
             while (tempPeriod != 0) {
                 if (startIndex < 0) {
@@ -346,7 +343,6 @@ public class FilterUtil {
                     if (tempPeriod <= 0) break;
                     startIndex = 0;
                 }
-                System.out.println("여기냐2");
 
                 for (int idx = currentWeekRow * 7; idx < currentWeekRow * 7 + 7; idx++) {
                     int nextIdxOfWeek = currentWeekRow * 7 + 7;
@@ -384,9 +380,7 @@ public class FilterUtil {
         return filteredEventList;
     }
 
-    public static void FilterDaily(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
-
-
+    public static void filterDaily(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
         int endIndex = event.getEndIndex();
         int interval = event.getInterval();
         int untilDate = event.getUntilDate();
@@ -398,11 +392,9 @@ public class FilterUtil {
             idx += interval;
             event.setStartIndex(idx);
         }
-        System.out.println(filteredEventList);
-
     }
 
-    public static void FilterWeekly(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
+    public static void filterWeekly(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
 
         int endIndex = event.getEndIndex();
         int interval = event.getInterval();
@@ -430,7 +422,7 @@ public class FilterUtil {
     }
 
 
-    public static void FilterMonthly(ICalEvent event, List<ICalFilteredEvent> filteredEventList, Setting setting) {
+    public static void filterMonthly(ICalEvent event, List<ICalFilteredEvent> filteredEventList, Setting setting) {
 
         WeekDayList byDayList = event.getByDayList();
         int startIndex = event.getStartIndex();
@@ -517,10 +509,9 @@ public class FilterUtil {
                 }
             }
         }
-
     }
 
-    public static void FilterYearly(ICalEvent event, List<ICalFilteredEvent> filteredEventList, Setting setting) {
+    public static void filterYearly(ICalEvent event, List<ICalFilteredEvent> filteredEventList, Setting setting) {
 
         WeekDayList byDayList = event.getByDayList();
         int startIndex = event.getStartIndex();
