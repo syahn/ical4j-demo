@@ -1,30 +1,23 @@
 package com.calendar.util;
 
 import com.calendar.data.ICalEvent;
-import com.calendar.data.Setting;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Period;
-import net.fortuna.ical4j.model.WeekDayList;
-
-import java.text.ParseException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import com.calendar.data.ICalFilteredEvent;
 import com.calendar.data.ICalTodo;
 import com.calendar.data.Setting;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.WeekDay;
 import net.fortuna.ical4j.model.WeekDayList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.RRule;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -296,6 +289,42 @@ public class FilterUtil {
         }
     }
 
+    public static ICalFilteredEvent makeFilteredEvent(ICalEvent event, String type){
+
+        int startIndex = event.getStartIndex();
+        int endIndex = event.getEndIndex();
+        int period = event.getPeriod();
+        int startHour = event.getStartHour();
+        int startMinute = event.getStartMinute();
+
+        ICalFilteredEvent data = new ICalFilteredEvent();
+        data.setSummary(event.getSummary());
+        data.setIndex(startIndex);
+        data.setPeriod(period);
+        data.setUid(event.getUid());
+        data.setType(type);
+        data.setEndIndex(endIndex);
+        data.setWeekRow(DateUtil.calculateWeekRow(startIndex));
+        data.setStartHour(startHour);
+        data.setStartMinute(startMinute);
+        data.setIsAnniversary(event.getIsAnniversary());
+        data.setTimeLabel(event.getTimeLabel());
+
+        return data;
+    }
+
+    public static boolean isVaildEvent(ICalEvent event){
+        int startIndex = event.getStartIndex();
+        int endIndex = event.getEndIndex();
+
+        if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
 
     public static void filterRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList, Setting setting) {
         String frequency = event.getFrequency();
@@ -326,8 +355,8 @@ public class FilterUtil {
         int weekRow = event.getWeekRow();
 
         // 당일 일정
-        if (period == 1) {
-            System.out.println("여기냐0"+ Integer.toString(period));
+        if (period == 1 && isVaildEvent(event)) {
+
             addEventToFilteredEvents("DAY", event, filteredEventList);
         }
 
@@ -352,9 +381,12 @@ public class FilterUtil {
                         if (startIndex + tempPeriod - 1 >= nextIdxOfWeek) {
                             event.setStartIndex(startIndex);
                             event.setPeriod(nextIdxOfWeek - startIndex);
-                            //event.setWeekRow(currentWeekRow);
-                            System.out.println(event.getSummary());
-                            addEventToFilteredEvents("PERIOD", event, filteredEventList);
+                            event.setWeekRow(currentWeekRow);
+
+                            if(isVaildEvent(event)){
+                                addEventToFilteredEvents("PERIOD", event, filteredEventList);
+                            }
+
 
                             tempPeriod -= (nextIdxOfWeek - startIndex); // 뿌려줄 남은 기간
                             startIndex = nextIdxOfWeek;
@@ -368,7 +400,9 @@ public class FilterUtil {
                             event.setPeriod(tempPeriod);
                             event.setWeekRow(currentWeekRow);
 
-                            addEventToFilteredEvents("PERIOD", event, filteredEventList);
+                            if(isVaildEvent(event)){
+                                addEventToFilteredEvents("PERIOD", event, filteredEventList);
+                            }
 
                             idx += (tempPeriod - 1);
                             tempPeriod = 0;
@@ -381,6 +415,9 @@ public class FilterUtil {
     }
 
     public static void filterDaily(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
+
+        List<ICalFilteredEvent> list = new ArrayList<>();
+
         int endIndex = event.getEndIndex();
         int interval = event.getInterval();
         int untilDate = event.getUntilDate();
@@ -388,7 +425,15 @@ public class FilterUtil {
         int idx = event.getStartIndex();
 
         while (idx < end) {
-            addEventToFilteredEvents("DAILY", event, filteredEventList);
+
+            if(isVaildEvent(event)){
+
+                ICalFilteredEvent data = makeFilteredEvent(event, "DAILY");
+                filteredEventList.add(data);
+
+                //addEventToFilteredEvents("DAILY", event, filteredEventList);
+            }
+
             idx += interval;
             event.setStartIndex(idx);
         }
@@ -412,7 +457,7 @@ public class FilterUtil {
             event.setStartIndex(startIndex + diff);//첫 요일 이후 다른 요일들 시작일 계산
 
             while (Idx < end) {
-                if (!(Idx + diff >= end)) {
+                if (!(Idx + diff >= end) && isVaildEvent(event)) {
                     addEventToFilteredEvents("WEEKLY", event, filteredEventList);
                 }
                 Idx += interval * 7;
@@ -441,7 +486,7 @@ public class FilterUtil {
 
 
         // 몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
-        if (setPos != 0) {
+        if (setPos != 0 && isVaildEvent(event)) {
             addDayRecurEventToFilteredEvents(event, filteredEventList, "MONTHLY", setting);
         }
         // 마지막 날
@@ -455,13 +500,17 @@ public class FilterUtil {
                 if (targetIndexForPre >= lastIndexForPre - DateUtil.getFirstDay(currentYear, currentMonth)
                         && targetIndexForPre < firstIndexForPre + daysOfMonth) {
                     event.setStartIndex(DateUtil.getLastDay(currentYear, currentMonth - 1));
-                    addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                    if(isVaildEvent(event)){
+                        addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                    }
                 }
             }
 
             int firstDayOfMonth = DateUtil.getFirstDay(currentYear, currentMonth);
             event.setStartIndex(firstDayOfMonth + DateUtil.daysOfMonth(currentYear, currentMonth) - 1);
-            addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+            if(isVaildEvent(event)){
+                addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+            }
         }
         // 마지막 무슨 요일
         else if (byDayList.size() > 0) {
@@ -479,11 +528,14 @@ public class FilterUtil {
                 int lastIndexForPre = firstDayOfMonth + DateUtil.daysOfMonth(currentYear, currentMonth - 1);
                 if (calculatedIdx >= lastIndexForPre - DateUtil.getFirstDay(currentYear, currentMonth) && calculatedIdx < firstDayOfMonth + DateUtil.daysOfMonth(currentYear, currentMonth - 1)) {
                     event.setStartIndex(startDayNum == 8 ? 0 : startDayNum - 1);
-                    addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                    if(isVaildEvent(event)){
+                        addEventToFilteredEvents("MONTHLY", event, filteredEventList);
+                    }
                 }
             }
-
-            addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList, setting);
+            if(isVaildEvent(event)){
+                addLastWeekRecurEventToFilteredEvents("MONTHLY", event, filteredEventList, setting);
+            }
 
         } else {
             int tempMonth = startMonth;
@@ -492,7 +544,7 @@ public class FilterUtil {
             int j = startIndex;
 
             while (j < end) {
-                if (tempCount == interval || tempCount == 0) {
+                if (tempCount == interval || tempCount == 0 && isVaildEvent(event)) {
                     addEventToFilteredEvents("MONTHLY", event, filteredEventList);
                     tempCount = 0;
                 }
@@ -527,17 +579,19 @@ public class FilterUtil {
         int daysOfMonth = DateUtil.daysOfMonth(currentYear, currentMonth - 1);
 
         //몇번째 주 무슨 요일 조건 - startDayNum은 이벤트의 시작 날짜에 따라 결정 ( BYDAY가 아닌)
-        if (setPos != 0) {
+        if (setPos != 0 && isVaildEvent(event)) {
             addDayRecurEventToFilteredEvents(event, filteredEventList, "YEARLY", setting);
         }
         // 마지막 날
         else if (byMonthDay != 0 && startMonth == currentMonth) {
             int firstDayOfMonth = DateUtil.getFirstDay(currentYear, currentMonth);
             event.setStartIndex(firstDayOfMonth + daysOfMonth - 1);
-            addEventToFilteredEvents("YEARLY", event, filteredEventList);
+            if(isVaildEvent(event)){
+                addEventToFilteredEvents("YEARLY", event, filteredEventList);
+            }
         }
         // 마지막 무슨 요일 - setPos가 안들어감
-        else if (byDayList.size() > 0 && startMonth == currentMonth) {
+        else if (byDayList.size() > 0 && startMonth == currentMonth && isVaildEvent(event)) {
             addLastWeekRecurEventToFilteredEvents("YEARLY", event, filteredEventList, setting);
         }
         // 일반 연 반복
@@ -547,7 +601,9 @@ public class FilterUtil {
             while (j < end) {
                 int daysForInterval = DateUtil.daysOfYear(startMonth <= 2 ? tempYear : tempYear + 1);
 
-                addEventToFilteredEvents("YEARLY", event, filteredEventList);
+                if(isVaildEvent(event)){
+                    addEventToFilteredEvents("YEARLY", event, filteredEventList);
+                }
 
                 j += daysForInterval;
                 event.setStartIndex(j);
