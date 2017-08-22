@@ -1,5 +1,6 @@
 package com.calendar.data;
 
+import com.calendar.util.DateUtil;
 import net.fortuna.ical4j.model.WeekDayList;
 
 import java.util.List;
@@ -8,6 +9,20 @@ import java.util.List;
  * Created by NAVER on 2017-07-19.
  */
 public class ICalEvent {
+
+    public ICalEvent(String uId, String start, String end, String summary) {
+        this.uid = uId;
+        this.start = start;
+        this.end = end;
+        this.summary = summary;
+        startDate = DateUtil.extractDate(this.getStart());
+        startMonth = DateUtil.extractMonth(this.getStart());
+        startYear = DateUtil.extractYear(this.getStart());
+        endDate = DateUtil.extractDate(this.getEnd());
+        endMonth = DateUtil.extractMonth(this.getEnd());
+        endYear = DateUtil.extractYear(this.getEnd());
+        weekRow = DateUtil.calculateWeekRow(this.getStartIndex());
+    }
 
     private String uid;
     private String start;
@@ -45,7 +60,7 @@ public class ICalEvent {
     private int endHour;
     private int endMinute;
     private String timeLabel;
-    private int isAnniversary=0;
+    private int isAnniversary = 0;
 
     public int getWeekRow() {
         return weekRow;
