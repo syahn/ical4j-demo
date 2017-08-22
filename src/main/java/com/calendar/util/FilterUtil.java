@@ -1,30 +1,23 @@
 package com.calendar.util;
 
 import com.calendar.data.ICalEvent;
-import com.calendar.data.Setting;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Period;
-import net.fortuna.ical4j.model.WeekDayList;
-
-import java.text.ParseException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import com.calendar.data.ICalFilteredEvent;
 import com.calendar.data.ICalTodo;
 import com.calendar.data.Setting;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.WeekDay;
 import net.fortuna.ical4j.model.WeekDayList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.RRule;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
