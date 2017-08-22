@@ -259,32 +259,14 @@ public class FilterUtil {
         return -1;
     }
 
-
     public static void addEventToFilteredEvents(
             String type,
             ICalEvent event,
             List<ICalFilteredEvent> filteredEventList
     ) {
-        int startIndex = event.getStartIndex();
-        int endIndex = event.getEndIndex();
-        int period = event.getPeriod();
-        int startHour = event.getStartHour();
-        int startMinute = event.getStartMinute();
 
-        if (startIndex >= 0 && startIndex < 42 || endIndex >= 0 && endIndex < 42) {
-            ICalFilteredEvent data = new ICalFilteredEvent();
-            data.setSummary(event.getSummary());
-            data.setIndex(startIndex);
-            data.setPeriod(period);
-            data.setUid(event.getUid());
-            data.setType(type);
-            data.setEndIndex(endIndex);
-            data.setWeekRow(DateUtil.calculateWeekRow(startIndex));
-            data.setStartHour(startHour);
-            data.setStartMinute(startMinute);
-            data.setIsAnniversary(event.getIsAnniversary());
-            data.setTimeLabel(event.getTimeLabel());
-
+        if (isVaildEvent(event)) {
+            ICalFilteredEvent data =makeFilteredEvent(event,type);
             filteredEventList.add(data);
         }
     }
@@ -349,7 +331,7 @@ public class FilterUtil {
 
     }
 
-    public static List<ICalFilteredEvent> FilterNoneRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
+    public static List<ICalFilteredEvent> filterNoneRecurEvent(ICalEvent event, List<ICalFilteredEvent> filteredEventList) {
         int startIndex = event.getStartIndex();
         int period = event.getPeriod();
         int weekRow = event.getWeekRow();
@@ -362,6 +344,7 @@ public class FilterUtil {
 
         // 여러날 일정
         else if (period > 1) {
+            System.out.println(event.getStart());
             int tempPeriod = period;
             int currentWeekRow = weekRow;
 
@@ -491,13 +474,13 @@ public class FilterUtil {
         else if (byMonthDay != 0) {
             if (startMonth <= DateUtil.getPreMonth(currentMonth) || startYear < currentYear) {
 
-                int firstIndexForPre = DateUtil.getFirstDay(currentYear, currentMonth - 1);
+                int firstIndexForPre = DateUtil.getFirstDay(currentYear, DateUtil.getPreMonth(currentMonth));
                 int targetIndexForPre = firstIndexForPre + daysOfMonth - 1;
                 int lastIndexForPre = firstIndexForPre + daysOfMonth;
 
                 if (targetIndexForPre >= lastIndexForPre - DateUtil.getFirstDay(currentYear, currentMonth)
                         && targetIndexForPre < firstIndexForPre + daysOfMonth) {
-                    event.setStartIndex(DateUtil.getLastDay(currentYear, currentMonth - 1));
+                    event.setStartIndex(DateUtil.getLastDay(currentYear, DateUtil.getPreMonth(currentMonth)));
                     if(isVaildEvent(event)){
                         addEventToFilteredEvents("MONTHLY", event, filteredEventList);
                     }

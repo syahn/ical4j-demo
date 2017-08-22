@@ -1,7 +1,6 @@
 package com.calendar.service;
 
 import com.calendar.data.*;
-import com.calendar.util.DateUtil;
 import com.calendar.util.FilterUtil;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -50,7 +49,7 @@ public class ICalService {
         return filteredData;
     }
 
-    private Setting setUp(int year, int month) {
+    public Setting setUp(int year, int month) {
         Setting setting = new Setting();
         setting.setCurrentMonth(month);
         setting.setCurrentYear(year);
@@ -118,7 +117,7 @@ public class ICalService {
         for (ICalEvent event : eventList) {
             // 반복 없는 일정
             if (event.getRecur() == false) {
-                filteredEventList = FilterUtil.FilterNoneRecurEvent(event, filteredEventList);
+                FilterUtil.filterNoneRecurEvent(event, filteredEventList);
             }
             // 반복 일정
             else {
