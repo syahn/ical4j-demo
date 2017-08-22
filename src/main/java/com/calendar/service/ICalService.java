@@ -127,9 +127,9 @@ public class ICalService {
 
             // 반복 없는 일정
             if (event.getRecur() == false) {
-
+                System.out.println("list1" + filteredEventList.toString());
                 filteredEventList = FilterUtil.FilterNoneRecurEvent(event, filteredEventList);
-                System.out.println("list" + filteredEventList.toString());
+                System.out.println("list2" + filteredEventList.toString());
             }
             // 반복 일정
             else {

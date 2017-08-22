@@ -10,20 +10,6 @@ import java.util.List;
  */
 public class ICalEvent {
 
-    public ICalEvent(String uId, String start, String end, String summary) {
-        this.uid = uId;
-        this.start = start;
-        this.end = end;
-        this.summary = summary;
-        startDate = DateUtil.extractDate(this.getStart());
-        startMonth = DateUtil.extractMonth(this.getStart());
-        startYear = DateUtil.extractYear(this.getStart());
-        endDate = DateUtil.extractDate(this.getEnd());
-        endMonth = DateUtil.extractMonth(this.getEnd());
-        endYear = DateUtil.extractYear(this.getEnd());
-        weekRow = DateUtil.calculateWeekRow(this.getStartIndex());
-    }
-
     private String uid;
     private String start;
     private String end;
@@ -37,6 +23,7 @@ public class ICalEvent {
     private int endMonth;
     private int endYear;
     private int period;
+    private int weekRow;
     private String until;
     private String frequency;
     private String untilDay;
@@ -54,13 +41,25 @@ public class ICalEvent {
     private int endIndex;
     private int byMonthDay;
     private int bySetPos;
-    private int weekRow;
     private int startHour;
     private int startMinute;
     private int endHour;
     private int endMinute;
     private String timeLabel;
     private int isAnniversary = 0;
+
+    public ICalEvent(String uId, String start, String end, String summary) {
+        this.uid = uId;
+        this.start = start;
+        this.end = end;
+        this.summary = summary;
+        startDate = DateUtil.extractDate(this.getStart());
+        startMonth = DateUtil.extractMonth(this.getStart());
+        startYear = DateUtil.extractYear(this.getStart());
+        endDate = DateUtil.extractDate(this.getEnd());
+        endMonth = DateUtil.extractMonth(this.getEnd());
+        endYear = DateUtil.extractYear(this.getEnd());
+    }
 
     public int getWeekRow() {
         return weekRow;
@@ -284,6 +283,7 @@ public class ICalEvent {
 
     public void setStartIndex(int startIndex) {
         this.startIndex = startIndex;
+
     }
 
     public int getEndIndex() {

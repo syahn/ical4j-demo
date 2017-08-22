@@ -116,8 +116,10 @@ public class FilterUtil {
         String end = event.getEndDate().getValue();
         String summary = event.getSummary().getValue();
         ICalEvent data = new ICalEvent(uId, start, end, summary);
+        int startIndex = calculateIndexOfDate(data, "start", setting);
 
-        data.setStartIndex(calculateIndexOfDate(data, "start", setting));//모든 이벤트 필수
+        data.setStartIndex(startIndex);//모든 이벤트 필수
+        data.setWeekRow(DateUtil.calculateWeekRow(startIndex));
         data.setEndIndex(calculateIndexOfDate(data, "end", setting));//기간 일정만
         data.setPeriod(calculatePeriod(data, event));
 
@@ -325,12 +327,17 @@ public class FilterUtil {
 
         // 당일 일정
         if (period == 1) {
+            System.out.println("여기냐0"+ Integer.toString(period));
             addEventToFilteredEvents("DAY", event, filteredEventList);
         }
+
+
         // 여러날 일정
         else if (period > 1) {
+
             int tempPeriod = period;
             int currentWeekRow = weekRow;
+            System.out.println("여기냐1"+ Integer.toString(period)+ Integer.toString(startIndex));
 
             while (tempPeriod != 0) {
                 if (startIndex < 0) {
@@ -339,6 +346,7 @@ public class FilterUtil {
                     if (tempPeriod <= 0) break;
                     startIndex = 0;
                 }
+                System.out.println("여기냐2");
 
                 for (int idx = currentWeekRow * 7; idx < currentWeekRow * 7 + 7; idx++) {
                     int nextIdxOfWeek = currentWeekRow * 7 + 7;
@@ -348,8 +356,8 @@ public class FilterUtil {
                         if (startIndex + tempPeriod - 1 >= nextIdxOfWeek) {
                             event.setStartIndex(startIndex);
                             event.setPeriod(nextIdxOfWeek - startIndex);
-                            event.setWeekRow(currentWeekRow);
-
+                            //event.setWeekRow(currentWeekRow);
+                            System.out.println(event.getSummary());
                             addEventToFilteredEvents("PERIOD", event, filteredEventList);
 
                             tempPeriod -= (nextIdxOfWeek - startIndex); // 뿌려줄 남은 기간
