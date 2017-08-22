@@ -1,5 +1,8 @@
 package com.calendar.util;
 
+import com.calendar.data.ICalEvent;
+import net.fortuna.ical4j.model.component.VEvent;
+
 import java.time.Month;
 import java.time.Year;
 import java.time.YearMonth;
@@ -8,6 +11,7 @@ import java.time.YearMonth;
  * Created by NAVER on 2017-08-21.
  */
 public class DateUtil {
+
     public static int getNextMonth(int month) {
         return  Month.of(month).plus(1).getValue();
     }
@@ -39,6 +43,28 @@ public class DateUtil {
 
     public static int getFirstDay(int year, int month) {
         return YearMonth.of(year, month).atDay(1).getDayOfWeek().getValue();
+    }
+
+    public static int calculatePeriod(ICalEvent data, VEvent event) {
+        int startYear = data.getStartYear();
+        int startMonth = data.getStartMonth();
+        int startDate = data.getStartDate();
+        int endYear = data.getEndYear();
+        int endMonth = data.getEndMonth();
+        int endDate = data.getEndDate();
+
+        // 종일 이벤트가 아닌 시간 이벤트면 1 더해주기
+        int offset = event.getStartDate().getTimeZone() != null ? 1 : 0;
+        if (startYear == endYear) {
+            if (startMonth == endMonth) {
+                return endDate - startDate + offset;
+            } else {
+                return DateUtil.daysOfMonth(startYear, startMonth) - startDate + endDate + offset;
+            }
+        } else {
+            // TODO: 연 계산하기
+        }
+        return -1;
     }
 
     public static int calculateWeekRow(int startIndex) {

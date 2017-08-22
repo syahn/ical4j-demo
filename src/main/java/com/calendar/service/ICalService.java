@@ -2,6 +2,7 @@ package com.calendar.service;
 
 import com.calendar.data.*;
 import com.calendar.util.DateUtil;
+import com.calendar.util.FilterUtil;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.filter.Filter;
@@ -39,17 +40,30 @@ public class ICalService {
 
     //일정리스트 만들기
     public ICalFilteredData filterData(Calendar calendar, int month, int year) throws ParseException {
+        // Setting 값 초기화
+        Setting setting = setUp(year, month);
+
+        // 이벤트와 todo리스트 추출
+        List<VEvent> events = calendar.getComponents("VEVENT");
+        List<VToDo> todos = calendar.getComponents("VTODO");
+
+        // 필터링
+        events = filterByValidPeriod(events, todos, setting);
+        List<ICalEvent> resolvedEventList = resolveDataToICalEvent(events, setting);
+        ICalFilteredData filteredData = filterByIndex(resolvedEventList, todos, setting);
+
+        return filteredData;
+    }
+
+    private Setting setUp(int year, int month) {
         Setting setting = new Setting();
         setting.setCurrentMonth(month);
         setting.setCurrentYear(year);
 
-        List<VEvent> events = calendar.getComponents("VEVENT");
-        List<VToDo> todos = calendar.getComponents("VTODO");
-
-        return filterByValidPeriod(events, todos, setting);
+        return setting;
     }
 
-    private ICalFilteredData filterByValidPeriod(
+    private List<VEvent> filterByValidPeriod(
             List<VEvent> events,
             List<VToDo> todos,
             Setting setting
@@ -58,32 +72,12 @@ public class ICalService {
         int currentMonth = setting.getCurrentMonth();
 
         // 전달 23일 부터 다음 달 6일까지의 기간 설정
-        Period period = makeValidPeriod(currentYear, currentMonth);
+        Period period = FilterUtil.makeValidPeriod(currentYear, currentMonth);
         Filter filter = new Filter(new PeriodRule(period));
 
-        events = (List<VEvent>) filter.filter(events);
-        List<ICalEvent> resolvedEventList = resolveDataToICalEvent(events, setting);
-
-        return filterByIndex(resolvedEventList, todos, setting);
+        return (List<VEvent>) filter.filter(events);
     }
 
-    private Period makeValidPeriod(int year, int month) throws ParseException {
-        YearMonth currentYearMonth = YearMonth.of(year, month);
-        int preYear = currentYearMonth.minusMonths(1).getYear();
-        int nextYear = currentYearMonth.plusMonths(1).getYear();
-        int preMonth = DateUtil.getPreMonth(month);
-        int nextMonth = DateUtil.getNextMonth(month);
-
-        LocalDate lastWeekOfPrevMonth = YearMonth.of(preYear, preMonth).atDay(23);
-        LocalDate firstWeekOfNextMonth = YearMonth.of(nextYear, nextMonth).atDay(6);
-        DateTime startDate = new DateTime(lastWeekOfPrevMonth
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//전달 23일
-        DateTime endDate = new DateTime(firstWeekOfNextMonth
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "T000000Z");//다음달 6일
-
-        //기간 만들기 - RRule 밑에 EXPIR있는 경우 인식 못함
-        return new Period(startDate, endDate);
-    }
 
     private List<ICalEvent> resolveDataToICalEvent(List<VEvent> events, Setting setting) {
         List<ICalEvent> eventList = new ArrayList<>();
@@ -100,10 +94,10 @@ public class ICalService {
             data.setEndDate(DateUtil.extractDate(data.getEnd()));
             data.setEndMonth(DateUtil.extractMonth(data.getEnd()));
             data.setEndYear(DateUtil.extractYear(data.getEnd()));
-            data.setStartIndex(calculateIndexOfDate(data, "start", setting));//모든 이벤트 필수
-            data.setEndIndex(calculateIndexOfDate(data, "end", setting));//기간 일정만
+            data.setStartIndex(FilterUtil.calIndexOfDate(data, "start", setting));//모든 이벤트 필수
+            data.setEndIndex(FilterUtil.calIndexOfDate(data, "end", setting));//기간 일정만
             data.setWeekRow(DateUtil.calculateWeekRow(data.getStartIndex()));
-            data.setPeriod(calculatePeriod(data, event));
+            data.setPeriod(DateUtil.calculatePeriod(data, event));
 
             //기념일 컴포넌트
             if (event.getProperty("X-NAVER-ANNIVERSARY") != null) {
@@ -145,7 +139,7 @@ public class ICalService {
                     data.setUntilDate(DateUtil.extractDate(data.getUntil()));
                     data.setUntilMonth(DateUtil.extractMonth(data.getUntil()));
                     data.setUntilYear(DateUtil.extractYear(data.getUntil()));
-                    data.setEndIndex(calculateIndexOfDate(data, "untilEnd",setting)); //until 존재시 endIndex를 until date에 맞춰줌
+                    data.setEndIndex(FilterUtil.calIndexOfDate(data, "untilEnd",setting)); //until 존재시 endIndex를 until date에 맞춰줌
                 }
 
                 /* 요일 반복 위한 이벤트 시작 날짜들 리스트(일,금 이면 1,6) */
@@ -470,19 +464,12 @@ public class ICalService {
             List<ICalFilteredEvent> filteredEventList,
             Setting setting
     ) {
-        int currentYear = setting.getCurrentYear();
-        int currentMonth = setting.getCurrentMonth();
-        WeekDayList byDayList = event.getByDayList();
-        int firstDayOfMonth = DateUtil.getFirstDay(currentYear, currentMonth);
-        int day = byDayList.get(0).getDay().ordinal();
-        DayOfWeek[] dayOfWeeks = DayOfWeek.values();
-        DayOfWeek dayOfWeek = dayOfWeeks[day - 1];
-        LocalDate date = LocalDate.of(currentYear, currentMonth, 1);
-        int lastDateInMonth = date.with(TemporalAdjusters.lastInMonth(dayOfWeek)).getDayOfMonth();
-        int calculatedIdx = firstDayOfMonth + lastDateInMonth - 1;
+        int calculatedIdx = FilterUtil.calIndexOfLastWeekRecurEvent(event, setting);
         event.setStartIndex(calculatedIdx);
+
         addEventToFilteredEvents(type, event, filteredEventList);
     }
+
 
     //몇째 주 요일 반복
     private void addDayRecurEventToFilteredEvents(
@@ -500,46 +487,43 @@ public class ICalService {
         int nextYear = DateUtil.getYearOfNextMonth(currentYear, currentMonth);
         int preMonth = DateUtil.getPreMonth(currentMonth);
         int nextMonth = DateUtil.getNextMonth(currentMonth);
+        int daysOfCurrentMonth = DateUtil.daysOfMonth(currentYear, currentMonth);
 
         if (type.equals("MONTHLY")) {
             int firstIndex = DateUtil.getFirstDay(currentYear, currentMonth);
-            int targetIndex;
-            if (startDayNum > firstIndex) { // 테이블의 0번째 row에 해당 요일이 포함되는 경우
-                targetIndex = startDayNum + 7 * (setPos - 1) - 1;
-            } else {
-                targetIndex = startDayNum + 7 * setPos - 1;
-            }
+            int targetIndex = FilterUtil.calIndexOfDayRecurEvent(event, currentYear, currentMonth);
+
             //이벤트 시작이 해당 인덱스보다 크면 현재 달 이후에 이벤트 시작이라는 것
             if (event.getStartIndex() <= targetIndex) {
                 event.setStartIndex(targetIndex);
                 addEventToFilteredEvents(type, event, filteredEventList);
             }
+
             //이전달의 이벤트는 표시
             if (startMonth <= preMonth || preYear < currentYear) {
                 //4,5째주면 표시가능
                 if (setPos == 4 || setPos == 5) {
-                    int firstIndexForPre = DateUtil.getFirstDay(preYear, currentMonth - 1);
-                    int targetIndexForPre;
-
-                    if (startDayNum > firstIndexForPre) { // 테이블의 0번째 row에 해당 요일이 포함되는 경우
-                        targetIndexForPre = startDayNum + 7 * (setPos - 1) - 1;
-                    } else {
-                        targetIndexForPre = startDayNum + 7 * setPos - 1;
-                    }
-
-                    int lastIndexForPre = firstIndexForPre + DateUtil.daysOfMonth(preYear, currentMonth - 1);
+                    int firstIndexForPre = DateUtil.getFirstDay(preYear, preMonth);
+                    int targetIndexForPre = FilterUtil.calIndexOfDayRecurEvent(event, preYear, preMonth);
+                    int lastIndexForPre = firstIndexForPre + DateUtil.daysOfMonth(preYear, preMonth);
                     if (targetIndexForPre >= lastIndexForPre - DateUtil.getFirstDay(currentYear, currentMonth)
                             && targetIndexForPre < firstIndexForPre + DateUtil.daysOfMonth(preYear, startMonth)) {
+
                         event.setStartIndex(startDayNum == 8 ? 0 : startDayNum - 1);
+
                         addEventToFilteredEvents(type, event, filteredEventList);
                     }
                 }
             }
-            if (setPos == 1) {//다음달 이벤트중 현재월뷰에 표시될 것
+            //다음달 이벤트중 현재월뷰에 표시될 것
+            if (setPos == 1) {
 
                 int targetIndexForNext = targetIndex + 7 * 4;
-                targetIndexForNext = targetIndexForNext <= (firstIndex + DateUtil.daysOfMonth(currentYear, currentMonth) - 1) ? targetIndex + 7 * 5 : targetIndexForNext;
-                if (firstIndex + DateUtil.daysOfMonth(currentYear, currentMonth) - 1 < targetIndexForNext) {
+                targetIndexForNext = (targetIndexForNext <= (firstIndex + daysOfCurrentMonth - 1))
+                        ? targetIndex + 7 * 5
+                        : targetIndexForNext;
+
+                if (firstIndex + daysOfCurrentMonth - 1 < targetIndexForNext) {
                     event.setStartIndex(targetIndexForNext);
                     addEventToFilteredEvents(type, event, filteredEventList);
                 }
@@ -549,27 +533,16 @@ public class ICalService {
 
         //YEARLY
         if (startMonth == currentMonth) {
-            int firstIndex = DateUtil.getFirstDay(currentYear, currentMonth);
-            int targetIndex;
-            if (startDayNum > firstIndex) { // 테이블의 0번째 row에 해당 요일이 포함되는 경우
-                targetIndex = startDayNum + 7 * (setPos - 1) - 1;
-            } else {
-                targetIndex = startDayNum + 7 * setPos - 1;
-            }
+            int targetIndex = FilterUtil.calIndexOfDayRecurEvent(event, currentYear, currentMonth);
+
             event.setStartIndex(targetIndex);
             addEventToFilteredEvents(type, event, filteredEventList);
+
         } else if (startMonth == preMonth) {
             //4,5째주면 표시가능
             if (setPos == 4 || setPos == 5) {
                 int firstIndex = DateUtil.getFirstDay(preYear, startMonth);
-                int targetIndex;
-
-                if (startDayNum > firstIndex) { // 테이블의 0번째 row에 해당 요일이 포함되는 경우
-                    targetIndex = startDayNum + 7 * (setPos - 1) - 1;
-                } else {
-                    targetIndex = startDayNum + 7 * setPos - 1;
-                }
-
+                int targetIndex = FilterUtil.calIndexOfDayRecurEvent(event, preYear, startMonth);
                 int lastIndexForPre = firstIndex + DateUtil.daysOfMonth(preYear, startMonth);
                 if (targetIndex >= lastIndexForPre - DateUtil.getFirstDay(currentYear, currentMonth) && targetIndex < firstIndex + DateUtil.daysOfMonth(preYear, startMonth)) {
                     event.setStartIndex(startDayNum == 8 ? 0 : startDayNum - 1);
@@ -596,71 +569,4 @@ public class ICalService {
     }
 
 
-    private int calculateIndexOfDate(ICalEvent event, String mode, Setting setting) {
-        int index;
-        int currentYear = setting.getCurrentYear();
-        int currentMonth = setting.getCurrentMonth();
-        int firstIndex = DateUtil.getFirstDay(currentYear, currentMonth);
-
-        int eventYear = mode.equals("start") ? event.getStartYear() : event.getUntilYear();
-        int eventMonth = mode.equals("start") ? event.getStartMonth() : event.getUntilMonth();
-        int eventDate = mode.equals("start") ? event.getStartDate() : event.getUntilDate();
-
-        //기간 일정의 종료날자 (DTEND)
-        if (mode.equals("end")) {
-            eventYear = event.getEndYear();
-            eventMonth = event.getEndMonth();
-            eventDate = event.getEndDate();
-        }
-
-        //현재 달에서 이벤트 시작시
-        if (eventMonth == currentMonth && eventYear == currentYear) {
-            index = eventDate + firstIndex - 1;
-        }
-
-        //현재 달 이후에 이벤트 시작시(최대 6일까지만 존재)
-        else if ((eventMonth > currentMonth && eventYear == currentYear) || eventYear > currentYear) {
-            index = eventDate + firstIndex - 1 + DateUtil.daysOfMonth(currentYear, currentMonth);
-        }
-
-        //현재 달 이전에 이벤트가 시작시(얼마나 이전인지 한계 없음)
-        else {
-            int tempMonth = currentMonth - 1;
-            int tempYear = currentYear;
-
-            while (tempYear > eventYear || (tempYear == eventYear && tempMonth >= eventMonth)) {
-                if (tempMonth == 0) {
-                    tempMonth = 12;
-                    tempYear--;
-                }
-
-                eventDate -= DateUtil.daysOfMonth(tempYear, tempMonth);
-                tempMonth--;
-            }
-            index = eventDate + firstIndex - 1;
-        }
-        return index;
-    }
-
-    private int calculatePeriod(ICalEvent data, VEvent event) {
-        int startYear = data.getStartYear();
-        int startMonth = data.getStartMonth();
-        int startDate = data.getStartDate();
-        int endYear = data.getEndYear();
-        int endMonth = data.getEndMonth();
-        int endDate = data.getEndDate();
-
-        // 종일 이벤트가 아닌 시간 이벤트면 1 더해주기
-        int offset = event.getStartDate().getTimeZone() != null ? 1 : 0;
-        if (startYear == endYear) {
-            if (startMonth == endMonth) {
-                return endDate - startDate + offset;
-            } else {
-                return DateUtil.daysOfMonth(startYear, startMonth) - startDate + endDate + offset;
-            }
-        } else {
-            // TODO: 연 계산하기
-        }
-        return -1;
-    }
 }
